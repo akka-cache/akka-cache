@@ -4,8 +4,11 @@ import akka.http.javadsl.model.StatusCodes;
 import akka.javasdk.testkit.TestKitSupport;
 import com.akka.cache.api.CacheEndpoint;
 import com.akka.cache.application.CacheEntity;
+import com.akka.cache.application.CacheView;
 import com.akka.cache.domain.Cache;
 import org.junit.jupiter.api.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -18,6 +21,8 @@ import java.util.Optional;
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class CacheIntegrationTest extends TestKitSupport {
+  private static final Logger log = LoggerFactory.getLogger(CacheIntegrationTest.class);
+
   private static final String TEST_DESC_1 = "This is our first test";
 
   private static final String PAYLOAD1 = "This is Akka 3's time.";
@@ -84,7 +89,7 @@ public class CacheIntegrationTest extends TestKitSupport {
                     .invokeAsync()
     );
     Assertions.assertEquals(StatusCodes.OK, response.status());
-
+    log.info("response: {}", response.body());
   }
 
 }

@@ -36,7 +36,7 @@ public class CacheView extends View {
     }
 
 //    @Query("SELECT cacheName, key FROM cache_view WHERE key LIKE :cacheName")
-    @Query("SELECT cacheName, key FROM cache_keys_view WHERE cacheName = :cacheName")
+    @Query("SELECT (cacheName, key) AS cached FROM cache_keys_view WHERE cacheName = :cacheName")
     public QueryEffect<CacheSummaries> getCacheKeys(String cacheName) {
         return queryResult();
     }

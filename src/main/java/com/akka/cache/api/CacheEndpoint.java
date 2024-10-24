@@ -2,10 +2,7 @@ package com.akka.cache.api;
 
 import akka.http.javadsl.model.HttpResponse;
 import akka.javasdk.annotations.Acl;
-import akka.javasdk.annotations.http.HttpEndpoint;
-import akka.javasdk.annotations.http.Get;
-import akka.javasdk.annotations.http.Post;
-import akka.javasdk.annotations.http.Put;
+import akka.javasdk.annotations.http.*;
 import akka.javasdk.client.ComponentClient;
 import akka.javasdk.http.HttpException;
 import akka.javasdk.http.HttpResponses;
@@ -17,9 +14,11 @@ import com.akka.cache.domain.CacheName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.stream.Collectors;
 
 @Acl(allow = @Acl.Matcher(principal = Acl.Principal.INTERNET))
 @HttpEndpoint("/cache")
@@ -46,6 +45,8 @@ public class CacheEndpoint {
             .invokeAsync(cn)
             .thenApply(__ -> HttpResponses.created());
   }
+
+  // TODO: /cacheName/createBatch
 
   @Post("/cacheName/update")
   public CompletionStage<HttpResponse> update(CacheNameRequest request) {
@@ -74,7 +75,20 @@ public class CacheEndpoint {
             });
   }
 
-  // TODO: Delete Cache
+/* TODO: finish Deletes
+  @Delete("/cacheName/{cacheName}")
+  public CompletionStage<HttpResponse> deleteCacheKeys(String cacheName) {
+    CompletionStage<CacheView.CacheSummaries> cacheKeys = componentClient.forView()
+            .method(CacheView::getCacheKeys)
+            .invokeAsync(cacheName)
+            .exceptionally(ex -> {
+              throw HttpException.badRequest(String.format("No cached items found for %s", cacheName));
+            });
+    return cacheKeys.thenCompose(keys -> {
+    });
+  }
+*/
+
   // TODO: Flush Cache
 
   // Cache Names -- END
@@ -86,7 +100,8 @@ public class CacheEndpoint {
   @Post("/")
   public CompletionStage<HttpResponse> cache(CacheRequest request) {
 
-    // TODO: Do we really need to validate that cache name exists?
+    // TODO: Do we really need to validate that cache name exists? I feel like this might be best configurable since we only
+    //  nned the cacheName if there an associated description
     CompletionStage<CacheName> cName = getCacheName(request.cacheName);
     return cName.thenCompose(c -> {
       if (c.cacheName().isEmpty()) {
@@ -102,6 +117,10 @@ public class CacheEndpoint {
       }
     });
   }
+
+  // TODO : Create Cache w/ TTL
+  // TODO : Create batched Cache
+  // TODO : Create batched Cache w/ TTL
 
   @Get("/{cacheName}/{key}")
   public CompletionStage<Cache> getCache(String cacheName, String key) {
