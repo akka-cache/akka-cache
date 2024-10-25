@@ -37,7 +37,7 @@ public class CacheEntity extends KeyValueEntity<Cache> {
     }
 
     public Effect<Boolean> isCached() {
-        Boolean isCached = currentState().value() == null ? false : true;
+        Boolean isCached = currentState().value().equals(emptyState()) ? false : true;
         return effects().reply(isCached);
     }
 

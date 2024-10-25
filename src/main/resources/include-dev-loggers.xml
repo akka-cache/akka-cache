@@ -10,4 +10,6 @@
  -->
 <included>
     <logger name="com.akka.akka-cache" level="INFO"/>
+    <logger name="com.akka.cache.api.CacheEndpoint" level="DEBUG"/>
+    <logger name="com.akka.cache.application.CacheTimedAction" level="DEBUG"/>
 </included>

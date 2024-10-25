@@ -1,6 +1,7 @@
 package com.akka.cache;
 
 import akka.http.javadsl.model.StatusCodes;
+import akka.javasdk.JsonSupport;
 import com.akka.cache.api.CacheEndpoint;
 import com.akka.cache.application.CacheNameEntity;
 import com.akka.cache.domain.CacheName;
@@ -67,10 +68,14 @@ public class CacheNameIntegrationTest extends TestKitSupport {
 
     var response = await(
             httpClient.GET("/cache/cacheName/cach1")
+                    .responseBodyAs(CacheName.class)
                     .invokeAsync()
     );
 
     Assertions.assertEquals(StatusCodes.OK, response.status());
+    // test the actual return
+    Assertions.assertEquals(Optional.of(TEST_DESC_1_MODIFIED), response.body().description());
+    // compare to the actual entity's return
     Assertions.assertEquals(Optional.of(TEST_DESC_1_MODIFIED), getCacheName("cache1").description());
 
   }
