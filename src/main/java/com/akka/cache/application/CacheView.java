@@ -25,12 +25,15 @@ public class CacheView extends View {
     @Consume.FromKeyValueEntity(CacheEntity.class)
     public static class KeysByCacheName extends TableUpdater<CacheSummary> {
         public Effect<CacheSummary> onUpdate(Cache cache) {
+            log.info("CacheView onUpdate received for {} {}", cache.cacheName(), cache.key());
             return effects()
                     .updateRow(new CacheSummary(cache.cacheName(), cache.key()));
         }
 
         @DeleteHandler
         public Effect<CacheSummary> onDelete() {
+            // TODO: clear cache timers for each deleted value if one exists
+            log.info("CacheView onDelete received for {}", updateContext().eventSubject());
             return effects().deleteRow();
         }
     }

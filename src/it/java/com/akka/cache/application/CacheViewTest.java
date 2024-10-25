@@ -34,9 +34,9 @@ public class CacheViewTest extends TestKitSupport {
     public void shouldGetCachedKeysForCache1() {
         EventingTestKit.IncomingMessages cacheEvents = testKit.getKeyValueEntityIncomingMessages("cache");
 
-        Cache cache1 = Cache.withOutTTL(CACHENAME1, KEY1, PAYLOAD1.getBytes());
-        Cache cache2 = Cache.withOutTTL(CACHENAME1, KEY2, PAYLOAD1.getBytes());
-        Cache cache3 = Cache.withOutTTL(CACHENAME1, KEY3, PAYLOAD1.getBytes());
+        Cache cache1 = new Cache(CACHENAME1, KEY1, PAYLOAD1.getBytes());
+        Cache cache2 = new Cache(CACHENAME1, KEY2, PAYLOAD1.getBytes());
+        Cache cache3 = new Cache(CACHENAME1, KEY3, PAYLOAD1.getBytes());
 
         cacheEvents.publish(cache1, "1");
         cacheEvents.publish(cache2, "2");

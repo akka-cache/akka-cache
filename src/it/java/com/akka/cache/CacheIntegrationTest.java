@@ -54,7 +54,7 @@ public class CacheIntegrationTest extends TestKitSupport {
   @Test
   @Order(2)
   public void httpCreateCach1Key1() {
-    CacheEndpoint.CacheRequest setRequest = new CacheEndpoint.CacheRequest("cache1", "key1", PAYLOAD1.getBytes());
+    CacheEndpoint.CacheRequest setRequest = new CacheEndpoint.CacheRequest("cache1", "key1", PAYLOAD1.getBytes(), Optional.empty());
 
     var response = await(
             httpClient.POST("/cache")
@@ -69,7 +69,7 @@ public class CacheIntegrationTest extends TestKitSupport {
   @Test
   @Order(3)
   public void httpCreateCach1Key2() {
-    CacheEndpoint.CacheRequest setRequest = new CacheEndpoint.CacheRequest("cache1", "key2", PAYLOAD2.getBytes());
+    CacheEndpoint.CacheRequest setRequest = new CacheEndpoint.CacheRequest("cache1", "key2", PAYLOAD2.getBytes(), Optional.empty());
 
     var response = await(
             httpClient.POST("/cache")
