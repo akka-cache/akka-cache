@@ -84,10 +84,14 @@ curl -i -d '{"cacheName":"cache1", "key":"key3", "value":"dGhpcyBpcyB0aGUgcGF5bG
 ```
 
 (this is the payload of four, with ttl 35 seconds)
+```
 curl -i -d '{"cacheName":"cache1", "key":"key4", "value":"dGhpcyBpcyB0aGUgcGF5bG9hZCBvZiBmb3VyLCB3aXRoIHR0bCAzNSBzZWNvbmRzCg==","ttlSeconds":35}' -H "Content-Type: application/json" -X POST http://localhost:9000/cache 
-
+```
 
 @Get("/{cacheName}/{key}")
-
+```
 curl -i http://localhost:9000/cache/cache1/key3
+```
+```
 curl -i http://localhost:9000/cache/cache1/key4
+```
