@@ -21,6 +21,7 @@ public class CacheView extends View {
 
     public record CacheSummaries(List<CacheSummary> cached) {}
     public record CacheSummary(String cacheName, String key) {}
+    public record CachedKeys(List<String> keys) {}
 
     @Consume.FromKeyValueEntity(CacheEntity.class)
     public static class KeysByCacheName extends TableUpdater<CacheSummary> {
@@ -38,9 +39,13 @@ public class CacheView extends View {
         }
     }
 
-//    @Query("SELECT cacheName, key FROM cache_view WHERE key LIKE :cacheName")
     @Query("SELECT (cacheName, key) AS cached FROM cache_keys_view WHERE cacheName = :cacheName")
-    public QueryEffect<CacheSummaries> getCacheKeys(String cacheName) {
+    public QueryEffect<CacheSummaries> getCacheSummaries(String cacheName) {
+        return queryResult();
+    }
+
+    @Query("SELECT key AS keys FROM cache_keys_view WHERE cacheName = :cacheName")
+    public QueryEffect<CachedKeys> getCacheKeys(String cacheName) {
         return queryResult();
     }
 

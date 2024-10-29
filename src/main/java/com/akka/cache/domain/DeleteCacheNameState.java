@@ -2,19 +2,36 @@ package com.akka.cache.domain;
 
 import com.akka.cache.application.CacheView;
 
-import static com.akka.cache.domain.DeleteCacheNameState.DeleteStatus.STARTED;
+import java.util.Collections;
 
-public record DeleteCacheNameState(CacheView.CacheSummaries cached, CacheView.CacheSummaries deleted, DeleteStatus deleteStatus) {
+import static com.akka.cache.domain.DeleteCacheNameState.DeleteStatus.DELETED;
+import static com.akka.cache.domain.DeleteCacheNameState.DeleteStatus.INPROGRESS;
 
-    public enum DeleteStatus {
-        STARTED, DELETED_SUCCESSFULLY, DELETE_FAILED
+public record DeleteCacheNameState(String cacheName, CacheView.CachedKeys keys, CacheView.CachedKeys deleted, Integer killTTLPos, DeleteStatus deleteStatus) {
+    public DeleteCacheNameState(String cacheName) {
+        this(cacheName, new CacheView.CachedKeys(Collections.emptyList()), new CacheView.CachedKeys(Collections.emptyList()), 0, DeleteStatus.EMPTY);
     }
 
-    public DeleteCacheNameState(CacheView.CacheSummaries cached, CacheView.CacheSummaries deleted) {
-        this(cached, deleted, STARTED);
+    public enum DeleteStatus {
+        EMPTY, INPROGRESS, DELETED, COMPLETE
     }
 
     public DeleteCacheNameState withStatus(DeleteStatus newStatus) {
-        return new DeleteCacheNameState(cached, deleted, newStatus);
+        return new DeleteCacheNameState(cacheName, keys, deleted, killTTLPos, newStatus);
+    }
+
+    public DeleteCacheNameState withCached(CacheView.CachedKeys cached) {
+        return new DeleteCacheNameState(cacheName, cached, deleted, killTTLPos, INPROGRESS);
+    }
+
+    public DeleteCacheNameState withDeleted(CacheView.CachedKeys deleted) {
+        if ((keys.keys().size() == deleted.keys().size())) {
+            return new DeleteCacheNameState(cacheName, keys, deleted, killTTLPos, DELETED);
+        }
+        return new DeleteCacheNameState(cacheName, keys, deleted, killTTLPos, INPROGRESS);
+    }
+
+    public DeleteCacheNameState withKillTTLPos(Integer killTTLPos) {
+        return new DeleteCacheNameState(cacheName, keys, deleted, killTTLPos, deleteStatus);
     }
 }

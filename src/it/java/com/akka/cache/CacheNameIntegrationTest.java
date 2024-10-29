@@ -19,6 +19,7 @@ import java.util.Optional;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class CacheNameIntegrationTest extends TestKitSupport {
 
+  private static final String CACHE_NAME = "cache1";
   private static final String TEST_DESC_1 = "This is our first test";
   private static final String TEST_DESC_1_MODIFIED = "This is our first test modification";
 
@@ -34,31 +35,31 @@ public class CacheNameIntegrationTest extends TestKitSupport {
   @Test
   @Order(1)
   public void httpCreateCacheName() {
-    CacheEndpoint.CacheNameRequest createRequest = new CacheEndpoint.CacheNameRequest("cache1", TEST_DESC_1);
+    CacheEndpoint.CacheNameRequest createRequest = new CacheEndpoint.CacheNameRequest(CACHE_NAME, TEST_DESC_1);
 
     var response = await(
-            httpClient.POST("/cache/cacheName/create")
+            httpClient.POST("/cache/cacheName")
             .withRequestBody(createRequest)
             .invokeAsync()
     );
 
     Assertions.assertEquals(StatusCodes.CREATED, response.status());
-    Assertions.assertEquals(Optional.of(TEST_DESC_1), getCacheName("cache1").description());
+    Assertions.assertEquals(Optional.of(TEST_DESC_1), getCacheName(CACHE_NAME).description());
   }
 
   @Test
   @Order(2)
   public void httpModifyCacheNameDescription() {
-    CacheEndpoint.CacheNameRequest updateRequest = new CacheEndpoint.CacheNameRequest("cache1", TEST_DESC_1_MODIFIED);
+    CacheEndpoint.CacheNameRequest updateRequest = new CacheEndpoint.CacheNameRequest(CACHE_NAME, TEST_DESC_1_MODIFIED);
 
     var response = await(
-            httpClient.POST("/cache/cacheName/update")
+            httpClient.PUT("/cache/cacheName")
                     .withRequestBody(updateRequest)
                     .invokeAsync()
     );
 
     Assertions.assertEquals(StatusCodes.ACCEPTED, response.status());
-    Assertions.assertEquals(Optional.of(TEST_DESC_1_MODIFIED), getCacheName("cache1").description());
+    Assertions.assertEquals(Optional.of(TEST_DESC_1_MODIFIED), getCacheName(CACHE_NAME).description());
 
   }
 
@@ -67,7 +68,7 @@ public class CacheNameIntegrationTest extends TestKitSupport {
   public void httpGetModifiedCacheNameDescription() {
 
     var response = await(
-            httpClient.GET("/cache/cacheName/cach1")
+            httpClient.GET("/cache/cacheName/" + CACHE_NAME)
                     .responseBodyAs(CacheName.class)
                     .invokeAsync()
     );
@@ -76,7 +77,7 @@ public class CacheNameIntegrationTest extends TestKitSupport {
     // test the actual return
     Assertions.assertEquals(Optional.of(TEST_DESC_1_MODIFIED), response.body().description());
     // compare to the actual entity's return
-    Assertions.assertEquals(Optional.of(TEST_DESC_1_MODIFIED), getCacheName("cache1").description());
+    Assertions.assertEquals(Optional.of(TEST_DESC_1_MODIFIED), getCacheName(CACHE_NAME).description());
 
   }
 }
