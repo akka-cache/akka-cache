@@ -31,7 +31,7 @@ public class CacheViewTest extends TestKitSupport {
     }
 
     @Test
-    public void shouldGetCachedKeysForCache1() {
+    public void shouldGetCachedKeysSummaryForCache1() {
         EventingTestKit.IncomingMessages cacheEvents = testKit.getKeyValueEntityIncomingMessages("cache");
 
         Cache cache1 = new Cache(CACHENAME1, KEY1, PAYLOAD1.getBytes());
@@ -50,7 +50,7 @@ public class CacheViewTest extends TestKitSupport {
                             CacheView.CacheSummaries summariesResponse =
                                     await(
                                             componentClient.forView()
-                                                    .method(CacheView::getCacheKeys)
+                                                    .method(CacheView::getCacheSummaries)
                                                     .invokeAsync(CACHENAME1)
                                     );
 
@@ -59,6 +59,35 @@ public class CacheViewTest extends TestKitSupport {
                             CacheView.CacheSummary sumKey3 = new CacheView.CacheSummary(CACHENAME1, KEY3);
 
                             assertThat(summariesResponse.cached()).containsOnly(sumKey1, sumKey2, sumKey3);
+                        }
+                );
+    }
+
+    @Test
+    public void shouldGetCachedKeysOnlyForCache1() {
+        EventingTestKit.IncomingMessages cacheEvents = testKit.getKeyValueEntityIncomingMessages("cache");
+
+        Cache cache1 = new Cache(CACHENAME1, KEY1, PAYLOAD1.getBytes());
+        Cache cache2 = new Cache(CACHENAME1, KEY2, PAYLOAD1.getBytes());
+        Cache cache3 = new Cache(CACHENAME1, KEY3, PAYLOAD1.getBytes());
+
+        cacheEvents.publish(cache1, "1");
+        cacheEvents.publish(cache2, "2");
+        cacheEvents.publish(cache3, "3");
+
+        Awaitility.await()
+                .ignoreExceptions()
+                .atMost(20, TimeUnit.SECONDS)
+                .untilAsserted(() -> {
+
+                            CacheView.CachedKeys keysResponse =
+                                    await(
+                                            componentClient.forView()
+                                                    .method(CacheView::getCacheKeys)
+                                                    .invokeAsync(CACHENAME1)
+                                    );
+
+                            assertThat(keysResponse.keys()).containsOnly(KEY1, KEY2, KEY3);
                         }
                 );
     }

@@ -1,17 +1,22 @@
 package com.akka.cache;
 
 import akka.http.javadsl.model.StatusCodes;
+import akka.javasdk.http.StrictResponse;
 import akka.javasdk.testkit.TestKitSupport;
+import akka.util.ByteString;
 import com.akka.cache.api.CacheEndpoint;
 import com.akka.cache.application.CacheEntity;
 import com.akka.cache.application.CacheView;
 import com.akka.cache.domain.Cache;
+import com.akka.cache.domain.CacheName;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /**
  * This is a skeleton for implementing integration tests for an Akka application built with the Akka SDK for Java.
@@ -23,6 +28,8 @@ import java.util.Optional;
 public class CacheIntegrationTest extends TestKitSupport {
   private static final Logger log = LoggerFactory.getLogger(CacheIntegrationTest.class);
 
+  private static final String CACHE_NAME = "cache1";
+  
   private static final String TEST_DESC_1 = "This is our first test";
 
   private static final String PAYLOAD1 = "This is Akka 3's time.";
@@ -40,10 +47,10 @@ public class CacheIntegrationTest extends TestKitSupport {
   @Test
   @Order(1)
   public void httpCreateCacheName() {
-    CacheEndpoint.CacheNameRequest createRequest = new CacheEndpoint.CacheNameRequest("cache1", TEST_DESC_1);
+    CacheEndpoint.CacheNameRequest createRequest = new CacheEndpoint.CacheNameRequest(CACHE_NAME, TEST_DESC_1);
 
     var response = await(
-            httpClient.POST("/cache/cacheName/create")
+            httpClient.POST("/cache/cacheName")
                     .withRequestBody(createRequest)
                     .invokeAsync()
     );
@@ -53,8 +60,8 @@ public class CacheIntegrationTest extends TestKitSupport {
 
   @Test
   @Order(2)
-  public void httpCreateCach1Key1() {
-    CacheEndpoint.CacheRequest setRequest = new CacheEndpoint.CacheRequest("cache1", "key1", PAYLOAD1.getBytes(), Optional.empty());
+  public void httpCreateCache1Key1() {
+    CacheEndpoint.CacheRequest setRequest = new CacheEndpoint.CacheRequest(CACHE_NAME, "key1", PAYLOAD1.getBytes(), Optional.empty());
 
     var response = await(
             httpClient.POST("/cache")
@@ -62,14 +69,14 @@ public class CacheIntegrationTest extends TestKitSupport {
                     .invokeAsync()
     );
     Assertions.assertEquals(StatusCodes.CREATED, response.status());
-    Cache cached = getCache("cache1", "key1");
+    Cache cached = getCache(CACHE_NAME, "key1");
     Assertions.assertEquals(PAYLOAD1, new String(cached.value(), StandardCharsets.UTF_8));
   }
 
   @Test
   @Order(3)
-  public void httpCreateCach1Key2() {
-    CacheEndpoint.CacheRequest setRequest = new CacheEndpoint.CacheRequest("cache1", "key2", PAYLOAD2.getBytes(), Optional.empty());
+  public void httpCreateCache1Key2() {
+    CacheEndpoint.CacheRequest setRequest = new CacheEndpoint.CacheRequest(CACHE_NAME, "key2", PAYLOAD2.getBytes(), Optional.empty());
 
     var response = await(
             httpClient.POST("/cache")
@@ -77,19 +84,28 @@ public class CacheIntegrationTest extends TestKitSupport {
                     .invokeAsync()
     );
     Assertions.assertEquals(StatusCodes.CREATED, response.status());
-    Cache cached = getCache("cache1", "key2");
+    Cache cached = getCache(CACHE_NAME, "key2");
     Assertions.assertEquals(PAYLOAD2, new String(cached.value(), StandardCharsets.UTF_8));
   }
 
   @Test
   @Order(4)
   public void httpVerifyCachKeysView() {
-    var response = await(
-            httpClient.GET("/cache/cacheName/keys/cache1")
-                    .invokeAsync()
-    );
-    Assertions.assertEquals(StatusCodes.OK, response.status());
-    log.info("response: {}", response.body());
+    Awaitility.await()
+            .ignoreExceptions()
+            .atMost(20, TimeUnit.SECONDS)
+            .untilAsserted(() -> {
+              var response = await(
+                      httpClient.GET("/cache/cacheName/" + CACHE_NAME + "/keys")
+                              .responseBodyAs(CacheView.CacheSummaries.class)
+                              .invokeAsync()
+
+              );
+              Assertions.assertEquals(StatusCodes.OK, response.status());
+              Assertions.assertEquals(response.body().cached().size(), 2);
+              // how to convert parse the response body
+              log.info("response: {}", response.body());
+            });
   }
 
 }

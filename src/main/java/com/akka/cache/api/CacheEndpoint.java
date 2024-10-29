@@ -12,6 +12,7 @@ import com.akka.cache.application.CacheNameEntity;
 import com.akka.cache.application.CacheEntity;
 import com.akka.cache.application.CacheView;
 import com.akka.cache.application.CacheTimedAction;
+import com.akka.cache.application.CacheNameDeleteWorkflow;
 import com.akka.cache.domain.Cache;
 import com.akka.cache.domain.CacheName;
 import com.typesafe.config.Config;
@@ -32,12 +33,19 @@ public class CacheEndpoint {
   private final ComponentClient componentClient;
   private final boolean cacheNameNeededFirst;
   private final TimerScheduler timerScheduler;
+  private final Optional<Duration> defaultTTL;
 
   public CacheEndpoint(Config config, ComponentClient componentClient, TimerScheduler timerScheduler) {
     this.config = config;
     this.componentClient = componentClient;
     this.timerScheduler = timerScheduler;
-    cacheNameNeededFirst = config.getBoolean("app.cache-name-needed-first");
+    cacheNameNeededFirst = this.config.getBoolean("app.cache-name-needed-first");
+    if (config.hasPath("app.default-default-ttl")) {
+      defaultTTL = Optional.of(this.config.getDuration("app.default-default-ttl"));
+    }
+    else {
+      defaultTTL = Optional.empty();
+    }
   }
 
 
@@ -47,7 +55,7 @@ public class CacheEndpoint {
   // Cache Names -- BEGIN
   public record CacheNameRequest(String cacheName, String description) {}
 
-  @Post("/cacheName/create")
+  @Post("/cacheName")
   public CompletionStage<HttpResponse> create(CacheNameRequest request) {
     CacheName cn = new CacheName(request.cacheName, Optional.of(request.description));
     return componentClient.forKeyValueEntity(cn.cacheName())
@@ -58,7 +66,7 @@ public class CacheEndpoint {
 
   // TODO: /cacheName/createBatch
 
-  @Post("/cacheName/update")
+  @Put("/cacheName")
   public CompletionStage<HttpResponse> update(CacheNameRequest request) {
     CacheName cn = new CacheName(request.cacheName, Optional.of(request.description));
     return componentClient.forKeyValueEntity(cn.cacheName())
@@ -75,29 +83,23 @@ public class CacheEndpoint {
             .thenApply(c -> c);
   }
 
-  @Get("/cacheName/keys/{cacheName}")
+  @Get("/cacheName/{cacheName}/keys")
   public CompletionStage<CacheView.CacheSummaries> getCacheKeyList(String cacheName) {
     return componentClient.forView()
-            .method(CacheView::getCacheKeys)
+            .method(CacheView::getCacheSummaries)
             .invokeAsync(cacheName)
             .exceptionally(ex -> {
-              throw HttpException.badRequest(String.format("No cached items found for %s", cacheName));
+              throw HttpException.badRequest(String.format("No keys items found for %s", cacheName));
             });
   }
 
-/* TODO: finish Deletes w/ workflow
   @Delete("/cacheName/{cacheName}")
   public CompletionStage<HttpResponse> deleteCacheKeys(String cacheName) {
-    CompletionStage<CacheView.CacheSummaries> cacheKeys = componentClient.forView()
-            .method(CacheView::getCacheKeys)
+    return componentClient.forWorkflow(cacheName)
+            .method(CacheNameDeleteWorkflow::startDeletions)
             .invokeAsync(cacheName)
-            .exceptionally(ex -> {
-              throw HttpException.badRequest(String.format("No cached items found for %s", cacheName));
-            });
-    return cacheKeys.thenCompose(keys -> {
-    });
+            .thenApply(transferState -> HttpResponses.accepted());
   }
-*/
 
   // TODO: finish flush w/ workflow
 
@@ -119,14 +121,21 @@ public class CacheEndpoint {
             .thenApply(result -> HttpResponses.created());
 
     return setresult.thenCompose(result -> {
+      Optional<Duration> ttlSeconds = Optional.empty();
       if (!cache.ttlSeconds().isEmpty()) {
+        ttlSeconds = cache.ttlSeconds();
+      }
+      else if (!defaultTTL.isEmpty()) {
+        ttlSeconds = defaultTTL;
+      }
+      if (!ttlSeconds.isEmpty()) {
         if (log.isDebugEnabled()) {
-          log.debug("starting TTL timer for {} {} {}", cacheName, key, cache.ttlSeconds().get().getSeconds());
+          log.debug("starting TTL timer for {} {} {}", cacheName, key, ttlSeconds.get().getSeconds());
         }
         CompletionStage<Done> timerRegistration =
                 timerScheduler.startSingleTimer(
-                        String.format("%s%s", "cached", cacheId),
-                        cache.ttlSeconds().get(),
+                        String.format("%s%s", "keys", cacheId),
+                        ttlSeconds.get(),
                         componentClient.forTimedAction()
                                 .method(CacheTimedAction::expireCacheTTL)
                                 .deferred(cacheId)
