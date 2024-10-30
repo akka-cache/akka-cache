@@ -3,6 +3,7 @@ package com.akka.cache.application;
 import akka.Done;
 import akka.javasdk.annotations.ComponentId;
 import akka.javasdk.client.ComponentClient;
+import akka.javasdk.timer.TimerScheduler;
 import akka.javasdk.workflow.Workflow;
 import com.akka.cache.domain.DeleteCacheNameState;
 import com.akka.cache.lib.FutureHelper;
@@ -21,11 +22,13 @@ public class CacheNameDeleteWorkflow extends Workflow<DeleteCacheNameState> {
 
     private final Config config;
     private final ComponentClient componentClient;
+    private final TimerScheduler timerScheduler;
     private final int deleteBlockSize;
 
-    public CacheNameDeleteWorkflow(Config config, ComponentClient componentClient) {
+    public CacheNameDeleteWorkflow(Config config, ComponentClient componentClient, TimerScheduler timerScheduler) {
         this.config = config;
         this.componentClient = componentClient;
+        this.timerScheduler = timerScheduler;
         deleteBlockSize = config.getInt("cache-name-delete-block-size");
     }
 
@@ -33,7 +36,7 @@ public class CacheNameDeleteWorkflow extends Workflow<DeleteCacheNameState> {
         DeleteCacheNameState initialState = new DeleteCacheNameState(cacheName);
         return effects()
                 .updateState(initialState)
-                .transitionTo("collectCacheIds", cacheName)
+                .transitionTo("collectCacheIds")
                 .thenReply(Done.done());
     }
 
@@ -64,9 +67,8 @@ public class CacheNameDeleteWorkflow extends Workflow<DeleteCacheNameState> {
     }
 
     private CompletionStage<Done> killTTLTimer(String key) {
-        return componentClient.forKeyValueEntity(currentState().cacheName())
-                .method(CacheNameEntity::delete)
-                .invokeAsync();
+        String compoundKey = String.format("%s%s", currentState().cacheName(), key);
+        return timerScheduler.cancel(compoundKey);
     }
 
     // note: cacheName Param not used as it's already in current state if needed
@@ -94,10 +96,10 @@ public class CacheNameDeleteWorkflow extends Workflow<DeleteCacheNameState> {
         // collect the batch of cacheIDs from the CacheView
         Step collectCacheIds =
                 step("collectCacheIds")
-                        .asyncCall(String.class, cacheName ->
+                        .asyncCall(() ->
                                 componentClient.forView()
                                         .method(CacheView::getCacheKeys)
-                                        .invokeAsync(cacheName))
+                                        .invokeAsync(currentState().cacheName()))
                                         .andThen(CacheView.CachedKeys.class, cachedKeys -> {
                                             return effects()
                                                     .updateState(currentState().withCached(cachedKeys))
@@ -107,8 +109,8 @@ public class CacheNameDeleteWorkflow extends Workflow<DeleteCacheNameState> {
         Step deleteCached =
                 step("deleteCached")
                         // just passing the cacheName
-                        .asyncCall(String.class, cacheName -> {
-                            return deleteBatch(cacheName);
+                        .asyncCall(() -> {
+                            return deleteBatch(currentState().cacheName());
                         })
                         .andThen(CacheView.CachedKeys.class, keysDeleted -> {
                             if (keysDeleted.keys().size() == currentState().keys().keys().size()) {
@@ -127,8 +129,8 @@ public class CacheNameDeleteWorkflow extends Workflow<DeleteCacheNameState> {
 
         Step killTimers =
                 step("killTimers")
-                        .asyncCall(String.class, cacheName -> {
-                            return killCachedTimers(cacheName);
+                        .asyncCall(() -> {
+                            return killCachedTimers(currentState().cacheName());
                         })
                         .andThen(Integer.class, killTTLPos -> {
                             if (currentState().deleted().keys().size() == killTTLPos) {
@@ -146,7 +148,7 @@ public class CacheNameDeleteWorkflow extends Workflow<DeleteCacheNameState> {
 
         Step deleteCacheName =
                 step("deleteCacheName")
-                        .asyncCall(String.class, cacheName -> {
+                        .asyncCall(() -> {
                             return componentClient.forKeyValueEntity(currentState().cacheName())
                                     .method(CacheNameEntity::delete)
                                     .invokeAsync();
