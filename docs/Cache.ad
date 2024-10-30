@@ -1,0 +1,83 @@
+= Cache
+
+TODO:
+
+* Do we need the internal concept of "id"?
+* Align on name -> Namespace
+* Consider how we would limit response payload sizes. We should document what those limitations are.
+* Are creates and updates the same thing? If so, should we have separate endpoints?
+
+
+[json]
+----
+{
+  "id": "string",
+  "namespace": "string",
+  "key": "string",
+  "value": "byte[]"
+}
+----
+
+=== Endpoints:
+
+- `GET /namespaces/{namespace}/caches`: Retrieves all `Cache` objects in a namespace
+
+Response:
+
+[json]
+----
+[
+    {
+      "namespace": "string",
+      "key": "string",
+      "value": "byte[]"
+    }, { ... }
+]
+----
+
+- `POST /namespaces/{namespace}/caches`: Creates a new `Cache` object in a namespace
+
+Request Body:
+
+[json]
+----
+{
+  "namespace": "string",
+  "key": "string",
+  "value": "byte[]"
+}
+----
+
+Response: `201 Created`: New resource created
+
+- `GET /namespaces/{namespace}/caches/{key}`: Retrieves a specific `Cache` object in a namespace
+
+Response:
+
+[json]
+----
+{
+  "namespace": "string",
+  "key": "string",
+  "value": "byte[]"
+}
+----
+
+- `PUT /namespaces/{namespace}/caches/{key}`: Updates a specific `Cache` object in a namespace
+
+Request Body:
+
+[json]
+----
+{
+  "namespace": "string",
+  "key": "string",
+  "value": "byte[]"
+}
+----
+
+Response: `202 Accepted`: Operation Accepted
+
+- `DELETE /namespaces/{namespace}/caches/{key}`: Deletes a specific `Cache` object in a namespace
+
+Response: `202 Accepted`: Operation Accepted

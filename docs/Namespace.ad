@@ -1,0 +1,74 @@
+= Namespace
+
+TODO:
+
+* Do we need the internal concept of "id"?
+* Align on name -> Namespace
+* Are creates and updates the same thing? If so, should we have separate endpoints?
+
+[json]
+----
+{
+  "id": "integer",
+  "namespace": "string",
+  "description": "string"
+}
+----
+
+== Endpoints:
+
+- `GET /namespaces`: Retrieves a list of all `Namespace`
+
+Response:
+
+[json]
+----
+[
+    {
+      "namespace": "string",
+      "description": "string"
+    }, {...}
+]
+----
+
+- `POST /namespaces/{namespace}`: Creates a new `Namespace`
+
+Request Body:
+
+[json]
+----
+{
+  "description": "string"
+}
+----
+
+Response: `201 Created`: Name Space Created
+
+- `GET /namespaces/{namespace}`: Retrieves a specific `Namespace`
+
+Response:
+
+[json]
+----
+{
+  "namespace": "string",
+  "description": "string"
+}
+----
+
+- `PUT /namespaces/{namespace}`: Updates a specific `Namespace`
+
+Request Body:
+
+[json]
+----
+{
+  "description": "string"
+}
+----
+
+Response: `202 Accepted`: Operation Accepted
+
+- `DELETE /namespaces/{namespace}`: Deletes a specific `Namespace`
+
+Response: `202 Accepted`: Operation Accepted if no linked caches
