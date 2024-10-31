@@ -3,35 +3,33 @@ package com.akka.cache.domain;
 import com.akka.cache.application.CacheView;
 
 import java.util.Collections;
+import java.util.List;
 
-import static com.akka.cache.domain.DeleteCacheNameState.DeleteStatus.DELETED;
 import static com.akka.cache.domain.DeleteCacheNameState.DeleteStatus.INPROGRESS;
 
-public record DeleteCacheNameState(String cacheName, CacheView.CachedKeys keys, CacheView.CachedKeys deleted, Integer killTTLPos, DeleteStatus deleteStatus) {
-    public DeleteCacheNameState(String cacheName) {
-        this(cacheName, new CacheView.CachedKeys(Collections.emptyList()), new CacheView.CachedKeys(Collections.emptyList()), 0, DeleteStatus.EMPTY);
+public record DeleteCacheNameState(String cacheName, CacheView.CachedKeys keys, Integer currOffset, DeleteStatus deleteStatus, Integer intRetries, Boolean flushOnly) {
+    public DeleteCacheNameState(String cacheName, Boolean flushOnly) {
+        this(cacheName, new CacheView.CachedKeys(Collections.emptyList()), 0, DeleteStatus.EMPTY, 0, flushOnly);
     }
 
     public enum DeleteStatus {
-        EMPTY, INPROGRESS, DELETED, COMPLETE
+        EMPTY, INPROGRESS, COMPLETE
     }
 
     public DeleteCacheNameState withStatus(DeleteStatus newStatus) {
-        return new DeleteCacheNameState(cacheName, keys, deleted, killTTLPos, newStatus);
+        return new DeleteCacheNameState(cacheName, keys, currOffset, newStatus, intRetries, flushOnly);
     }
 
     public DeleteCacheNameState withCached(CacheView.CachedKeys cached) {
-        return new DeleteCacheNameState(cacheName, cached, deleted, killTTLPos, INPROGRESS);
+        return new DeleteCacheNameState(cacheName, cached, currOffset, INPROGRESS, intRetries, flushOnly);
     }
 
-    public DeleteCacheNameState withDeleted(CacheView.CachedKeys deleted) {
-        if ((keys.keys().size() == deleted.keys().size())) {
-            return new DeleteCacheNameState(cacheName, keys, deleted, killTTLPos, DELETED);
-        }
-        return new DeleteCacheNameState(cacheName, keys, deleted, killTTLPos, INPROGRESS);
+    public DeleteCacheNameState withCurrOffset(Integer currOffset) {
+        return new DeleteCacheNameState(cacheName, keys, currOffset, deleteStatus, intRetries, flushOnly);
     }
 
-    public DeleteCacheNameState withKillTTLPos(Integer killTTLPos) {
-        return new DeleteCacheNameState(cacheName, keys, deleted, killTTLPos, deleteStatus);
+    public DeleteCacheNameState withIntRetries(Integer intRetries) {
+        return new DeleteCacheNameState(cacheName, keys, currOffset, deleteStatus, intRetries, flushOnly);
     }
+
 }

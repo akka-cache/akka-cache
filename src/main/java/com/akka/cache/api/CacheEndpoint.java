@@ -50,7 +50,7 @@ public class CacheEndpoint {
 
 
   /*
-  TODO: Do we really need this? The only real reason to have a separate cacheName entity is to maintain a description of the cache
+  Note: The only real reason to have a separate cacheName entity is to maintain a description of the cache
    */
   // Cache Names -- BEGIN
   public record CacheNameRequest(String cacheName, String description) {}
@@ -93,15 +93,26 @@ public class CacheEndpoint {
             });
   }
 
+  // This deletes the cachName as well as all the keys
   @Delete("/cacheName/{cacheName}")
   public CompletionStage<HttpResponse> deleteCacheKeys(String cacheName) {
+    var startDeletionSetup = new CacheNameDeleteWorkflow.StartDeletionsSetup(cacheName, false);
     return componentClient.forWorkflow(cacheName)
             .method(CacheNameDeleteWorkflow::startDeletions)
-            .invokeAsync(cacheName)
+            .invokeAsync(startDeletionSetup)
             .thenApply(transferState -> HttpResponses.accepted());
   }
 
-  // TODO: finish flush w/ workflow
+  // This deletes all the cached data but leaves the cacheName in place
+  @Put("/cacheName/{cacheName}/flush")
+  public CompletionStage<HttpResponse> flushCacheKeys(String cacheName) {
+    var startDeletionSetup = new CacheNameDeleteWorkflow.StartDeletionsSetup(cacheName, true);
+    return componentClient.forWorkflow(cacheName)
+            .method(CacheNameDeleteWorkflow::startDeletions)
+            .invokeAsync(startDeletionSetup)
+            .thenApply(transferState -> HttpResponses.accepted());
+  }
+
 
   // Cache Names -- END
 

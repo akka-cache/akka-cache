@@ -23,7 +23,9 @@ public class CacheNameEntity extends KeyValueEntity<CacheName> {
 
     public Effect<Done> create(CacheName cacheName) {
         if (currentState().equals(emptyState())) {
-            log.info("Creating cache with id '{}'", commandContext().entityId());
+            if (log.isDebugEnabled()) {
+                log.info("Creating cache with id '{}'", commandContext().entityId());
+            }
             return effects()
                     .updateState(cacheName)
                     .thenReply(Done.done());
@@ -42,13 +44,12 @@ public class CacheNameEntity extends KeyValueEntity<CacheName> {
     }
 
     public Effect<Done> delete() {
+        if (log.isDebugEnabled()) {
+            log.info("Deleting cacheName with id '{}'", commandContext().entityId());
+        }
         return effects()
                 .deleteEntity()
                 .thenReply(done());
-    }
-
-    public Effect<Done> flush() {
-        return effects().reply(done());
     }
 
     public Effect<CacheName> get() {
