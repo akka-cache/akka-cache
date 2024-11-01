@@ -19,6 +19,11 @@ import java.util.concurrent.CompletableFuture;
 public class CacheNameDeleteWorkflow extends Workflow<DeleteCacheNameState> {
     private static final Logger log = LoggerFactory.getLogger(CacheNameDeleteWorkflow.class);
 
+    private static final String STEP1_COLLECT_CACHE_IDS = "s1";
+    private static final String STEP2_DELETE_CACHE_IDS = "s2";
+    private static final String STEP3_DELETE_CACHE_NAME = "s3";
+    private static final String STEP4_END_WORKFLOW = "s4";
+
     private final Config config;
     private final ComponentClient componentClient;
     private final TimerScheduler timerScheduler;
@@ -42,7 +47,7 @@ public class CacheNameDeleteWorkflow extends Workflow<DeleteCacheNameState> {
         DeleteCacheNameState initialState = new DeleteCacheNameState(startDeletionsSetup.cacheName, startDeletionsSetup.flushOnly);
         return effects()
                 .updateState(initialState)
-                .transitionTo("collectCacheIds")
+                .transitionTo(STEP1_COLLECT_CACHE_IDS)
                 .thenReply(Done.done());
     }
 
@@ -153,7 +158,7 @@ public class CacheNameDeleteWorkflow extends Workflow<DeleteCacheNameState> {
                         }
                         return effects()
                                 .updateState(currentState().withIntRetries(currentState().intRetries()+1))
-                                .transitionTo("collectCacheIds");
+                                .transitionTo(STEP1_COLLECT_CACHE_IDS);
                     }
                 });
     }
@@ -191,10 +196,10 @@ public class CacheNameDeleteWorkflow extends Workflow<DeleteCacheNameState> {
     @Override
     public WorkflowDef<DeleteCacheNameState> definition() {
 
-        Step collectCacheIds = getStepCollectCacheIds("collectCacheIds", "deleteCache");
-        Step deleteCached = getStepDeleteCached("deleteCache", "deleteCacheName", "endDeleteWorkflow");
-        Step deleteCacheName = getStepDeleteCacheName("deleteCacheName");
-        Step end = getStepEndDeleteWorkflow("endDeleteWorkflow");
+        Step collectCacheIds = getStepCollectCacheIds(STEP1_COLLECT_CACHE_IDS, STEP2_DELETE_CACHE_IDS);
+        Step deleteCached = getStepDeleteCached(STEP2_DELETE_CACHE_IDS, STEP3_DELETE_CACHE_NAME, STEP4_END_WORKFLOW);
+        Step deleteCacheName = getStepDeleteCacheName(STEP3_DELETE_CACHE_NAME);
+        Step end = getStepEndDeleteWorkflow(STEP4_END_WORKFLOW);
         return workflow()
                 .addStep(collectCacheIds)
                 .addStep(deleteCached)
