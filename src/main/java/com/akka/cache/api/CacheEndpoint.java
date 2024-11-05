@@ -15,6 +15,7 @@ import com.akka.cache.application.CacheTimedAction;
 import com.akka.cache.application.CacheNameDeleteWorkflow;
 import com.akka.cache.domain.Cache;
 import com.akka.cache.domain.CacheName;
+import com.akka.cache.domain.PayloadChunk;
 import com.typesafe.config.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +59,7 @@ public class CacheEndpoint {
   @Post("/cacheName")
   public CompletionStage<HttpResponse> create(CacheNameRequest request) {
     CacheName cn = new CacheName(request.cacheName, Optional.of(request.description));
-    return componentClient.forKeyValueEntity(cn.cacheName())
+    return componentClient.forEventSourcedEntity(cn.cacheName())
             .method(CacheNameEntity::create)
             .invokeAsync(cn)
             .thenApply(__ -> HttpResponses.created());
@@ -69,7 +70,7 @@ public class CacheEndpoint {
   @Put("/cacheName")
   public CompletionStage<HttpResponse> update(CacheNameRequest request) {
     CacheName cn = new CacheName(request.cacheName, Optional.of(request.description));
-    return componentClient.forKeyValueEntity(cn.cacheName())
+    return componentClient.forEventSourcedEntity(cn.cacheName())
             .method(CacheNameEntity::update)
             .invokeAsync(cn)
             .thenApply(__ -> HttpResponses.accepted());
@@ -77,7 +78,7 @@ public class CacheEndpoint {
 
   @Get("/cacheName/{cacheName}")
   public CompletionStage<CacheName> getCacheName(String cacheName) {
-    return componentClient.forKeyValueEntity(cacheName)
+    return componentClient.forEventSourcedEntity(cacheName)
             .method(CacheNameEntity::get)
             .invokeAsync()
             .thenApply(c -> c);
@@ -89,7 +90,7 @@ public class CacheEndpoint {
             .method(CacheView::getCacheSummaries)
             .invokeAsync(cacheName)
             .exceptionally(ex -> {
-              throw HttpException.badRequest(String.format("No keys items found for %s", cacheName));
+              throw HttpException.badRequest("No keys items found for ".concat(cacheName));
             });
   }
 
@@ -118,15 +119,15 @@ public class CacheEndpoint {
 
   // Cache API -- BEGIN
 
-  public record CacheRequest(String cacheName, String key, byte[] value, Optional<Integer> ttlSeconds) {
+  public record CacheRequest(String cacheName, String key, Optional<Integer> ttlSeconds, byte[] value) {
     public CacheRequest(String cacheName, String key, byte[] value) {
-      this(cacheName, key, value, Optional.empty());
+      this(cacheName, key, Optional.empty(), value);
     }
   }
 
   private CompletionStage<HttpResponse> createCacheEntity(String cacheName, String key, Cache cache) {
-    String cacheId = String.format("%s%s", cacheName, key);
-    var setresult = componentClient.forKeyValueEntity(cacheId)
+    String cacheId = cacheName.concat(key);
+    var setresult = componentClient.forEventSourcedEntity(cacheId)
             .method(CacheEntity::set)
             .invokeAsync(cache)
             .thenApply(result -> HttpResponses.created());
@@ -145,7 +146,7 @@ public class CacheEndpoint {
         }
         CompletionStage<Done> timerRegistration =
                 timerScheduler.startSingleTimer(
-                        String.format("%s%s", "keys", cacheId),
+                        "keys".concat(cacheId),
                         ttlSeconds.get(),
                         componentClient.forTimedAction()
                                 .method(CacheTimedAction::expireCacheTTL)
@@ -162,11 +163,11 @@ public class CacheEndpoint {
 
   private Cache createCacheObject(CacheRequest cacheRequest) {
     if (cacheRequest.ttlSeconds.isEmpty()) {
-      return new Cache(cacheRequest.cacheName, cacheRequest.key, cacheRequest.value);
+      return new Cache(cacheRequest.cacheName, cacheRequest.key).withChunk(new PayloadChunk(0, cacheRequest.value));
     }
     else {
-      return new Cache(cacheRequest.cacheName, cacheRequest.key, cacheRequest.value,
-              Optional.of(Duration.ofSeconds(cacheRequest.ttlSeconds.get())));
+      return new Cache(cacheRequest.cacheName, cacheRequest.key, Optional.of(Duration.ofSeconds(cacheRequest.ttlSeconds.get())))
+              .withChunk(new PayloadChunk(0, cacheRequest.value));
     }
   }
 
@@ -187,13 +188,12 @@ public class CacheEndpoint {
     }
   }
 
-  // TODO : Create Cache w/ TTL
   // TODO : Create batched Cache
   // TODO : Create batched Cache w/ TTL
 
   @Get("/{cacheName}/{key}")
   public CompletionStage<Cache> getCache(String cacheName, String key) {
-    return componentClient.forKeyValueEntity(String.format("%s%s", cacheName, key))
+    return componentClient.forEventSourcedEntity(cacheName.concat(key))
             .method(CacheEntity::get)
             .invokeAsync()
             .thenApply(c -> c);

@@ -3,7 +3,6 @@ package com.akka.cache;
 import akka.http.javadsl.model.StatusCodes;
 import akka.javasdk.http.StrictResponse;
 import akka.javasdk.testkit.TestKitSupport;
-import akka.util.ByteString;
 import com.akka.cache.api.CacheEndpoint;
 import com.akka.cache.application.CacheEntity;
 import com.akka.cache.application.CacheView;
@@ -38,7 +37,7 @@ public class CacheIntegrationTest extends TestKitSupport {
   private Cache getCache(String cacheName, String key) {
     return await(
             componentClient
-              .forKeyValueEntity(String.format("%s%s", cacheName, key))
+              .forEventSourcedEntity(cacheName.concat(key))
               .method(CacheEntity::get)
               .invokeAsync()
     );
@@ -61,7 +60,7 @@ public class CacheIntegrationTest extends TestKitSupport {
   @Test
   @Order(2)
   public void httpCreateCache1Key1() {
-    CacheEndpoint.CacheRequest setRequest = new CacheEndpoint.CacheRequest(CACHE_NAME, "key1", PAYLOAD1.getBytes(), Optional.empty());
+    CacheEndpoint.CacheRequest setRequest = new CacheEndpoint.CacheRequest(CACHE_NAME, "key1", Optional.empty(), PAYLOAD1.getBytes());
 
     var response = await(
             httpClient.POST("/cache")
@@ -70,13 +69,14 @@ public class CacheIntegrationTest extends TestKitSupport {
     );
     Assertions.assertEquals(StatusCodes.CREATED, response.status());
     Cache cached = getCache(CACHE_NAME, "key1");
-    Assertions.assertEquals(PAYLOAD1, new String(cached.value(), StandardCharsets.UTF_8));
+    String returnedPayload = new String(cached.chunks().get(0).payload(), StandardCharsets.UTF_8);
+    Assertions.assertEquals(PAYLOAD1, returnedPayload);
   }
 
   @Test
   @Order(3)
   public void httpCreateCache1Key2() {
-    CacheEndpoint.CacheRequest setRequest = new CacheEndpoint.CacheRequest(CACHE_NAME, "key2", PAYLOAD2.getBytes(), Optional.empty());
+    CacheEndpoint.CacheRequest setRequest = new CacheEndpoint.CacheRequest(CACHE_NAME, "key2", Optional.empty(), PAYLOAD2.getBytes());
 
     var response = await(
             httpClient.POST("/cache")
@@ -85,7 +85,8 @@ public class CacheIntegrationTest extends TestKitSupport {
     );
     Assertions.assertEquals(StatusCodes.CREATED, response.status());
     Cache cached = getCache(CACHE_NAME, "key2");
-    Assertions.assertEquals(PAYLOAD2, new String(cached.value(), StandardCharsets.UTF_8));
+    String returnedPayload = new String(cached.chunks().get(0).payload(), StandardCharsets.UTF_8);
+    Assertions.assertEquals(PAYLOAD2, returnedPayload);
   }
 
   @Test

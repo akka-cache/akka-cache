@@ -52,11 +52,11 @@ public class CacheNameDeleteWorkflow extends Workflow<DeleteCacheNameState> {
     }
 
     private CompletableFuture<Done> deleteCache(String key) {
-        String compoundKey = String.format("%s%s", currentState().cacheName(), key);
+        String compoundKey = currentState().cacheName().concat(key);
         if (log.isDebugEnabled()) {
             log.debug("requesting delete of cache {}", compoundKey);
         }
-        return componentClient.forKeyValueEntity(compoundKey)
+        return componentClient.forEventSourcedEntity(compoundKey)
                 .method(CacheNameEntity::delete)
                 .invokeAsync()
                 .thenApply(c -> {
@@ -166,7 +166,7 @@ public class CacheNameDeleteWorkflow extends Workflow<DeleteCacheNameState> {
     protected Step getStepDeleteCacheName(String stepName) {
         return step(stepName)
                 .asyncCall(() -> {
-                    return componentClient.forKeyValueEntity(currentState().cacheName())
+                    return componentClient.forEventSourcedEntity(currentState().cacheName())
                             .method(CacheNameEntity::delete)
                             .invokeAsync();
                 })

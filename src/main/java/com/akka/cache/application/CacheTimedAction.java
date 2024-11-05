@@ -23,7 +23,7 @@ public class CacheTimedAction extends TimedAction {
             log.debug("CacheTimedAction expiring cache for cacheId {}", cacheId);
         }
         return effects().asyncDone(
-                componentClient.forKeyValueEntity(cacheId)
+                componentClient.forEventSourcedEntity(cacheId)
                         .method(CacheEntity::delete)
                         .invokeAsync()
                         .thenApply(__ -> Done.done()));
