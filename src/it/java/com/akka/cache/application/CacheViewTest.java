@@ -4,12 +4,14 @@ import akka.javasdk.testkit.EventingTestKit;
 import akka.javasdk.testkit.TestKit;
 import akka.javasdk.testkit.TestKitSupport;
 import com.akka.cache.domain.Cache;
+import com.akka.cache.domain.CacheEvent;
+import com.akka.cache.domain.PayloadChunk;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public class CacheViewTest extends TestKitSupport {
@@ -27,20 +29,20 @@ public class CacheViewTest extends TestKitSupport {
     @Override
     protected TestKit.Settings testKitSettings() {
         return TestKit.Settings.DEFAULT
-                .withKeyValueEntityIncomingMessages("cache");
+                .withEventSourcedEntityIncomingMessages("cache");
     }
 
     @Test
     public void shouldGetCachedKeysSummaryForCache1() {
-        EventingTestKit.IncomingMessages cacheEvents = testKit.getKeyValueEntityIncomingMessages("cache");
+        EventingTestKit.IncomingMessages cacheEvents = testKit.getEventSourcedEntityIncomingMessages("cache");
 
-        Cache cache1 = new Cache(CACHENAME1, KEY1, PAYLOAD1.getBytes());
-        Cache cache2 = new Cache(CACHENAME1, KEY2, PAYLOAD1.getBytes());
-        Cache cache3 = new Cache(CACHENAME1, KEY3, PAYLOAD1.getBytes());
+        var evt1 = new CacheEvent.CacheSet(CACHENAME1, KEY1, Optional.empty(), new PayloadChunk(0, PAYLOAD1.getBytes()));
+        var evt2 = new CacheEvent.CacheSet(CACHENAME1, KEY2, Optional.empty(), new PayloadChunk(0, PAYLOAD2.getBytes()));
+        var evt3 = new CacheEvent.CacheSet(CACHENAME1, KEY3, Optional.empty(), new PayloadChunk(0, PAYLOAD3.getBytes()));
 
-        cacheEvents.publish(cache1, "1");
-        cacheEvents.publish(cache2, "2");
-        cacheEvents.publish(cache3, "3");
+        cacheEvents.publish(evt1, "1");
+        cacheEvents.publish(evt2, "2");
+        cacheEvents.publish(evt3, "3");
 
         Awaitility.await()
                 .ignoreExceptions()
@@ -65,15 +67,15 @@ public class CacheViewTest extends TestKitSupport {
 
     @Test
     public void shouldGetCachedKeysOnlyForCache1() {
-        EventingTestKit.IncomingMessages cacheEvents = testKit.getKeyValueEntityIncomingMessages("cache");
+        EventingTestKit.IncomingMessages cacheEvents = testKit.getEventSourcedEntityIncomingMessages("cache");
 
-        Cache cache1 = new Cache(CACHENAME1, KEY1, PAYLOAD1.getBytes());
-        Cache cache2 = new Cache(CACHENAME1, KEY2, PAYLOAD1.getBytes());
-        Cache cache3 = new Cache(CACHENAME1, KEY3, PAYLOAD1.getBytes());
+        var evt1 = new CacheEvent.CacheSet(CACHENAME1, KEY1, Optional.empty(), new PayloadChunk(0, PAYLOAD1.getBytes()));
+        var evt2 = new CacheEvent.CacheSet(CACHENAME1, KEY2, Optional.empty(), new PayloadChunk(0, PAYLOAD2.getBytes()));
+        var evt3 = new CacheEvent.CacheSet(CACHENAME1, KEY3, Optional.empty(), new PayloadChunk(0, PAYLOAD3.getBytes()));
 
-        cacheEvents.publish(cache1, "1");
-        cacheEvents.publish(cache2, "2");
-        cacheEvents.publish(cache3, "3");
+        cacheEvents.publish(evt1, "1");
+        cacheEvents.publish(evt2, "2");
+        cacheEvents.publish(evt3, "3");
 
         Awaitility.await()
                 .ignoreExceptions()

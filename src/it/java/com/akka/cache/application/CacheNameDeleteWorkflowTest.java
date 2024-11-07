@@ -7,7 +7,9 @@ import akka.javasdk.testkit.TestKit;
 import akka.javasdk.testkit.TestKitSupport;
 import com.akka.cache.api.CacheEndpoint;
 import com.akka.cache.domain.Cache;
+import com.akka.cache.domain.CacheEvent;
 import com.akka.cache.domain.CacheName;
+import com.akka.cache.domain.PayloadChunk;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -15,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.CompletionStage;
@@ -37,7 +40,7 @@ public class CacheNameDeleteWorkflowTest extends TestKitSupport {
     @Override
     protected TestKit.Settings testKitSettings() {
         return TestKit.Settings.DEFAULT
-                .withKeyValueEntityIncomingMessages("cache");
+                .withEventSourcedEntityIncomingMessages("cache");
     }
 
     private CompletionStage<CacheView.CachedKeys> getView(String cachName) {
@@ -48,18 +51,14 @@ public class CacheNameDeleteWorkflowTest extends TestKitSupport {
 
     @Test
     public void shouldCreateThenDeleteCachedEntites() throws ExecutionException, InterruptedException {
-        final EventingTestKit.IncomingMessages cacheEvents = testKit.getKeyValueEntityIncomingMessages("cache");
+        final EventingTestKit.IncomingMessages cacheEvents = testKit.getEventSourcedEntityIncomingMessages("cache");
 
         Awaitility.await().until(() -> {
             log.info("shouldCreateThenDeleteCached creating caches...");
             for (int i = 1; i <= NUMBER_OF_CACHES; i++) {
-                Cache cache;
-                if (random.nextBoolean()) {
-                    cache = new Cache(CACHENAME1, "key" + i, ("my payload " + i).getBytes(), Optional.of(ttl));
-                } else {
-                    cache = new Cache(CACHENAME1, "key" + i, ("my payload " + i).getBytes());
-                }
-                cacheEvents.publish(cache, String.valueOf(i));
+                Optional<Duration> evtTTL = random.nextBoolean() ? Optional.of(this.ttl) : Optional.empty();
+                var event = new CacheEvent.CacheSet(CACHENAME1, "key" + i, evtTTL, new PayloadChunk(0, ("my payload " + i).getBytes()));
+                cacheEvents.publish(event, String.valueOf(i));
             }
             return true;
         });
@@ -104,7 +103,7 @@ public class CacheNameDeleteWorkflowTest extends TestKitSupport {
     private CacheName getCacheName(String cacheName) {
         return await(
                 componentClient
-                        .forKeyValueEntity(cacheName)
+                        .forEventSourcedEntity(cacheName)
                         .method(CacheNameEntity::get)
                         .invokeAsync()
         );
@@ -112,7 +111,7 @@ public class CacheNameDeleteWorkflowTest extends TestKitSupport {
 
     @Test
     public void shouldCreateThenFlushCachedEntites() throws ExecutionException, InterruptedException {
-        final EventingTestKit.IncomingMessages cacheEvents = testKit.getKeyValueEntityIncomingMessages("cache");
+        final EventingTestKit.IncomingMessages cacheEvents = testKit.getEventSourcedEntityIncomingMessages("cache");
 
         Awaitility.await()
                 .ignoreExceptions()
@@ -134,13 +133,9 @@ public class CacheNameDeleteWorkflowTest extends TestKitSupport {
         Awaitility.await().until(() -> {
             log.info("shouldCreateThenDeleteCached creating caches...");
             for (int i = 1; i <= NUMBER_OF_CACHES; i++) {
-                Cache cache;
-                if (random.nextBoolean()) {
-                    cache = new Cache(CACHENAME2, "key" + i, ("my payload " + i).getBytes(), Optional.of(ttl));
-                } else {
-                    cache = new Cache(CACHENAME2, "key" + i, ("my payload " + i).getBytes());
-                }
-                cacheEvents.publish(cache, String.valueOf(i));
+                Optional<Duration> evtTTL = random.nextBoolean() ? Optional.of(this.ttl) : Optional.empty();
+                var event = new CacheEvent.CacheSet(CACHENAME2, "key" + i, evtTTL, new PayloadChunk(0, ("my payload " + i).getBytes()));
+                cacheEvents.publish(event, String.valueOf(i));
             }
             return true;
         });

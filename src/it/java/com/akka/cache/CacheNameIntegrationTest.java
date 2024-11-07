@@ -26,7 +26,7 @@ public class CacheNameIntegrationTest extends TestKitSupport {
   private CacheName getCacheName(String cacheName) {
     return await(
             componentClient
-                    .forKeyValueEntity(cacheName)
+                    .forEventSourcedEntity(cacheName)
                     .method(CacheNameEntity::get)
                     .invokeAsync()
     );
@@ -68,7 +68,7 @@ public class CacheNameIntegrationTest extends TestKitSupport {
   public void httpGetModifiedCacheNameDescription() {
 
     var response = await(
-            httpClient.GET("/cache/cacheName/" + CACHE_NAME)
+            httpClient.GET("/cache/cacheName/".concat(CACHE_NAME))
                     .responseBodyAs(CacheName.class)
                     .invokeAsync()
     );
