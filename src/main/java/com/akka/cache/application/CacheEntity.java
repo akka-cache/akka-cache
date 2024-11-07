@@ -6,6 +6,7 @@ import akka.javasdk.annotations.ComponentId;
 import akka.javasdk.eventsourcedentity.EventSourcedEntity;
 import com.akka.cache.domain.Cache;
 import com.akka.cache.domain.CacheEvent;
+import com.akka.cache.domain.CacheInternalGetResponse;
 import com.akka.cache.domain.PayloadChunk;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,31 +17,39 @@ import static akka.Done.done;
 public class CacheEntity extends EventSourcedEntity<Cache, CacheEvent> {
     private static final Logger log = LoggerFactory.getLogger(CacheEntity.class);
 
-    public ReadOnlyEffect<Cache> get() {
+    public ReadOnlyEffect<CacheInternalGetResponse> get() {
         if (currentState() == null || currentState().deleted()) {
             return errorNotFound();
         }
         else {
-            // TODO: just return the first payload
-            return effects().reply(currentState());
+            return effects().reply(new CacheInternalGetResponse(
+                    currentState().cacheName(),
+                    currentState().key(),
+                    currentState().ttlSeconds(),
+                    currentState().deleted(),
+                    currentState().chunks().size(),
+                    currentState().chunks().get(0))
+            );
         }
     }
 
-    public ReadOnlyEffect<Cache> getChunk(int index) {
+    public ReadOnlyEffect<PayloadChunk> getChunk(int index) {
         if (currentState() == null || currentState().deleted()) {
             return errorNotFound();
         }
         else {
-            // just return the first payload
+            if (log.isDebugEnabled()) {
+                log.debug("CacheEntity {} getChunk({})", commandContext().entityId(), index);
+            }
             return effects().reply(
-                    currentState().withChunk(currentState().chunks().get(index))
+                    currentState().chunks().get(index)
             );
         }
     }
 
     public Effect<Done> set(Cache cache) {
         if (log.isDebugEnabled()) {
-            log.info("Creating {}", commandContext().entityId());
+            log.debug("CacheEntity Creating new cache {}", commandContext().entityId());
         }
         return effects()
                 .persist(new CacheEvent.CacheSet(cache.cacheName(), cache.key(), cache.ttlSeconds(), cache.chunks().get(0)))
@@ -49,7 +58,7 @@ public class CacheEntity extends EventSourcedEntity<Cache, CacheEvent> {
 
     public Effect<Done> setWithChunk(PayloadChunk chunk) {
         if (log.isDebugEnabled()) {
-            log.info("adding chuck {} sequence {}", commandContext().entityId(), chunk.sequence());
+            log.debug("CacheEntity adding chunk {} sequence {}", commandContext().entityId(), chunk.sequence());
         }
         return effects()
                 .persist(new CacheEvent.ChunkAdded(chunk))
@@ -57,14 +66,16 @@ public class CacheEntity extends EventSourcedEntity<Cache, CacheEvent> {
     }
 
     /*
-    TODO: we're not actually deleting for now,
+    TODO: we're not actually deleting for now, just flagging it
      */
     public Effect<Done> delete() {
         if (currentState() == null || currentState().deleted()) {
             return errorNotFound();
         }
         else {
-            // just return the first payload
+            if (log.isDebugEnabled()) {
+                log.debug("CacheEntity delete {}", commandContext().entityId());
+            }
             return effects()
                     .persist(new CacheEvent.CacheDeleted())
                     .thenReply(__ -> done());

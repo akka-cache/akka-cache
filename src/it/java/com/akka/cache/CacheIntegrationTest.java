@@ -1,13 +1,11 @@
 package com.akka.cache;
 
 import akka.http.javadsl.model.StatusCodes;
-import akka.javasdk.http.StrictResponse;
 import akka.javasdk.testkit.TestKitSupport;
 import com.akka.cache.api.CacheEndpoint;
 import com.akka.cache.application.CacheEntity;
 import com.akka.cache.application.CacheView;
-import com.akka.cache.domain.Cache;
-import com.akka.cache.domain.CacheName;
+import com.akka.cache.domain.CacheInternalGetResponse;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
@@ -34,7 +32,7 @@ public class CacheIntegrationTest extends TestKitSupport {
   private static final String PAYLOAD1 = "This is Akka 3's time.";
   private static final String PAYLOAD2 = "Akka 3 is on it's way";
 
-  private Cache getCache(String cacheName, String key) {
+  private CacheInternalGetResponse getCache(String cacheName, String key) {
     return await(
             componentClient
               .forEventSourcedEntity(cacheName.concat(key))
@@ -68,8 +66,8 @@ public class CacheIntegrationTest extends TestKitSupport {
                     .invokeAsync()
     );
     Assertions.assertEquals(StatusCodes.CREATED, response.status());
-    Cache cached = getCache(CACHE_NAME, "key1");
-    String returnedPayload = new String(cached.chunks().get(0).payload(), StandardCharsets.UTF_8);
+    CacheInternalGetResponse cached = getCache(CACHE_NAME, "key1");
+    String returnedPayload = new String(cached.firstChunk().payload(), StandardCharsets.UTF_8);
     Assertions.assertEquals(PAYLOAD1, returnedPayload);
   }
 
@@ -84,8 +82,8 @@ public class CacheIntegrationTest extends TestKitSupport {
                     .invokeAsync()
     );
     Assertions.assertEquals(StatusCodes.CREATED, response.status());
-    Cache cached = getCache(CACHE_NAME, "key2");
-    String returnedPayload = new String(cached.chunks().get(0).payload(), StandardCharsets.UTF_8);
+    CacheInternalGetResponse cached = getCache(CACHE_NAME, "key2");
+    String returnedPayload = new String(cached.firstChunk().payload(), StandardCharsets.UTF_8);
     Assertions.assertEquals(PAYLOAD2, returnedPayload);
   }
 

@@ -13,7 +13,7 @@ import scala.Tuple2;
 
 import static akka.util.ByteString.emptyByteString;
 
-class Chunker extends GraphStage<FlowShape<ByteString, ByteString>> {
+public class Chunker extends GraphStage<FlowShape<ByteString, ByteString>> {
 
     private final int chunkSize;
 
