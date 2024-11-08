@@ -308,6 +308,16 @@ public class CacheEndpoint {
             });
   }
 
+  public record CacheGetKeysResponse(String cacheName, List<String> keys) {}
+
+  @Get("/{cacheName}/keys")
+  public CompletionStage<CacheGetKeysResponse> getCacheKeys(String cacheName) {
+    return componentClient.forView()
+            .method(CacheView::getCacheKeys)
+            .invokeAsync(cacheName)
+            .thenApply(results -> new CacheGetKeysResponse(cacheName, results.keys()));
+  }
+
   @Delete("/{cacheName}/{key}")
   public CompletionStage<HttpResponse> delete(String cacheName, String key) {
     String compoundKey = cacheName.concat(key);
