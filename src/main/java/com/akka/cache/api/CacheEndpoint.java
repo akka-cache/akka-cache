@@ -360,16 +360,19 @@ public class CacheEndpoint {
   }
 
   public record BatchGetCacheRequest(String cacheName, String key) {}
-
+  public record BatchGetCacheRequests(List<BatchGetCacheRequest> getCachedBatch) {}
   public record BatchGetCacheResponse(Boolean complete, List<CacheGetResponse> results) {}
 
   @Post("/batch/get")
-  public CompletionStage<BatchGetCacheResponse> getCacheBatch(List<BatchGetCacheRequest> getCachedBatch) {
+  public CompletionStage<BatchGetCacheResponse> getCacheBatch(BatchGetCacheRequests getBatchRequests) {
     List<CompletableFuture<CacheGetResponse>> getBatchFutures = new ArrayList<>();
-    for (BatchGetCacheRequest request : getCachedBatch) {
-      getBatchFutures.add(getCache(request.cacheName, request.key).toCompletableFuture());
-    }
-    return FutureHelper.allOf(getBatchFutures)
+      for (BatchGetCacheRequest request : getBatchRequests.getCachedBatch) {
+          getBatchFutures.add(
+                  getCache(request.cacheName, request.key)
+                          .toCompletableFuture()
+          );
+      }
+      return FutureHelper.allOf(getBatchFutures)
             .thenApply(results -> new BatchGetCacheResponse(true, results))
             .exceptionally(ex -> {
               // collect results from actual future list
@@ -392,9 +395,9 @@ public class CacheEndpoint {
   public record BatchDeleteCacheResponse(Boolean success, List<CacheDeleteResponse> cacheDeleteResponses) {}
 
   @Delete("/batch/")
-  public CompletionStage<BatchDeleteCacheResponse> deleteCacheBatch(List<BatchGetCacheRequest> getCachedBatch) {
+  public CompletionStage<BatchDeleteCacheResponse> deleteCacheBatch(BatchGetCacheRequests getBatchRequests) {
     List<CompletableFuture<CacheDeleteResponse>> getBatchFutures = new ArrayList<>();
-    getCachedBatch.forEach(request -> {
+    for (BatchGetCacheRequest request : getBatchRequests.getCachedBatch) {
       getBatchFutures.add(
               delete(request.cacheName, request.key)
                       .thenApply(deleteResult -> {
@@ -403,7 +406,7 @@ public class CacheEndpoint {
                       })
                       .toCompletableFuture()
       );
-    });
+    }
     return FutureHelper.allOf(getBatchFutures)
             .thenApply(results -> new BatchDeleteCacheResponse(true, results))
             .exceptionally(ex -> {
