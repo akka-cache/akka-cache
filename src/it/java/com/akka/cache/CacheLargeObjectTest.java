@@ -3,9 +3,6 @@ package com.akka.cache;
 import akka.http.javadsl.model.StatusCodes;
 import akka.javasdk.testkit.TestKitSupport;
 import com.akka.cache.api.CacheEndpoint;
-import com.akka.cache.application.CacheEntity;
-import com.akka.cache.domain.Cache;
-import com.akka.cache.domain.CacheGetResponse;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -67,7 +63,7 @@ public class CacheLargeObjectTest extends TestKitSupport {
 
         var cache = await(
                 httpClient.GET("/cache/" + CACHE_NAME + "/" + key)
-                        .responseBodyAs(CacheGetResponse.class)
+                        .responseBodyAs(CacheEndpoint.CacheGetResponse.class)
                         .invokeAsync()
         );
 
