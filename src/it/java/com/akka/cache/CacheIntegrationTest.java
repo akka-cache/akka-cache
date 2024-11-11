@@ -4,7 +4,6 @@ import akka.http.javadsl.model.StatusCodes;
 import akka.javasdk.testkit.TestKitSupport;
 import com.akka.cache.api.CacheEndpoint;
 import com.akka.cache.application.CacheEntity;
-import com.akka.cache.application.CacheView;
 import com.akka.cache.domain.CacheInternalGetResponse;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.*;
@@ -89,7 +88,7 @@ public class CacheIntegrationTest extends TestKitSupport {
 
   @Test
   @Order(4)
-  public void httpVerifyCachKeysView() {
+  public void httpVerifyCacheKeysView() {
     Awaitility.await()
             .ignoreExceptions()
             .atMost(20, TimeUnit.SECONDS)

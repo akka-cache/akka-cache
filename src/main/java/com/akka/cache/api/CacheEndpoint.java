@@ -104,7 +104,7 @@ public class CacheEndpoint {
             });
   }
 
-  // This deletes the cachName as well as all the keys
+  // This deletes the cacheName as well as all the keys
   @Delete("/cacheName/{cacheName}")
   public CompletionStage<HttpResponse> deleteCacheKeys(String cacheName) {
     var startDeletionSetup = new CacheNameDeleteWorkflow.StartDeletionsSetup(cacheName, false);

@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
-@ComponentId("cach_name_delete_workflow")
+@ComponentId("cache_name_delete_workflow")
 public class CacheNameDeleteWorkflow extends Workflow<DeleteCacheNameState> {
     private static final Logger log = LoggerFactory.getLogger(CacheNameDeleteWorkflow.class);
 
@@ -102,18 +102,14 @@ public class CacheNameDeleteWorkflow extends Workflow<DeleteCacheNameState> {
                         componentClient.forView()
                                 .method(CacheView::getCacheKeys)
                                 .invokeAsync(currentState().cacheName()))
-                .andThen(CacheView.CachedKeys.class, cachedKeys -> {
-                    return effects()
-                            .updateState(currentState().withCached(cachedKeys))
-                            .transitionTo(transitionTo);
-                });
+                .andThen(CacheView.CachedKeys.class, cachedKeys -> effects()
+                        .updateState(currentState().withCached(cachedKeys))
+                        .transitionTo(transitionTo));
     }
 
     protected Step getStepDeleteCached(String stepName, String transitionTo, String transitionOnFlushOnly) {
         return step(stepName)
-                .asyncCall(() -> {
-                    return deleteNextBatch();
-                })
+                .asyncCall(this::deleteNextBatch)
                 .andThen(DeleteBatchResult.class, deleteBatchResult -> {
                     if (log.isDebugEnabled()) {
                         log.debug("{} deleteBatchResult success {}", stepName, deleteBatchResult.success);
@@ -165,11 +161,9 @@ public class CacheNameDeleteWorkflow extends Workflow<DeleteCacheNameState> {
 
     protected Step getStepDeleteCacheName(String stepName) {
         return step(stepName)
-                .asyncCall(() -> {
-                    return componentClient.forEventSourcedEntity(currentState().cacheName())
-                            .method(CacheNameEntity::delete)
-                            .invokeAsync();
-                })
+                .asyncCall(() -> componentClient.forEventSourcedEntity(currentState().cacheName())
+                        .method(CacheNameEntity::delete)
+                        .invokeAsync())
                 .andThen(Done.class, done -> {
                     if (log.isDebugEnabled()) {
                         log.debug("getStepDeleteCacheName completed.");

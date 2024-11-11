@@ -4,7 +4,6 @@ import akka.Done;
 import akka.javasdk.annotations.ComponentId;
 import akka.javasdk.client.ComponentClient;
 import akka.javasdk.timedaction.TimedAction;
-import com.akka.cache.api.CacheEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

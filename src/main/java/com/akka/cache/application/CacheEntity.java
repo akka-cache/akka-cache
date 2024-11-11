@@ -28,7 +28,7 @@ public class CacheEntity extends EventSourcedEntity<Cache, CacheEvent> {
                     currentState().ttlSeconds(),
                     currentState().deleted(),
                     currentState().chunks().size(),
-                    currentState().chunks().get(0))
+                    currentState().chunks().getFirst())
             );
         }
     }
@@ -52,7 +52,7 @@ public class CacheEntity extends EventSourcedEntity<Cache, CacheEvent> {
             log.debug("CacheEntity Creating new cache {}", commandContext().entityId());
         }
         return effects()
-                .persist(new CacheEvent.CacheSet(cache.cacheName(), cache.key(), cache.ttlSeconds(), cache.chunks().get(0)))
+                .persist(new CacheEvent.CacheSet(cache.cacheName(), cache.key(), cache.ttlSeconds(), cache.chunks().getFirst()))
                 .thenReply(__ -> done());
     }
 
@@ -97,46 +97,3 @@ public class CacheEntity extends EventSourcedEntity<Cache, CacheEvent> {
         );
     }
 }
-
-/*
-import akka.Done;
-import akka.javasdk.annotations.ComponentId;
-import akka.javasdk.keyvalueentity.KeyValueEntity;
-import com.akka.cache.domain.Cache;
-
-import java.util.Optional;
-
-import static akka.Done.done;
-
-@ComponentId("cache")
-public class CacheEntity extends KeyValueEntity<Cache> {
-
-    @Override
-    public Cache emptyState() {
-        return new Cache("", commandContext().entityId(), null, Optional.empty());
-    }
-
-    public Effect<Done> set(Cache newCache) {
-        return effects()
-                .updateState(newCache)
-                .thenReply(done());
-    }
-
-    public Effect<Done> delete() {
-        return effects()
-                .deleteEntity()
-                .thenReply(done());
-    }
-
-    public Effect<Cache> get() {
-        return effects()
-                .reply(currentState());
-    }
-
-    public Effect<Boolean> isCached() {
-        Boolean isCached = currentState().value().equals(emptyState()) ? false : true;
-        return effects().reply(isCached);
-    }
-
-}
-*/
