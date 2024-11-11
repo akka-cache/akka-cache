@@ -95,16 +95,16 @@ public class CacheIntegrationTest extends TestKitSupport {
             .atMost(20, TimeUnit.SECONDS)
             .untilAsserted(() -> {
               var response = await(
-                      httpClient.GET("/cache/cacheName/" + CACHE_NAME + "/keys")
-                              .responseBodyAs(CacheView.CacheSummaries.class)
+                      httpClient.GET("/cache/" + CACHE_NAME + "/keys")
+                              .responseBodyAs(CacheEndpoint.CacheGetKeysResponse.class)
                               .invokeAsync()
 
               );
               Assertions.assertEquals(StatusCodes.OK, response.status());
-              Assertions.assertEquals(response.body().cached().size(), 2);
-              // how to convert parse the response body
-              log.info("response: {}", response.body());
+              Assertions.assertEquals(response.body().keys().size(), 2);
+              log.info("response: {}", response.body().keys());
             });
+
   }
 
 }

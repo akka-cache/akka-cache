@@ -187,7 +187,8 @@ public class CacheEndpoint {
           return CompletableFuture.completedFuture(HttpResponses.accepted());
         }
       });
-    } else {
+    }
+    else {
       return CompletableFuture.completedFuture(HttpResponses.accepted());
     }
   }
