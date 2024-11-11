@@ -46,23 +46,4 @@ public class CacheView extends View {
     public QueryEffect<CachedKeys> getCacheKeys(String cacheName) {
         return queryResult();
     }
-
 }
-
-/*    public static class KeysByCacheName extends TableUpdater<CacheSummary> {
-        public Effect<CacheSummary> onUpdate(Cache cache) {
-            if (log.isDebugEnabled()) {
-                log.debug("CacheView onUpdate received for {} {}", cache.cacheName(), cache.key());
-            }
-            return effects()
-                    .updateRow(new CacheSummary(cache.cacheName(), cache.key()));
-        }
-
-        @DeleteHandler
-        public Effect<CacheSummary> onDelete() {
-            if (log.isDebugEnabled()) {
-                log.debug("CacheView onDelete received for {}", updateContext().eventSubject());
-            }
-            return effects().deleteRow();
-        }
-    }*/

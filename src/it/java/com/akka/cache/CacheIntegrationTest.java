@@ -4,7 +4,6 @@ import akka.http.javadsl.model.StatusCodes;
 import akka.javasdk.testkit.TestKitSupport;
 import com.akka.cache.api.CacheEndpoint;
 import com.akka.cache.application.CacheEntity;
-import com.akka.cache.application.CacheView;
 import com.akka.cache.domain.CacheInternalGetResponse;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.*;
@@ -89,22 +88,22 @@ public class CacheIntegrationTest extends TestKitSupport {
 
   @Test
   @Order(4)
-  public void httpVerifyCachKeysView() {
+  public void httpVerifyCacheKeysView() {
     Awaitility.await()
             .ignoreExceptions()
             .atMost(20, TimeUnit.SECONDS)
             .untilAsserted(() -> {
               var response = await(
-                      httpClient.GET("/cache/cacheName/" + CACHE_NAME + "/keys")
-                              .responseBodyAs(CacheView.CacheSummaries.class)
+                      httpClient.GET("/cache/" + CACHE_NAME + "/keys")
+                              .responseBodyAs(CacheEndpoint.CacheGetKeysResponse.class)
                               .invokeAsync()
 
               );
               Assertions.assertEquals(StatusCodes.OK, response.status());
-              Assertions.assertEquals(response.body().cached().size(), 2);
-              // how to convert parse the response body
-              log.info("response: {}", response.body());
+              Assertions.assertEquals(response.body().keys().size(), 2);
+              log.info("response: {}", response.body().keys());
             });
+
   }
 
 }

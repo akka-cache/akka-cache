@@ -104,7 +104,7 @@ public class CacheEndpoint {
             });
   }
 
-  // This deletes the cachName as well as all the keys
+  // This deletes the cacheName as well as all the keys
   @Delete("/cacheName/{cacheName}")
   public CompletionStage<HttpResponse> deleteCacheKeys(String cacheName) {
     var startDeletionSetup = new CacheNameDeleteWorkflow.StartDeletionsSetup(cacheName, false);
@@ -187,7 +187,8 @@ public class CacheEndpoint {
           return CompletableFuture.completedFuture(HttpResponses.accepted());
         }
       });
-    } else {
+    }
+    else {
       return CompletableFuture.completedFuture(HttpResponses.accepted());
     }
   }
@@ -306,6 +307,16 @@ public class CacheEndpoint {
                         });
               }
             });
+  }
+
+  public record CacheGetKeysResponse(String cacheName, List<String> keys) {}
+
+  @Get("/{cacheName}/keys")
+  public CompletionStage<CacheGetKeysResponse> getCacheKeys(String cacheName) {
+    return componentClient.forView()
+            .method(CacheView::getCacheKeys)
+            .invokeAsync(cacheName)
+            .thenApply(results -> new CacheGetKeysResponse(cacheName, results.keys()));
   }
 
   @Delete("/{cacheName}/{key}")
