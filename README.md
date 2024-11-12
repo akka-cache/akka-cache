@@ -72,7 +72,7 @@ Cache:
 
 POST /cache (this is the payload of one)
 ```
-curl -i -d '{"cacheName":"cache1", "key":"key1", "value":"this is the payload of one"}' -H "Content-Type: application/json" -X POST http://localhost:9000/cache
+curl -i -d '{"cacheName":"cache1", "key":"key1", "value":"dGhpcyBpcyB0aGUgcGF5bG9hZCBvZiBvbmU="}' -H "Content-Type: application/json" -X POST http://localhost:9000/cache
 ```
 (this is the payload of two)
 ```

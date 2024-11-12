@@ -10,10 +10,12 @@
  -->
 <included>
     <logger name="com.akka.akka-cache" level="INFO"/>
+<!--
     <logger name="com.akka.cache.api.CacheEndpoint" level="DEBUG"/>
     <logger name="com.akka.cache.application.CacheView" level="DEBUG"/>
     <logger name="com.akka.cache.application.CacheNameEntity" level="DEBUG"/>
     <logger name="com.akka.cache.application.CacheEntity" level="DEBUG"/>
     <logger name="com.akka.cache.application.CacheTimedAction" level="DEBUG"/>
     <logger name="com.akka.cache.application.CacheNameDeleteWorkflow" level="DEBUG"/>
+-->
 </included>
