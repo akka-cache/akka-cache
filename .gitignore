@@ -1,3 +1,4 @@
+# Java/Scala related
 *.class
 .idea
 .bsp
@@ -6,4 +7,48 @@ project/
 akka-diagnostics/
 logs
 lightbend.sbt
+
+# IDE and Editor files
+.vscode
+.cursorrules
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Remix/Node.js related
+node_modules/
+**/node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+/frontend/.cache/
+/frontend/build/
+/frontend/public/build/
+/frontend/.env
+/frontend/api/_build/
+
+# Testing
+/frontend/test-results/
+/frontend/playwright-report/
+/frontend/playwright/.cache/
+/frontend/coverage/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Project specific files
 images/2025-Chevrolet-Corvette-ZR1-001-1440sw(copy).jpg
+backend/images/2025-Chevrolet-Corvette-ZR1-001-1440sw(copy).jpg
+
+# Temporary files
+*.tmp
+*.temp
+=======
+backend/images/2025-Chevrolet-Corvette-ZR1-001-1440sw(copy).jpg

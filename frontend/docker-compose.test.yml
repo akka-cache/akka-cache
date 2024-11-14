@@ -1,0 +1,11 @@
+services:
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    command: npx playwright test
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - CI=true
