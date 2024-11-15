@@ -60,7 +60,7 @@ public class CacheIntegrationTest extends TestKitSupport {
     CacheEndpoint.CacheRequest setRequest = new CacheEndpoint.CacheRequest(CACHE_NAME, "key1", Optional.empty(), PAYLOAD1.getBytes());
 
     var response = await(
-            httpClient.POST("/cache")
+            httpClient.POST("/cache/set")
                     .withRequestBody(setRequest)
                     .invokeAsync()
     );
@@ -76,7 +76,7 @@ public class CacheIntegrationTest extends TestKitSupport {
     CacheEndpoint.CacheRequest setRequest = new CacheEndpoint.CacheRequest(CACHE_NAME, "key2", Optional.empty(), PAYLOAD2.getBytes());
 
     var response = await(
-            httpClient.POST("/cache")
+            httpClient.POST("/cache/set")
                     .withRequestBody(setRequest)
                     .invokeAsync()
     );
