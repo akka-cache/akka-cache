@@ -1,8 +1,7 @@
-package com.akka.gatling;
+package io.akka.gatling;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-import io.gatling.javaapi.core.Body;
 import io.gatling.javaapi.core.FeederBuilder;
 import io.gatling.javaapi.core.ScenarioBuilder;
 import io.gatling.javaapi.core.Simulation;
@@ -10,7 +9,6 @@ import io.gatling.javaapi.http.HttpProtocolBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Base64;
 import java.util.Random;
@@ -19,8 +17,8 @@ import static io.gatling.javaapi.core.CoreDsl.*;
 import static io.gatling.javaapi.http.HttpDsl.http;
 import static io.gatling.javaapi.http.HttpDsl.status;
 
-public class CacheGetScenario extends Simulation {
-    private static final Logger log = LoggerFactory.getLogger(CacheGetScenario.class);
+public class CacheJSONGetScenario extends Simulation {
+    private static final Logger log = LoggerFactory.getLogger(CacheJSONGetScenario.class);
 
     private Config config = ConfigFactory.load();
 
