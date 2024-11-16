@@ -22,11 +22,18 @@ Access the app at http://localhost:5173
 
 ## Testing
 
-Run end-to-end tests:
+Run end-to-end tests independently:
 
 ```bash
+# Build and run tests
+docker build -t frontend-test -f Dockerfile.test .
+docker run frontend-test
+
+# Or use docker compose
 docker compose -f docker-compose.test.yml up --build
 ```
+
+Note: Tests can be run independently from the development environment, as testing dependencies are isolated in their own container.
 
 ## Production
 

@@ -1,12 +1,73 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Define CSS variables for light and dark themes */
+:root {
+  --background: #ffffff;
+  --text-color: #333333;
+  --heading-color: #4e4e4e;
+  --link-color: #00dbdd;
+  --button-bg: #00dbdd;
+  --button-text: #000000;
+  --border-color: #ffce4a;
+  --footer-color: #ffffff;
+  --swiper-theme-color: #007aff;
+}
 
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #000000;
+    --text-color: #f1f1f1;
+    --heading-color: #4e4e4e;
+    --link-color: #00dbdd;
+    --button-bg: #00dbdd;
+    --button-text: #000000;
+    --border-color: #ffce4a;
+    --footer-color: #f1f1f1;
+    --swiper-theme-color: #007aff;
+  }
+}
+
+/* Apply light and dark themes */
 html,
 body {
-  @apply bg-white dark:bg-gray-950;
+  background-color: var(--background);
+  color: var(--text-color);
+}
 
-  @media (prefers-color-scheme: dark) {
-    color-scheme: dark;
+/* Custom component classes */
+h1 {
+  @apply text-3xl font-bold;
+  color: var(--text-color);
+}
+
+h2 {
+  @apply text-2xl font-semibold;
+  color: var(--heading-color);
+}
+
+h3 {
+  @apply text-xl font-medium;
+  color: var(--border-color);
+}
+
+button, a {
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  &:hover {
+    background-color: var(--button-bg);
+    color: var(--footer-color);
   }
+}
+
+/* Custom utility for borders */
+.border-custom {
+  border-color: var(--border-color);
+}
+
+/* Footer color */
+footer {
+  color: var(--footer-color);
+}
+
+/* Custom classes for theme-based elements */
+.swiper-theme {
+  color: var(--swiper-theme-color);
 }

@@ -6,7 +6,10 @@ import {
   ScrollRestoration,
 } from "@remix-run/react";
 import type { LinksFunction } from "@remix-run/node";
-
+import { MantineProvider, ColorSchemeScript } from '@mantine/core';
+import '@mantine/core/styles.css';
+import { useColorScheme } from '@mantine/hooks';
+import theme from './theme';
 import "./tailwind.css";
 
 export const links: LinksFunction = () => [
@@ -22,7 +25,9 @@ export const links: LinksFunction = () => [
   },
 ];
 
-export function Layout({ children }: { children: React.ReactNode }) {
+export default function App() {
+  const preferredColorScheme = useColorScheme();
+
   return (
     <html lang="en">
       <head>
@@ -30,16 +35,18 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
+        <ColorSchemeScript defaultColorScheme={preferredColorScheme} />
       </head>
       <body>
-        {children}
+        <MantineProvider 
+          defaultColorScheme={preferredColorScheme}
+          theme={theme}
+        >
+          <Outlet />
+        </MantineProvider>
         <ScrollRestoration />
         <Scripts />
       </body>
     </html>
   );
-}
-
-export default function App() {
-  return <Outlet />;
 }
