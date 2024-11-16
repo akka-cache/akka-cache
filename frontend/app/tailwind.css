@@ -1,8 +1,10 @@
 /* Define CSS variables for light and dark themes */
 :root {
   --background: #ffffff;
-  --text-color: #333333;
-  --heading-color: #4e4e4e;
+  --sidebar-bg: #f8f9fa; /* Updated lighter sidebar */
+  --text-color: #343a40;        /* Updated: dark gray but not black */
+  --text-secondary: #6c757d;    /* Added: medium gray for secondary text */
+  --heading-color: #212529;     /* Updated: slightly darker than text color */
   --link-color: #00dbdd;
   --button-bg: #00dbdd;
   --button-text: #000000;
@@ -14,8 +16,10 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #000000;
+    --sidebar-bg: #1a1a1a; /* Dark sidebar */
     --text-color: #f1f1f1;
-    --heading-color: #4e4e4e;
+    --text-secondary: #AAAAAA;
+    --heading-color: #E1E1E1;
     --link-color: #00dbdd;
     --button-bg: #00dbdd;
     --button-text: #000000;
@@ -25,49 +29,47 @@
   }
 }
 
-/* Apply light and dark themes */
+/* Apply styles globally */
 html,
 body {
   background-color: var(--background);
   color: var(--text-color);
 }
 
-/* Custom component classes */
 h1 {
-  @apply text-3xl font-bold;
-  color: var(--text-color);
-}
-
-h2 {
-  @apply text-2xl font-semibold;
+  font-size: 1.875rem; /* text-3xl */
+  font-weight: 700;    /* font-bold */
   color: var(--heading-color);
 }
 
-h3 {
-  @apply text-xl font-medium;
+h2 {
+  font-size: 1.5rem; /* text-2xl */
+  font-weight: 600;    /* font-semibold */
+  color: var(--heading-color);
+}
+
+h3, h4 {
   color: var(--border-color);
 }
 
-button, a {
+/* Sidebar styling */
+.sidebar {
+  background-color: var(--sidebar-bg);
+  color: var(--text-color);
+}
+
+/* Link styles */
+a {
+  color: var(--link-color);
+}
+
+/* Button styles */
+button {
   background-color: var(--button-bg);
   color: var(--button-text);
-  &:hover {
-    background-color: var(--button-bg);
-    color: var(--footer-color);
-  }
 }
 
-/* Custom utility for borders */
-.border-custom {
-  border-color: var(--border-color);
-}
-
-/* Footer color */
-footer {
-  color: var(--footer-color);
-}
-
-/* Custom classes for theme-based elements */
-.swiper-theme {
-  color: var(--swiper-theme-color);
+/* Add this for secondary text */
+.text-secondary {
+  color: var(--text-secondary);
 }

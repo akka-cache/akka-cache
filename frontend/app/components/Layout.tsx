@@ -1,9 +1,9 @@
-import { 
-    AppShell, 
-    Burger, 
+import {
+    AppShell,
+    Burger,
     Group,
-    UnstyledButton, 
-    Menu, 
+    UnstyledButton,
+    Menu,
     Avatar,
     NavLink,
     Stack,
@@ -13,7 +13,7 @@ import {
   } from '@mantine/core';
   import { useDisclosure } from '@mantine/hooks';
   import { Link, useNavigate, useLocation } from '@remix-run/react';
-  import { 
+  import {
     IconLogout,
     IconSettings,
     IconUser,
@@ -24,7 +24,7 @@ import {
     IconPlus
   } from '@tabler/icons-react';
   import { ThemeToggle } from './ThemeToggle';
-  
+
   type LayoutProps = {
     children: React.ReactNode;
     user?: {
@@ -33,51 +33,52 @@ import {
       avatar?: string;
     };
   };
-  
+
   export default function Layout({ children, user }: LayoutProps) {
     const [opened, { toggle }] = useDisclosure();
     const navigate = useNavigate();
     const location = useLocation();
     const { colorScheme } = useMantineColorScheme();
-  
+
     const handleSignOut = () => {
       navigate('/sign-in');
     };
-  
+
     const mainLinks = [
       { icon: IconPlus, label: 'Create Cache', href: '/create-cache' },
       { icon: IconDatabase, label: 'My Caches', href: '/caches' },
       { icon: IconChartLine, label: 'Observability', href: '/observability' },
       { icon: IconBook, label: 'Documentation', href: '/docs' },
     ];
-  
+
     const bottomLinks = [
       { icon: IconSettings, label: 'Settings', href: '/settings' },
       { icon: IconCreditCard, label: 'Billing', href: '/billing' },
     ];
-  
+
     return (
       <AppShell
-        navbar={{ 
-          width: 300, 
-          breakpoint: 'sm', 
+        navbar={{
+          width: 300,
+          breakpoint: 'sm',
           collapsed: { mobile: !opened }
         }}
-        bg={colorScheme === 'dark' ? 'dark.0' : 'light.0'}
+        bg={colorScheme === 'dark' ? 'dark.0' : 'gray.0'}
       >
-        <AppShell.Navbar p="md">
+        <AppShell.Navbar p="md" bg={colorScheme === 'dark' ? 'dark.1' : 'gray.1'}>
             <AppShell.Section>
                 <Group pb="md" px="md">
                     <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-                    <Link 
-                    to="/dashboard" 
+                    <Link
+                    to="/dashboard"
                     className="text-xl font-bold navbar-logo"
+                    style={{ color: colorScheme === 'dark' ? 'var(--mantine-color-dark-9)' : 'var(--mantine-color-gray-8)' }}
                     >
                     Akka Cache
                     </Link>
                 </Group>
             </AppShell.Section>
-  
+
           <AppShell.Section grow>
             <Stack gap={0}>
               {mainLinks.map((link) => (
@@ -86,13 +87,14 @@ import {
                   component={Link}
                   to={link.href}
                   label={link.label}
+                  c={colorScheme === 'dark' ? 'dark.9' : 'gray.7'}
                   leftSection={
-                    <link.icon 
-                      style={{ 
-                        width: rem(20), 
-                        color: `var(--mantine-color-${colorScheme === 'dark' ? 'dark-6' : 'dark-0'})` 
-                      }} 
-                      stroke={1.5} 
+                    <link.icon
+                      style={{
+                        width: rem(20),
+                        color: `var(--mantine-color-${colorScheme === 'dark' ? 'akkaAccent-4' : 'akkaAccent-4'})`
+                      }}
+                      stroke={1.5}
                     />
                   }
                   active={location.pathname === link.href}
@@ -100,7 +102,7 @@ import {
               ))}
             </Stack>
           </AppShell.Section>
-  
+
           <AppShell.Section>
             <Stack gap={0}>
               {bottomLinks.map((link) => (
@@ -109,13 +111,14 @@ import {
                   component={Link}
                   to={link.href}
                   label={link.label}
+                  c={colorScheme === 'dark' ? 'dark.9' : 'gray.7'}
                   leftSection={
-                    <link.icon 
-                      style={{ 
-                        width: rem(20), 
-                        color: `var(--mantine-color-${colorScheme === 'dark' ? 'dark-6' : 'dark-0'})` 
-                      }} 
-                      stroke={1.5} 
+                    <link.icon
+                      style={{
+                        width: rem(20),
+                        color: `var(--mantine-color-${colorScheme === 'dark' ? 'akkaAccent-4' : 'akkaAccent-4'})`
+                      }}
+                      stroke={1.5}
                     />
                   }
                   active={location.pathname === link.href}
@@ -129,8 +132,19 @@ import {
                       <Group>
                         <Avatar src={user.avatar} radius="xl" alt={user.name} />
                         <div style={{ flex: 1 }}>
-                          <Text size="sm" fw={500}>{user.name}</Text>
-                          <Text size="xs" c="dimmed">{user.email}</Text>
+                          <Text
+                            size="sm"
+                            fw={500}
+                            c={colorScheme === 'dark' ? 'dark.9' : 'gray.7'}
+                          >
+                            {user.name}
+                          </Text>
+                          <Text
+                            size="xs"
+                            c={colorScheme === 'dark' ? 'gray.6' : 'gray.5'}
+                          >
+                            {user.email}
+                          </Text>
                         </div>
                       </Group>
                     </UnstyledButton>
@@ -141,7 +155,7 @@ import {
                       Profile
                     </Menu.Item>
                     <Menu.Divider />
-                    <Menu.Item 
+                    <Menu.Item
                       leftSection={<IconLogout size={14} />}
                       onClick={handleSignOut}
                       color="red"
@@ -154,7 +168,7 @@ import {
             </Stack>
           </AppShell.Section>
         </AppShell.Navbar>
-  
+
         <AppShell.Main>
           {children}
         </AppShell.Main>
