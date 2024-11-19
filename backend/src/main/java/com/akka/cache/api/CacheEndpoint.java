@@ -63,14 +63,8 @@ public class CacheEndpoint {
         }
     }
 
-
-    /*
-    Note: The only real reason to have a separate cacheName
-      entity is to maintain a description of the cache, and potentially additional settings
-     */
     // Cache Names -- BEGIN
-    public record CacheNameRequest(String cacheName, String description) {
-    }
+    public record CacheNameRequest(String cacheName, String description) {}
 
     @Post("/cacheName")
     public CompletionStage<HttpResponse> create(CacheNameRequest request) {
@@ -148,7 +142,8 @@ public class CacheEndpoint {
         String cacheId = cacheName.concat(key);
         if (requestTTLSeconds.isPresent()) {
             ttlSeconds = requestTTLSeconds;
-        } else if (defaultTTL.isPresent()) {
+        }
+        else if (defaultTTL.isPresent()) {
             ttlSeconds = defaultTTL;
         }
         if (ttlSeconds.isPresent()) {
@@ -162,7 +157,8 @@ public class CacheEndpoint {
                             .method(CacheTimedAction::expireCacheTTL)
                             .deferred(cacheId)
             );
-        } else {
+        }
+        else {
             return CompletableFuture.completedFuture(Done.done());
         }
 
@@ -191,7 +187,8 @@ public class CacheEndpoint {
             return cName.thenCompose(c -> {
                 if (c.cacheName().isEmpty()) {
                     return CompletableFuture.completedFuture(HttpResponses.notFound());
-                } else {
+                }
+                else {
                     return CompletableFuture.completedFuture(HttpResponses.accepted());
                 }
             });
@@ -324,8 +321,7 @@ public class CacheEndpoint {
     }
 
     /*
-     This is an alternate REST call that could potentially
-     replace the default "/" cache setter above.
+     This is an alternate binary REST call that is now a default.
 
      This solves the problem of having to convert into
      and out of ByteString for chunking.
@@ -427,8 +423,7 @@ public class CacheEndpoint {
   }
 
   /*
-   This is an alternate REST call that could potentially
-   replace the default "/" cache setter above.
+   This is an alternate binary REST call that is now a default.
 
    This solves the problem of having to convert into
    and out of ByteString for chunking.

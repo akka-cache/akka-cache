@@ -64,7 +64,7 @@ Cache Name:
 
 POST /cache/cacheName/create
 ```shell
-curl -i -d '{"cacheName":"cache1", "description":"This is our first test"}' -H "Content-Type: application/json" -X POST http://localhost:9000/cache/cacheName/create
+curl -i -d '{"cacheName":"cache1", "description":"This is our first test"}' -H "Content-Type: application/json" -X POST http://localhost:9000/cache/cacheName
 ```
 
 GET /cache/cacheName/{cacheName}
