@@ -1,30 +1,29 @@
 package com.akka.cache.api;
 
-import akka.http.javadsl.model.*;
+import akka.http.javadsl.model.HttpEntity;
+import akka.http.javadsl.model.HttpResponse;
 import akka.javasdk.annotations.Acl;
 import akka.javasdk.annotations.http.*;
 import akka.javasdk.client.ComponentClient;
-import akka.http.javadsl.model.HttpResponse;
 import akka.javasdk.timer.TimerScheduler;
 import akka.stream.Materializer;
 import com.akka.cache.application.CacheView;
-import com.akka.cache.domain.*;
+import com.akka.cache.domain.CacheAPI.*;
+import com.akka.cache.domain.CacheName;
 import com.typesafe.config.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletionStage;
 
-import com.akka.cache.domain.CacheAPI.*;
-
 @Acl(allow = @Acl.Matcher(principal = Acl.Principal.INTERNET))
-@HttpEndpoint("/cache")
-public class CacheEndpoint {
-    private static final Logger log = LoggerFactory.getLogger(CacheEndpoint.class);
+@HttpEndpoint
+public class CacheEndpointExternal {
+    private static final Logger log = LoggerFactory.getLogger(CacheEndpointExternal.class);
 
     private final CacheAPICoreImpl core;
 
-    public CacheEndpoint(Config config, ComponentClient componentClient, TimerScheduler timerScheduler, Materializer materializer) {
+    public CacheEndpointExternal(Config config, ComponentClient componentClient, TimerScheduler timerScheduler, Materializer materializer) {
         core = new CacheAPICoreImpl(config, componentClient, timerScheduler, materializer);
     }
 

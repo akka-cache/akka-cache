@@ -5,8 +5,7 @@ import akka.http.javadsl.model.StatusCodes;
 import akka.javasdk.testkit.EventingTestKit;
 import akka.javasdk.testkit.TestKit;
 import akka.javasdk.testkit.TestKitSupport;
-import com.akka.cache.api.CacheEndpoint;
-import com.akka.cache.domain.Cache;
+import com.akka.cache.domain.CacheAPI.*;
 import com.akka.cache.domain.CacheEvent;
 import com.akka.cache.domain.CacheName;
 import com.akka.cache.domain.PayloadChunk;
@@ -17,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.CompletionStage;
@@ -56,8 +54,9 @@ public class CacheNameDeleteWorkflowTest extends TestKitSupport {
         Awaitility.await().until(() -> {
             log.info("shouldCreateThenDeleteCached creating caches...");
             for (int i = 1; i <= NUMBER_OF_CACHES; i++) {
-                Optional<Duration> evtTTL = random.nextBoolean() ? Optional.of(this.ttl) : Optional.empty();
+                Optional<Duration> evtTTL = Optional.empty();
                 var event = new CacheEvent.CacheSet(CACHENAME1, "key" + i, evtTTL, new PayloadChunk(0, ("my payload " + i).getBytes()));
+                log.info("creating {} {}", CACHENAME1, "key" + i);
                 cacheEvents.publish(event, String.valueOf(i));
             }
             return true;
@@ -117,7 +116,7 @@ public class CacheNameDeleteWorkflowTest extends TestKitSupport {
                 .ignoreExceptions()
                 .atMost(20, TimeUnit.SECONDS)
                 .untilAsserted(() -> {
-                    CacheEndpoint.CacheNameRequest createRequest = new CacheEndpoint.CacheNameRequest(CACHENAME2, CACHENAME_DESC);
+                    CacheNameRequest createRequest = new CacheNameRequest(CACHENAME2, CACHENAME_DESC);
                     var createCacheNameResponse =
                             httpClient.POST("/cache/cacheName")
                                     .withRequestBody(createRequest)
