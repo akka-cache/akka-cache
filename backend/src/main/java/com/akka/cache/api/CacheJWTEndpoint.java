@@ -6,6 +6,8 @@ import akka.javasdk.annotations.Acl;
 import akka.javasdk.annotations.http.*;
 import akka.javasdk.client.ComponentClient;
 import akka.javasdk.timer.TimerScheduler;
+import akka.javasdk.annotations.JWT;
+import akka.javasdk.annotations.http.HttpEndpoint;
 import akka.stream.Materializer;
 import com.akka.cache.application.CacheView;
 import com.akka.cache.domain.CacheAPI.*;
@@ -18,12 +20,13 @@ import java.util.concurrent.CompletionStage;
 
 @Acl(allow = @Acl.Matcher(principal = Acl.Principal.INTERNET))
 @HttpEndpoint
-public class CacheEndpointExternal {
-    private static final Logger log = LoggerFactory.getLogger(CacheEndpointExternal.class);
+@JWT(validate = JWT.JwtMethodMode.BEARER_TOKEN, bearerTokenIssuers = "gcp?")
+public class CacheJWTEndpoint {
+    private static final Logger log = LoggerFactory.getLogger(CacheJWTEndpoint.class);
 
     private final CacheAPICoreImpl core;
 
-    public CacheEndpointExternal(Config config, ComponentClient componentClient, TimerScheduler timerScheduler, Materializer materializer) {
+    public CacheJWTEndpoint(Config config, ComponentClient componentClient, TimerScheduler timerScheduler, Materializer materializer) {
         core = new CacheAPICoreImpl(config, componentClient, timerScheduler, materializer);
     }
 
