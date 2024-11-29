@@ -8,15 +8,15 @@ export function ThemeToggle() {
   const toggleColorScheme = () => {
     const newScheme = isDark ? 'light' : 'dark';
     setColorScheme(newScheme);
-    document.documentElement.style.colorScheme = newScheme;
   };
 
   return (
-    <ActionIcon 
-      variant="default" 
-      onClick={toggleColorScheme} 
+    <ActionIcon
+      variant="default"
+      onClick={toggleColorScheme}
       size="lg"
       aria-label="Toggle color scheme"
+      className="mx-3 my-2"
     >
       {isDark ? <IconSun size={18} /> : <IconMoon size={18} />}
     </ActionIcon>

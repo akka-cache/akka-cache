@@ -8,9 +8,8 @@ import {
 import type { LinksFunction } from "@remix-run/node";
 import { MantineProvider, ColorSchemeScript } from '@mantine/core';
 import '@mantine/core/styles.css';
-import { useColorScheme } from '@mantine/hooks';
-import theme from './theme';
-import "./tailwind.css";
+import theme from './utils/theme';
+import "./styles/tailwind.css";
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -21,13 +20,11 @@ export const links: LinksFunction = () => [
   },
   {
     rel: "stylesheet",
-    href: "https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap",
+    href: "https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wdth,wght@0,75..100,400..700;1,75..100,400..700&family=Roboto+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap",
   },
 ];
 
 export default function App() {
-  const preferredColorScheme = useColorScheme();
-
   return (
     <html lang="en">
       <head>
@@ -35,11 +32,11 @@ export default function App() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
-        <ColorSchemeScript defaultColorScheme={preferredColorScheme} />
+        <ColorSchemeScript defaultColorScheme="dark" />
       </head>
       <body>
-        <MantineProvider 
-          defaultColorScheme={preferredColorScheme}
+        <MantineProvider
+          defaultColorScheme="dark"
           theme={theme}
         >
           <Outlet />
