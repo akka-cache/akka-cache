@@ -33,7 +33,7 @@ public class CacheNameDeleteWorkflowTest extends TestKitSupport {
     private final static int NUMBER_OF_CACHES = 22;
     private final Duration timeout = Duration.ofSeconds(6);
     private final Duration ttl = Duration.ofSeconds(30);
-    private Random random = new Random();
+    private final Random random = new Random();
 
     @Override
     protected TestKit.Settings testKitSettings() {
@@ -41,21 +41,22 @@ public class CacheNameDeleteWorkflowTest extends TestKitSupport {
                 .withEventSourcedEntityIncomingMessages("cache");
     }
 
-    private CompletionStage<CacheView.CachedKeys> getView(String cachName) {
+    private CompletionStage<CacheView.CachedKeys> getView(String cacheName) {
         return componentClient.forView()
                 .method(CacheView::getCacheKeys)
-                .invokeAsync(cachName);
+                .invokeAsync(cacheName);
     }
 
     @Test
-    public void shouldCreateThenDeleteCachedEntites() throws ExecutionException, InterruptedException {
+    public void shouldCreateThenDeleteCachedEntities() throws ExecutionException, InterruptedException {
         final EventingTestKit.IncomingMessages cacheEvents = testKit.getEventSourcedEntityIncomingMessages("cache");
 
         Awaitility.await().until(() -> {
             log.info("shouldCreateThenDeleteCached creating caches...");
             for (int i = 1; i <= NUMBER_OF_CACHES; i++) {
                 Optional<Duration> evtTTL = Optional.empty();
-                var event = new CacheEvent.CacheSet(CACHENAME1, "key" + i, evtTTL, new PayloadChunk(0, ("my payload " + i).getBytes()));
+                String payload = "my payload " + i;
+                var event = new CacheEvent.CacheSet(CACHENAME1, "key" + i, evtTTL, payload.length(), new PayloadChunk(0, payload.getBytes()));
                 log.info("creating {} {}", CACHENAME1, "key" + i);
                 cacheEvents.publish(event, String.valueOf(i));
             }
@@ -67,7 +68,7 @@ public class CacheNameDeleteWorkflowTest extends TestKitSupport {
             .atMost(20, TimeUnit.SECONDS)
             .untilAsserted(() -> {
 
-                // make sure we have everthing poplulated
+                // make sure we have everything populated
                 log.info("shouldCreateThenDeleteCached verifying the view has been populated...");
                 CacheView.CachedKeys insertedKeys = await(getView(CACHENAME1));
                 Assertions.assertEquals(NUMBER_OF_CACHES, insertedKeys.keys().size());
@@ -87,15 +88,13 @@ public class CacheNameDeleteWorkflowTest extends TestKitSupport {
                 .atMost(20, TimeUnit.SECONDS)
                 .untilAsserted(() -> {
 
-                    // make sure we have everthing poplulated
+                    // make sure we have everything populated
                     log.info("shouldCreateThenDeleteCached verifying the view has no entries ...");
 
                     var cache1View2 = getView(CACHENAME1);
                     assertThat(cache1View2)
                             .succeedsWithin(timeout)
-                            .satisfies(res -> {
-                                assertThat(res.keys().isEmpty());
-                            });
+                            .satisfies(res -> assertThat(res.keys().isEmpty()));
                 });
     }
 
@@ -109,7 +108,7 @@ public class CacheNameDeleteWorkflowTest extends TestKitSupport {
     }
 
     @Test
-    public void shouldCreateThenFlushCachedEntites() throws ExecutionException, InterruptedException {
+    public void shouldCreateThenFlushCachedEntities() throws ExecutionException, InterruptedException {
         final EventingTestKit.IncomingMessages cacheEvents = testKit.getEventSourcedEntityIncomingMessages("cache");
 
         Awaitility.await()
@@ -133,7 +132,8 @@ public class CacheNameDeleteWorkflowTest extends TestKitSupport {
             log.info("shouldCreateThenDeleteCached creating caches...");
             for (int i = 1; i <= NUMBER_OF_CACHES; i++) {
                 Optional<Duration> evtTTL = random.nextBoolean() ? Optional.of(this.ttl) : Optional.empty();
-                var event = new CacheEvent.CacheSet(CACHENAME2, "key" + i, evtTTL, new PayloadChunk(0, ("my payload " + i).getBytes()));
+                String payload = "my payload " + i;
+                var event = new CacheEvent.CacheSet(CACHENAME2, "key" + i, evtTTL, payload.length(), new PayloadChunk(0, payload.getBytes()));
                 cacheEvents.publish(event, String.valueOf(i));
             }
             return true;
@@ -144,7 +144,7 @@ public class CacheNameDeleteWorkflowTest extends TestKitSupport {
                 .atMost(20, TimeUnit.SECONDS)
                 .untilAsserted(() -> {
 
-                    // make sure we have everthing poplulated
+                    // make sure we have everything populated
                     log.info("shouldCreateThenDeleteCached verifying the view has been populated...");
                     CacheView.CachedKeys insertedKeys = await(getView(CACHENAME2));
                     Assertions.assertEquals(NUMBER_OF_CACHES, insertedKeys.keys().size());
@@ -165,7 +165,7 @@ public class CacheNameDeleteWorkflowTest extends TestKitSupport {
                 .atMost(20, TimeUnit.SECONDS)
                 .untilAsserted(() -> {
 
-                    // make sure we have everthing poplulated
+                    // make sure we have everything populated
                     log.info("shouldCreateThenDeleteCached verifying the view has no entries ...");
 
                     var cache2View2 = getView(CACHENAME2);

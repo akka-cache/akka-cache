@@ -63,7 +63,7 @@ public class CacheAPICoreImpl {
     }
 
     // Cache Names -- BEGIN
-    public CompletionStage<HttpResponse> create(CacheNameRequest request) {
+    public CompletionStage<HttpResponse> createCacheName(CacheNameRequest request) {
         CacheName cn = new CacheName(request.cacheName(), Optional.of(request.description()));
         return componentClient.forEventSourcedEntity(cn.cacheName())
                 .method(CacheNameEntity::create)
@@ -71,7 +71,7 @@ public class CacheAPICoreImpl {
                 .thenApply(__ -> HttpResponses.created());
     }
     
-    public CompletionStage<HttpResponse> update(CacheNameRequest request) {
+    public CompletionStage<HttpResponse> updateCacheName(CacheNameRequest request) {
         CacheName cn = new CacheName(request.cacheName(), Optional.of(request.description()));
         return componentClient.forEventSourcedEntity(cn.cacheName())
                 .method(CacheNameEntity::update)
@@ -159,7 +159,7 @@ public class CacheAPICoreImpl {
     private Cache createSmallCacheObject(CacheRequest cacheRequest) {
         Optional<Duration> requestTTL = cacheRequest.ttlSeconds().map(Duration::ofSeconds);
         List<PayloadChunk> chunks = new ArrayList<>(List.of(new PayloadChunk(0, cacheRequest.value())));
-        return new Cache(cacheRequest.cacheName(), cacheRequest.key(), requestTTL, false, false, chunks);
+        return new Cache(cacheRequest.cacheName(), cacheRequest.key(), requestTTL, false, cacheRequest.value().length, false, chunks);
     }
 
     private CompletionStage<HttpResponse> isCacheNameNeededFirst(String cacheName) {
@@ -212,7 +212,7 @@ public class CacheAPICoreImpl {
                     PayloadChunk payloadChunk = new PayloadChunk(chunkPair.first(), imageblder.result().toArray());
                     if (chunkPair.first() == 0) {
                         List<PayloadChunk> initChunks = new ArrayList<>(List.of(payloadChunk));
-                        Cache initCache = new Cache(cacheRequest.cacheName(), cacheRequest.key(), requestTTL, false, false, initChunks);
+                        Cache initCache = new Cache(cacheRequest.cacheName(), cacheRequest.key(), requestTTL, false, objectSize, false, initChunks);
                         return componentClient.forEventSourcedEntity(cacheId)
                                 .method(CacheEntity::set)
                                 .invokeAsync(initCache)
@@ -258,7 +258,7 @@ public class CacheAPICoreImpl {
                     PayloadChunk payloadChunk = new PayloadChunk(chunkPair.first(), imageblder.result().toArray());
                     if (chunkPair.first() == 0) {
                         List<PayloadChunk> initChunks = new ArrayList<>(List.of(payloadChunk));
-                        Cache initCache = new Cache(cacheRequest.cacheName(), cacheRequest.key(), requestTTL, false, false, initChunks);
+                        Cache initCache = new Cache(cacheRequest.cacheName(), cacheRequest.key(), requestTTL, false, payloadSize, false, initChunks);
                         return componentClient.forEventSourcedEntity(cacheId)
                                 .method(CacheEntity::set)
                                 .invokeAsync(initCache)
@@ -288,7 +288,7 @@ public class CacheAPICoreImpl {
                             CompletionStage<Done> streamResult = streamLargeObjectAsChunks(cacheRequest);
                             return streamResult
                                     .thenCompose(result -> {
-                                        Optional ttlSecs = cacheRequest.ttlSeconds().isPresent() ? Optional.of(Duration.ofSeconds(cacheRequest.ttlSeconds().get())) : Optional.empty();
+                                        Optional<Duration> ttlSecs = cacheRequest.ttlSeconds().isPresent() ? Optional.of(Duration.ofSeconds(cacheRequest.ttlSeconds().get())) : Optional.empty();
                                         return scheduleTTLTimerIfNeeded(cacheRequest.cacheName(), cacheRequest.key(), ttlSecs)
                                                 .thenApply(rs -> HttpResponses.created());
                                     });
@@ -325,7 +325,7 @@ public class CacheAPICoreImpl {
                                 CompletionStage<Done> streamResult = streamLargeObjectAsChunks(cacheRequest, payloadSize, strictRequestBody.getData());
                                 return streamResult
                                         .thenCompose(result -> {
-                                            Optional ttl = ttlSecs.isPresent() ? Optional.of(Duration.ofSeconds(ttlSecs.get())) : Optional.empty();
+                                            Optional<Duration> ttl = ttlSecs.map(Duration::ofSeconds);
                                             return scheduleTTLTimerIfNeeded(cacheRequest.cacheName(), cacheRequest.key(), ttl)
                                                     .thenApply(rs -> HttpResponses.created());
                                         });
@@ -343,25 +343,20 @@ public class CacheAPICoreImpl {
         return cacheSet(cacheName, key, 0, strictRequestBody);
     }
 
-  private byte[] compbineChunks(List<PayloadChunk> chunks) {
-      int totalSize = 0;
-      // calculate total size
-      for (PayloadChunk payloadChunk : chunks) {
-          totalSize += payloadChunk.payload().length;
-      }
-      byte[] allByteArray = new byte[totalSize];
-      ByteBuffer buff = ByteBuffer.wrap(allByteArray);
-      for (PayloadChunk future : chunks) {
-          buff.put(future.payload());
-      }
-      return buff.array();
-  }
+    private byte[] combineChunks(long totalBytes, List<PayloadChunk> chunks) {
+        byte[] allByteArray = new byte[Long.valueOf(totalBytes).intValue()];
+        ByteBuffer buff = ByteBuffer.wrap(allByteArray);
+        for (PayloadChunk future : chunks) {
+            buff.put(future.payload());
+        }
+        return buff.array();
+    }
 
-  private CompletionStage<CacheInternalGetResponse> getCache(String compoundKey) {
-    return componentClient.forEventSourcedEntity(compoundKey)
-            .method(CacheEntity::get)
-            .invokeAsync();
-  }
+    private CompletionStage<CacheInternalGetResponse> getCache(String compoundKey) {
+        return componentClient.forEventSourcedEntity(compoundKey)
+                .method(CacheEntity::get)
+                .invokeAsync();
+    }
 
     // this is a JSON verison of GET
     public CompletionStage<CacheGetResponse> getCache(String cacheName, String key) {
@@ -382,19 +377,15 @@ public class CacheAPICoreImpl {
                             );
                         }
                         return FutureHelper.allOf(getChunkFutures)
-                                .thenApply(futures -> {
-                                    return new CacheGetResponse(cacheName, key, true, compbineChunks(futures));
-                                })
-                                .exceptionally(ex -> { // TODO: retry w/ backoff
+                                .thenApply(futures -> new CacheGetResponse(cacheName, key, true, combineChunks(internalGetResponse.totalBytes(), futures)))
+                                .exceptionally(ex -> { // TODO: maybe do a retry w/ backoff, or do it with the client
                                     String msg = String.format("an exception occurred while retrieving chunks for cache %s key %s:", cacheName, key);
                                     log.error(msg, ex.getMessage());
                                     return new CacheGetResponse(cacheName, key, false, new byte[0]);
                                 });
                     }
                 })
-                .exceptionally(ex -> {
-                    return new CacheGetResponse(cacheName, key, false, new byte[0]);
-                });
+                .exceptionally(ex -> new CacheGetResponse(cacheName, key, false, new byte[0]));
     }
 
     /*
@@ -421,19 +412,15 @@ public class CacheAPICoreImpl {
                   );
                 }
                 return FutureHelper.allOf(getChunkFutures)
-                        .thenApply(futures -> {
-                          return HttpResponse.create().withEntity(compbineChunks(futures));
-                        })
-                        .exceptionally(ex -> { // TODO: retry w/ backoff
+                        .thenApply(futures -> HttpResponse.create().withEntity(combineChunks(internalGetResponse.totalBytes(), futures)))
+                        .exceptionally(ex -> { // TODO: maybe do a retry w/ backoff, or do it with the client
                           String msg = String.format("an exception occurred while retrieving chunks for cache %s key %s:", cacheName, key);
                           log.error(msg, ex.getMessage());
                           return HttpResponses.internalServerError(msg);
                         });
               }
             })
-            .exceptionally(ex -> {
-                return HttpResponses.notFound();
-            });
+            .exceptionally(ex -> HttpResponses.notFound());
   }
     
     public CompletionStage<CacheGetKeysResponse> getCacheKeys(String cacheName) {
@@ -516,7 +503,7 @@ public class CacheAPICoreImpl {
             getBatchFutures.add(
                     delete(request.cacheName(), request.key())
                             .thenApply(deleteResult -> {
-                                Boolean success = deleteResult.status().isSuccess() ? true : false;
+                                Boolean success = deleteResult.status().isSuccess();
                                 return new CacheDeleteResponse(request.cacheName(), request.key(), success);
                             })
                             .toCompletableFuture()

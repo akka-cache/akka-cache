@@ -31,13 +31,13 @@ public class CacheEndpoint {
     // Cache Names -- BEGIN
 
     @Post("/cacheName")
-    public CompletionStage<HttpResponse> create(CacheNameRequest request) {
-        return core.create(request);
+    public CompletionStage<HttpResponse> createCacheName(CacheNameRequest request) {
+        return core.createCacheName(request);
     }
 
     @Put("/cacheName")
-    public CompletionStage<HttpResponse> update(CacheNameRequest request) {
-        return core.update(request);
+    public CompletionStage<HttpResponse> updateCacheName(CacheNameRequest request) {
+        return core.updateCacheName(request);
     }
 
     @Get("/cacheName/{cacheName}")
