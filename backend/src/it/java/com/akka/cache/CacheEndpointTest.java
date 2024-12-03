@@ -2,7 +2,6 @@ package com.akka.cache;
 
 import akka.http.javadsl.model.StatusCodes;
 import akka.javasdk.testkit.TestKitSupport;
-import com.akka.cache.api.CacheEndpoint;
 import com.akka.cache.domain.CacheAPI.*;
 import com.akka.cache.application.CacheEntity;
 import com.akka.cache.domain.CacheInternalGetResponse;
@@ -22,8 +21,8 @@ import java.util.concurrent.TimeUnit;
  * (already configured and provided automatically through injection).
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class CacheIntegrationTest extends TestKitSupport {
-  private static final Logger log = LoggerFactory.getLogger(CacheIntegrationTest.class);
+public class CacheEndpointTest extends TestKitSupport {
+  private static final Logger log = LoggerFactory.getLogger(CacheEndpointTest.class);
 
   private static final String CACHE_NAME = "cache1";
   
@@ -101,7 +100,7 @@ public class CacheIntegrationTest extends TestKitSupport {
 
               );
               Assertions.assertEquals(StatusCodes.OK, response.status());
-              Assertions.assertEquals(response.body().keys().size(), 2);
+              Assertions.assertEquals(2, response.body().keys().size());
               log.info("response: {}", response.body().keys());
             });
 
