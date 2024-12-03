@@ -163,3 +163,38 @@
 .link:hover {
   text-decoration: underline;
 }
+
+/* Define color classes to match Style Guide */
+.cta {
+  color: var(--color-river-blue);
+}
+
+.hl {
+  color: var(--color-spark-yellow);
+}
+
+.muted {
+  color: var(--color-medium-gray);
+}
+
+/* Card styles */
+.mantine-Card-root {
+  border: 1px solid transparent;
+}
+
+.mantine-Card-root .mantine-Title-root {
+  color: var(--color-spark-yellow);
+}
+
+/* Card border variants */
+.mantine-Card-root.cta {
+  border-color: var(--color-river-blue);
+}
+
+.mantine-Card-root.hl {
+  border-color: var(--color-spark-yellow);
+}
+
+.mantine-Card-root.muted {
+  border-color: var(--color-medium-gray);
+}

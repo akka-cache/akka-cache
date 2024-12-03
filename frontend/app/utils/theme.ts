@@ -1,5 +1,52 @@
-import { createTheme, MantineThemeOverride } from '@mantine/core';
+import { createTheme, MantineThemeOverride, MantineColorScheme } from '@mantine/core';
 
+// Theme color mapping type
+type ThemeColorMapping = {
+  [key: string]: {
+    dark: string;
+    light: string;
+  };
+};
+
+// Semantic color mappings
+export const themeColors: ThemeColorMapping = {
+  headingText: {
+    dark: 'var(--mantine-color-dark-9)',
+    light: 'var(--mantine-color-gray-8)',
+  },
+  bodyText: {
+    dark: 'var(--mantine-color-gray-6)',
+    light: 'var(--mantine-color-gray-5)',
+  },
+  secondaryText: {
+    dark: 'var(--mantine-color-dark-9)',
+    light: 'var(--mantine-color-gray-7)',
+  },
+  mutedText: {
+    dark: 'var(--mantine-color-gray-6)',
+    light: 'var(--mantine-color-gray-5)',
+  },
+  background: {
+    dark: 'var(--mantine-color-dark-7)',
+    light: 'var(--mantine-color-gray-0)',
+  }
+};
+
+// Theme color utility functions
+export const getThemeColor = (colorKey: keyof typeof themeColors, scheme: MantineColorScheme) => {
+  const effectiveScheme = scheme === 'auto' ? 'dark' : scheme;
+  return themeColors[colorKey][effectiveScheme];
+};
+
+// Custom hook for theme colors
+import { useMantineColorScheme } from '@mantine/core';
+
+export const useThemeColor = (colorKey: keyof typeof themeColors) => {
+  const { colorScheme } = useMantineColorScheme();
+  return getThemeColor(colorKey, colorScheme);
+};
+
+// Mantine theme configuration
 const themeOverride: MantineThemeOverride = {
   colors: {
     light: [

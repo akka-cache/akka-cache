@@ -1,57 +1,57 @@
+// app/routes/index.tsx
 import { Container, Title, Text, Button, Anchor } from '@mantine/core';
 import { Link } from '@remix-run/react';
 import Layout from '~/components/Layout';
-import { useMantineColorScheme } from '@mantine/core';
+import { useThemeColor } from '~/utils/theme';
+
+const MainHeading = ({ color }: { color: string }) => (
+  <Title order={1} className="text-center mb-6" c={color}>
+    Enterprise-Grade Serverless Caching
+  </Title>
+);
+
+const Subtitle = ({ color }: { color: string }) => (
+  <Text size="lg" className="text-center mb-8" c={color}>
+    Simplify your architecture
+  </Text>
+);
+
+const SignInSection = ({ secondaryTextColor }: { secondaryTextColor: string }) => (
+  <>
+    <Button component={Link} to="/sign-in" size="lg">
+      Sign In
+    </Button>
+
+    <Text size="sm" c={secondaryTextColor}>
+      Don't have an account?{' '}
+      <Anchor component={Link} to="/sign-up">
+        Sign Up
+      </Anchor>
+    </Text>
+  </>
+);
 
 export default function Index() {
-  const { colorScheme } = useMantineColorScheme();
+  const colors = {
+    heading: useThemeColor('headingText'),
+    body: useThemeColor('bodyText'),
+    secondary: useThemeColor('secondaryText'),
+    muted: useThemeColor('mutedText'),
+  };
 
   return (
     <Layout>
-      <Container size="lg" className="min-h-screen flex flex-col justify-center">
-        <Title order={1} className="text-center mb-6" c={colorScheme === 'dark' ? 'dark.9' : 'gray.8'}>
-          Enterprise-Grade Serverless Caching
-        </Title>
-
-        <Text
-          size="lg"
-          className="text-center mb-8"
-          c={colorScheme === 'dark' ? 'gray.6' : 'gray.5'}
-        >
-          Simplify your architecture
-        </Text>
-
-        <div className="flex flex-col items-center gap-4">
-          <Button
-            component={Link}
-            to="/sign-in"
-            size="lg"
-          >
-            Sign In
-          </Button>
-
-          <Text size="sm" c={colorScheme === 'dark' ? 'dark.9' : 'gray.7'}>
-            Don't have an account?{' '}
-            <Anchor component={Link} to="/sign-up">
-              Sign Up
-            </Anchor>
-          </Text>
-
-          <Text
-            size="xs"
-            c={colorScheme === 'dark' ? 'gray.6' : 'gray.5'}
-            className="text-center mt-4 max-w-md"
-          >
-            By signing up, you acknowledge that you agree to our{' '}
-            <Anchor component={Link} to="/privacy">
-              Privacy Policy
-            </Anchor>{' '}
-            and{' '}
-            <Anchor component={Link} to="/terms">
-              Terms of Service
-            </Anchor>
-            .
-          </Text>
+      <Container 
+        size="lg" 
+        className="min-h-screen flex flex-col justify-center items-center"
+      >
+        <div className="w-full max-w-2xl">
+          <MainHeading color={colors.heading} />
+          <Subtitle color={colors.body} />
+          
+          <div className="flex flex-col items-center space-y-4">
+            <SignInSection secondaryTextColor={colors.secondary} />
+          </div>
         </div>
       </Container>
     </Layout>

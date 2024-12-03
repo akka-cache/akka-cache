@@ -10,6 +10,8 @@ import { MantineProvider, ColorSchemeScript } from '@mantine/core';
 import '@mantine/core/styles.css';
 import theme from './utils/theme';
 import "./styles/tailwind.css";
+import { redirect } from '@remix-run/node';
+import type { LoaderFunctionArgs } from '@remix-run/node';
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -23,6 +25,22 @@ export const links: LinksFunction = () => [
     href: "https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wdth,wght@0,75..100,400..700;1,75..100,400..700&family=Roboto+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap",
   },
 ];
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  
+  // List of public routes that don't require authentication
+  const publicRoutes = ['/sign-in', '/', '/sign-up', '/privacy', '/terms'];
+  
+  // Don't redirect if we're on a public route
+  if (publicRoutes.includes(url.pathname)) {
+    return null;
+  }
+  
+  // For now, redirect all other routes to sign-in
+  // Later, you'll add authentication check here
+  return redirect('/sign-in');
+}
 
 export default function App() {
   return (
