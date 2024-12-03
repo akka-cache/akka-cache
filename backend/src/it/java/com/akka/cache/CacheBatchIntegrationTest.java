@@ -1,14 +1,7 @@
 package com.akka.cache;
 
 import akka.javasdk.testkit.TestKitSupport;
-import com.akka.cache.api.CacheEndpoint.CacheRequest;
-import com.akka.cache.api.CacheEndpoint.BatchCacheRequest;
-import com.akka.cache.api.CacheEndpoint.BatchCacheResponse;
-import com.akka.cache.api.CacheEndpoint.BatchGetCacheRequest;
-import com.akka.cache.api.CacheEndpoint.BatchGetCacheResponse;
-import com.akka.cache.api.CacheEndpoint.CacheGetResponse;
-import com.akka.cache.api.CacheEndpoint.BatchGetCacheRequests;
-import com.akka.cache.api.CacheEndpoint.BatchDeleteCacheResponse;
+import com.akka.cache.domain.CacheAPI.*;
 
 import com.akka.cache.application.CacheEntity;
 import com.akka.cache.domain.CacheInternalGetResponse;

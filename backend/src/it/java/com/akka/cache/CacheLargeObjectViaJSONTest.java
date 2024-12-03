@@ -3,6 +3,7 @@ package com.akka.cache;
 import akka.http.javadsl.model.StatusCodes;
 import akka.javasdk.testkit.TestKitSupport;
 import com.akka.cache.api.CacheEndpoint;
+import com.akka.cache.domain.CacheAPI.*;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,7 +53,7 @@ public class CacheLargeObjectViaJSONTest extends TestKitSupport {
     @Order(1)
     public void httpCreateLargeCache1Key1() throws IOException {
 
-        CacheEndpoint.CacheRequest setRequest = new CacheEndpoint.CacheRequest(CACHE_NAME, key1, Optional.empty(), imageData);
+        CacheRequest setRequest = new CacheRequest(CACHE_NAME, key1, Optional.empty(), imageData);
 
         var response = await(
                 httpClient.POST("/cache/set")
@@ -70,7 +71,7 @@ public class CacheLargeObjectViaJSONTest extends TestKitSupport {
 
         var cache = await(
                 httpClient.GET("/cache/get/" + CACHE_NAME + "/" + key1)
-                        .responseBodyAs(CacheEndpoint.CacheGetResponse.class)
+                        .responseBodyAs(CacheGetResponse.class)
                         .invokeAsync()
         );
 

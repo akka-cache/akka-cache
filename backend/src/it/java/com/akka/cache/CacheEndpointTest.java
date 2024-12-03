@@ -2,7 +2,7 @@ package com.akka.cache;
 
 import akka.http.javadsl.model.StatusCodes;
 import akka.javasdk.testkit.TestKitSupport;
-import com.akka.cache.api.CacheEndpoint;
+import com.akka.cache.domain.CacheAPI.*;
 import com.akka.cache.application.CacheEntity;
 import com.akka.cache.domain.CacheInternalGetResponse;
 import org.awaitility.Awaitility;
@@ -21,8 +21,8 @@ import java.util.concurrent.TimeUnit;
  * (already configured and provided automatically through injection).
  */
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class CacheIntegrationTest extends TestKitSupport {
-  private static final Logger log = LoggerFactory.getLogger(CacheIntegrationTest.class);
+public class CacheEndpointTest extends TestKitSupport {
+  private static final Logger log = LoggerFactory.getLogger(CacheEndpointTest.class);
 
   private static final String CACHE_NAME = "cache1";
   
@@ -43,7 +43,7 @@ public class CacheIntegrationTest extends TestKitSupport {
   @Test
   @Order(1)
   public void httpCreateCacheName() {
-    CacheEndpoint.CacheNameRequest createRequest = new CacheEndpoint.CacheNameRequest(CACHE_NAME, TEST_DESC_1);
+    CacheNameRequest createRequest = new CacheNameRequest(CACHE_NAME, TEST_DESC_1);
 
     var response = await(
             httpClient.POST("/cache/cacheName")
@@ -57,7 +57,7 @@ public class CacheIntegrationTest extends TestKitSupport {
   @Test
   @Order(2)
   public void httpCreateCache1Key1() {
-    CacheEndpoint.CacheRequest setRequest = new CacheEndpoint.CacheRequest(CACHE_NAME, "key1", Optional.empty(), PAYLOAD1.getBytes());
+    CacheRequest setRequest = new CacheRequest(CACHE_NAME, "key1", Optional.empty(), PAYLOAD1.getBytes());
 
     var response = await(
             httpClient.POST("/cache/set")
@@ -73,7 +73,7 @@ public class CacheIntegrationTest extends TestKitSupport {
   @Test
   @Order(3)
   public void httpCreateCache1Key2() {
-    CacheEndpoint.CacheRequest setRequest = new CacheEndpoint.CacheRequest(CACHE_NAME, "key2", Optional.empty(), PAYLOAD2.getBytes());
+    CacheRequest setRequest = new CacheRequest(CACHE_NAME, "key2", Optional.empty(), PAYLOAD2.getBytes());
 
     var response = await(
             httpClient.POST("/cache/set")
@@ -95,12 +95,12 @@ public class CacheIntegrationTest extends TestKitSupport {
             .untilAsserted(() -> {
               var response = await(
                       httpClient.GET("/cache/" + CACHE_NAME + "/keys")
-                              .responseBodyAs(CacheEndpoint.CacheGetKeysResponse.class)
+                              .responseBodyAs(CacheGetKeysResponse.class)
                               .invokeAsync()
 
               );
               Assertions.assertEquals(StatusCodes.OK, response.status());
-              Assertions.assertEquals(response.body().keys().size(), 2);
+              Assertions.assertEquals(2, response.body().keys().size());
               log.info("response: {}", response.body().keys());
             });
 
