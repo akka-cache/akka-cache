@@ -13,6 +13,7 @@ import com.typesafe.config.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
 import com.akka.cache.domain.CacheAPI.*;
@@ -80,12 +81,12 @@ public class CacheEndpoint {
     */
     @Post("/{cacheName}/{key}/{ttlSeconds}")
     public CompletionStage<HttpResponse> cacheSet(String cacheName, String key, Integer ttlSeconds, HttpEntity.Strict strictRequestBody) {
-        return core.cacheSet(cacheName, key, ttlSeconds, strictRequestBody);
+        return core.cacheSet(Optional.empty(), cacheName, key, ttlSeconds, strictRequestBody);
     }
 
     @Post("/{cacheName}/{key}")
     public CompletionStage<HttpResponse> cacheSet(String cacheName, String key, HttpEntity.Strict strictRequestBody) {
-        return core.cacheSet(cacheName, key, 0, strictRequestBody);
+        return core.cacheSet(Optional.empty(), cacheName, key, 0, strictRequestBody);
     }
 
     // this is a JSON verison of GET

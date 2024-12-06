@@ -22,7 +22,7 @@ public class CacheLargeObjectViaJSONTest extends TestKitSupport {
 
     private static final String CACHE_NAME = "cache1";
     private static final String imageName = "./images/2025-Chevrolet-Corvette-ZR1-001-1440sw.jpg";
-    private static String copyToFile1 = "./images/2025-Chevrolet-Corvette-ZR1-001-1440sw(copy).jpg";
+    private static final String copyToFile1 = "./images/2025-Chevrolet-Corvette-ZR1-001-1440sw(copy).jpg";
 
     private static final String key1 = "2025-Corvette-JSON";
     final byte[] imageData = readFileToBytes(imageName);
@@ -51,7 +51,7 @@ public class CacheLargeObjectViaJSONTest extends TestKitSupport {
 
     @Test
     @Order(1)
-    public void httpCreateLargeCache1Key1() throws IOException {
+    public void httpCreateLargeCache1Key1() {
 
         CacheRequest setRequest = new CacheRequest(CACHE_NAME, key1, Optional.empty(), imageData);
 
