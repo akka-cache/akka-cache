@@ -14,6 +14,9 @@ import akka.http.javadsl.model.StatusCodes;
 import com.akka.cache.domain.CacheAPI.*;
 import com.akka.cache.application.CacheEntity;
 import com.akka.cache.domain.CacheInternalGetResponse;
+import com.akka.cache.domain.Organization;
+import com.akka.cache.application.OrgEntity;
+
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -133,6 +136,28 @@ public class CacheJWTEndpointTest extends TestKitSupport {
                     Assertions.assertEquals(2, response.body().keys().size());
                     log.info("response: {}", response.body().keys());
                 });
+
+    }
+
+    private Organization getOrg(String org) {
+        return await(
+                componentClient
+                        .forKeyValueEntity(org)
+                        .method(OrgEntity::get)
+                        .invokeAsync()
+        );
+    }
+
+    @Test
+    @Order(5)
+    public void verifyOrgBytesUsed() {
+        // this test relies on the Organization and the CacheConsumer
+        var org = getOrg(ORG);
+
+        long payloadsSize = PAYLOAD1.length() + PAYLOAD2.length();
+
+        Assertions.assertEquals(2, org.cacheCount());
+        Assertions.assertEquals(payloadsSize, org.totalBytesCached());
 
     }
 }

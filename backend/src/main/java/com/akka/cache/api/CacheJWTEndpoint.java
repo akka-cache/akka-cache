@@ -6,14 +6,17 @@ import akka.javasdk.annotations.Acl;
 import akka.javasdk.annotations.http.*;
 import akka.javasdk.client.ComponentClient;
 import akka.javasdk.http.HttpException;
+import akka.javasdk.http.HttpResponses;
 import akka.javasdk.http.RequestContext;
 import akka.javasdk.timer.TimerScheduler;
 import akka.javasdk.annotations.JWT;
 import akka.javasdk.annotations.http.HttpEndpoint;
 import akka.stream.Materializer;
 import com.akka.cache.application.CacheView;
+import com.akka.cache.application.OrgEntity;
 import com.akka.cache.domain.CacheAPI.*;
 import com.akka.cache.domain.CacheName;
+import com.akka.cache.domain.Organization;
 import com.google.common.collect.Maps;
 import com.google.common.util.concurrent.RateLimiter;
 import com.typesafe.config.Config;
@@ -24,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 @Acl(allow = @Acl.Matcher(principal = Acl.Principal.INTERNET))
@@ -34,23 +38,39 @@ public class CacheJWTEndpoint {
 
     private static final String ORG = "org";
     private static final String SERVICE_LEVEL = "serviceLevel";
+    private static final String EXCEEDED_CACHED_ALLOTMENT = "You've exceeded maximum allow bytes cached for your account level.";
+
+    private final ComponentClient componentClient;
     
     private final CacheAPICoreImpl core;
     private final RequestContext requestContext;
+
+/* TODO: if we decide to throttle at the node level
     private final int rateLimitDefaultRPS;
     private final int rateLimitWaitTimeoutMillis;
+    private record OrgStats(RateLimiter rateLimiter) {}
+    // if done at org level, then we'd need to injest the following as stateful
+    private final Map<String, OrgStats> orgLimitMap = Maps.newConcurrentMap();
+*/
+    private final long freeServiceMaxCachedBytes;
+
     private final Map<String, String> claims;
     private final OrgClaims orgClaims;
 
-    private record OrgStats(RateLimiter rateLimiter) {}
-
-    private final Map<String, OrgStats> orgLimitMap = Maps.newConcurrentMap();
-
     public CacheJWTEndpoint(Config config, ComponentClient componentClient, TimerScheduler timerScheduler, Materializer materializer, RequestContext requestContext) {
         this.requestContext = requestContext;
+        this.componentClient = componentClient;
+
         this.core = new CacheAPICoreImpl(config, componentClient, timerScheduler, materializer);
+/*
         this.rateLimitDefaultRPS = config.getInt("app.rate-limit-default-request-per-second");
         this.rateLimitWaitTimeoutMillis = config.getInt("app.rate-limit-wait-timeout-millis");
+*/
+        this.freeServiceMaxCachedBytes = config.getLong("app.free-service-level-max-bytes");
+        if (log.isDebugEnabled()) {
+            log.debug("Free Service level max bytes {}", this.freeServiceMaxCachedBytes);
+        }
+
         this.claims = requestContext.getJwtClaims().asMap();
         this.orgClaims = getOrgClaim();
     }
@@ -66,13 +86,32 @@ public class CacheJWTEndpoint {
         if (serviceLevel == null) {
             throw HttpException.badRequest(SERVICE_LEVEL + " not found in the JWT Token");
         }
-        return new OrgClaims(org, serviceLevel);
+        return new OrgClaims(org, serviceLevel.toUpperCase());
     }
 
-    private void doesExceedSubscription() {
+    private CompletionStage<Organization> getOrg(String org) {
+        return componentClient
+                        .forKeyValueEntity(org)
+                        .method(OrgEntity::get)
+                        .invokeAsync();
+    }
 
-
-
+    private CompletionStage<Boolean> doesExceedSubscription() {
+        return getOrg(orgClaims.org()).thenApply(org -> {
+            return switch (orgClaims.serviceLevel()) {
+                case "FREE" -> {
+                    if (org.totalBytesCached() > freeServiceMaxCachedBytes) {
+                        yield true;
+                    }
+                    else {
+                        yield false;
+                    }
+                }
+                default -> {
+                    throw HttpException.badRequest(String.format("Invalide Service Level (%s) found in the JWT Token", orgClaims.serviceLevel()));
+                }
+            };
+        });
     }
 
     // Cache Names -- BEGIN
@@ -82,39 +121,33 @@ public class CacheJWTEndpoint {
 
     @Post("/cacheName")
     public CompletionStage<HttpResponse> createCacheName(CacheNameRequest request) {
-        doesExceedSubscription();
         return core.createCacheName(modCacheNameWithOrg(request));
     }
 
     @Put("/cacheName")
     public CompletionStage<HttpResponse> updateCacheName(CacheNameRequest request) {
-        doesExceedSubscription();
         return core.updateCacheName(modCacheNameWithOrg(request));
     }
 
     @Get("/cacheName/{cacheName}")
     public CompletionStage<CacheName> getCacheName(String cacheName) {
-        doesExceedSubscription();
         return core.getCacheName(orgClaims.org.concat(cacheName));
     }
 
     @Get("/cacheName/{cacheName}/keys")
     public CompletionStage<CacheView.CacheSummaries> getCacheKeyList(String cacheName) {
-        doesExceedSubscription();
         return core.getCacheKeyList(orgClaims.org.concat(cacheName));
     }
 
     // This deletes the cacheName as well as all the keys
     @Delete("/cacheName/{cacheName}")
     public CompletionStage<HttpResponse> deleteCacheKeys(String cacheName) {
-        doesExceedSubscription();
         return core.deleteCacheKeys(orgClaims.org.concat(cacheName));
     }
 
     // This deletes all the cached data but leaves the cacheName in place
     @Put("/cacheName/{cacheName}/flush")
     public CompletionStage<HttpResponse> flushCacheKeys(String cacheName) {
-        doesExceedSubscription();
         return core.flushCacheKeys(orgClaims.org.concat(cacheName));
     }
 
@@ -135,8 +168,12 @@ public class CacheJWTEndpoint {
 
     @Post("/set")
     public CompletionStage<HttpResponse> cache(CacheRequest cacheRequest) {
-        doesExceedSubscription();
-        return core.cache(modCachNameCacheRequestWithOrg(cacheRequest));
+        return doesExceedSubscription().thenCompose(trueOrFalse -> {
+           if (trueOrFalse) {
+               return CompletableFuture.completedFuture(HttpResponses.badRequest(EXCEEDED_CACHED_ALLOTMENT));
+           }
+           return core.cache(modCachNameCacheRequestWithOrg(cacheRequest));
+        });
     }
 
     /*
@@ -147,20 +184,27 @@ public class CacheJWTEndpoint {
     */
     @Post("/{cacheName}/{key}/{ttlSeconds}")
     public CompletionStage<HttpResponse> cacheSet(String cacheName, String key, Integer ttlSeconds, HttpEntity.Strict strictRequestBody) {
-        doesExceedSubscription();
-        return core.cacheSet(Optional.of(orgClaims.org()), orgClaims.org.concat(cacheName), key, ttlSeconds, strictRequestBody);
+        return doesExceedSubscription().thenCompose(trueOrFalse -> {
+            if (trueOrFalse) {
+                return CompletableFuture.completedFuture(HttpResponses.badRequest(EXCEEDED_CACHED_ALLOTMENT));
+            }
+            return core.cacheSet(Optional.of(orgClaims.org()), orgClaims.org.concat(cacheName), key, ttlSeconds, strictRequestBody);
+        });
     }
 
     @Post("/{cacheName}/{key}")
     public CompletionStage<HttpResponse> cacheSet(String cacheName, String key, HttpEntity.Strict strictRequestBody) {
-        doesExceedSubscription();        
-        return core.cacheSet(Optional.of(orgClaims.org()), orgClaims.org.concat(cacheName), key, 0, strictRequestBody);
+        return doesExceedSubscription().thenCompose(trueOrFalse -> {
+            if (trueOrFalse) {
+                return CompletableFuture.completedFuture(HttpResponses.badRequest(EXCEEDED_CACHED_ALLOTMENT));
+            }
+            return core.cacheSet(Optional.of(orgClaims.org()), orgClaims.org.concat(cacheName), key, 0, strictRequestBody);
+        });
     }
 
     // this is a JSON verison of GET
     @Get("/get/{cacheName}/{key}")
     public CompletionStage<CacheGetResponse> getCache(String cacheName, String key) {
-        doesExceedSubscription();
         return core.getCache(orgClaims.org.concat(cacheName), key);
     }
 
@@ -172,19 +216,16 @@ public class CacheJWTEndpoint {
     */
     @Get("/{cacheName}/{key}")
     public CompletionStage<HttpResponse> getCacheGet(String cacheName, String key) {
-        doesExceedSubscription();
         return core.getCacheGet(orgClaims.org.concat(cacheName), key);
     }
 
     @Get("/{cacheName}/keys")
     public CompletionStage<CacheGetKeysResponse> getCacheKeys(String cacheName) {
-        doesExceedSubscription();
         return core.getCacheKeys(orgClaims.org.concat(cacheName));
     }
 
     @Delete("/{cacheName}/{key}")
     public CompletionStage<HttpResponse> delete(String cacheName, String key) {
-        doesExceedSubscription();
         return core.delete(orgClaims.org.concat(cacheName), key);
     }
 
@@ -196,10 +237,22 @@ public class CacheJWTEndpoint {
         return new BatchCacheRequest(cacheRequests);
     }
 
+    BatchCacheResponse failAllBatchRequests(BatchCacheRequest batchCacheRequest) {
+        List<BatchCacheResult> cacheResults = new ArrayList<>();
+        batchCacheRequest.cacheRequests().forEach(cacheRequest -> {
+            cacheResults.add(new BatchCacheResult(cacheRequest.cacheName(), cacheRequest.key(), false));
+        });
+        return new BatchCacheResponse(false, cacheResults);
+    }
+
     @Post("/batch/")
     public CompletionStage<BatchCacheResponse> cacheBatch(BatchCacheRequest batchCacheRequest) {
-        doesExceedSubscription();
-        return core.cacheBatch(addOrgToBatchRequest(batchCacheRequest));
+        return doesExceedSubscription().thenCompose(trueOrFalse -> {
+            if (trueOrFalse) {
+                return CompletableFuture.completedFuture(failAllBatchRequests(batchCacheRequest));
+            }
+            return core.cacheBatch(addOrgToBatchRequest(batchCacheRequest));
+        });
     }
 
     BatchGetCacheRequests addOrgToBatchGetRequest(BatchGetCacheRequests batchCacheRequest) {
@@ -212,13 +265,11 @@ public class CacheJWTEndpoint {
 
     @Post("/batch/get")
     public CompletionStage<BatchGetCacheResponse> getCacheBatch(BatchGetCacheRequests batchGetCacheRequests) {
-        doesExceedSubscription();
         return core.getCacheBatch(addOrgToBatchGetRequest(batchGetCacheRequests));
     }
 
     @Delete("/batch/")
     public CompletionStage<BatchDeleteCacheResponse> deleteCacheBatch(BatchGetCacheRequests batchGetCacheRequests) {
-        doesExceedSubscription();
         return core.deleteCacheBatch(addOrgToBatchGetRequest(batchGetCacheRequests));
     }
 

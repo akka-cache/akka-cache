@@ -15,7 +15,7 @@ public class OrgEntity extends KeyValueEntity<Organization> {
 
     @Override
     public Organization emptyState() {
-        return new Organization(commandContext().entityId(), 0L);
+        return new Organization(commandContext().entityId(), 0, 0L);
     }
 
     // this can be used to "reset" total usage
@@ -24,7 +24,7 @@ public class OrgEntity extends KeyValueEntity<Organization> {
             log.debug("OrgEntity set received for {}", orgName);
         }
         return effects()
-                .updateState(new Organization(orgName, 0L))
+                .updateState(new Organization(orgName, 0, 0L))
                 .thenReply(done());
     }
 
