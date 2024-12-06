@@ -35,9 +35,9 @@ public class CacheViewTest extends TestKitSupport {
     public void shouldGetCachedKeysSummaryForCache1() {
         EventingTestKit.IncomingMessages cacheEvents = testKit.getEventSourcedEntityIncomingMessages("cache");
 
-        var evt1 = new CacheEvent.CacheSet(CACHENAME1, KEY1, Optional.empty(), PAYLOAD1.length(), new PayloadChunk(0, PAYLOAD1.getBytes()));
-        var evt2 = new CacheEvent.CacheSet(CACHENAME1, KEY2, Optional.empty(), PAYLOAD2.length(), new PayloadChunk(0, PAYLOAD2.getBytes()));
-        var evt3 = new CacheEvent.CacheSet(CACHENAME1, KEY3, Optional.empty(), PAYLOAD3.length(), new PayloadChunk(0, PAYLOAD3.getBytes()));
+        var evt1 = new CacheEvent.CacheSet(Optional.empty(), CACHENAME1, KEY1, Optional.empty(), PAYLOAD1.length(), new PayloadChunk(0, PAYLOAD1.getBytes()));
+        var evt2 = new CacheEvent.CacheSet(Optional.empty(), CACHENAME1, KEY2, Optional.empty(), PAYLOAD2.length(), new PayloadChunk(0, PAYLOAD2.getBytes()));
+        var evt3 = new CacheEvent.CacheSet(Optional.empty(), CACHENAME1, KEY3, Optional.empty(), PAYLOAD3.length(), new PayloadChunk(0, PAYLOAD3.getBytes()));
 
         cacheEvents.publish(evt1, "1");
         cacheEvents.publish(evt2, "2");
@@ -68,9 +68,9 @@ public class CacheViewTest extends TestKitSupport {
     public void shouldGetCachedKeysOnlyForCache1() {
         EventingTestKit.IncomingMessages cacheEvents = testKit.getEventSourcedEntityIncomingMessages("cache");
 
-        var evt1 = new CacheEvent.CacheSet(CACHENAME1, KEY1, Optional.empty(), PAYLOAD1.length(), new PayloadChunk(0, PAYLOAD1.getBytes()));
-        var evt2 = new CacheEvent.CacheSet(CACHENAME1, KEY2, Optional.empty(), PAYLOAD2.length(), new PayloadChunk(0, PAYLOAD2.getBytes()));
-        var evt3 = new CacheEvent.CacheSet(CACHENAME1, KEY3, Optional.empty(), PAYLOAD3.length(), new PayloadChunk(0, PAYLOAD3.getBytes()));
+        var evt1 = new CacheEvent.CacheSet(Optional.empty(), CACHENAME1, KEY1, Optional.empty(), PAYLOAD1.length(), new PayloadChunk(0, PAYLOAD1.getBytes()));
+        var evt2 = new CacheEvent.CacheSet(Optional.empty(), CACHENAME1, KEY2, Optional.empty(), PAYLOAD2.length(), new PayloadChunk(0, PAYLOAD2.getBytes()));
+        var evt3 = new CacheEvent.CacheSet(Optional.empty(), CACHENAME1, KEY3, Optional.empty(), PAYLOAD3.length(), new PayloadChunk(0, PAYLOAD3.getBytes()));
 
         cacheEvents.publish(evt1, "1");
         cacheEvents.publish(evt2, "2");

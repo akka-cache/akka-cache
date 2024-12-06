@@ -29,13 +29,22 @@ public sealed interface CacheAPI {
 
     public record CacheNameRequest(String cacheName, String description) implements CacheAPI {}
 
-    public record CacheRequest(String cacheName, String key, Optional<Integer> ttlSeconds, byte[] value) implements CacheAPI {
+    public record CacheRequest(Optional<String> org, String cacheName, String key, Optional<Integer> ttlSeconds, byte[] value) implements CacheAPI {
+
+        public CacheRequest(String cacheName, String key, Optional<Integer> ttlSeconds, byte[] value) {
+            this(Optional.empty(), cacheName, key, ttlSeconds, value);
+        }
+
         public CacheRequest(String cacheName, String key, byte[] value) {
-            this(cacheName, key, Optional.empty(), value);
+            this(Optional.empty(), cacheName, key, Optional.empty(), value);
         }
 
         public CacheRequest(String cacheName, String key, Optional<Integer> ttlSeconds) {
-            this(cacheName, key, Optional.empty(), null);
+            this(Optional.empty(), cacheName, key, Optional.empty(), null);
+        }
+
+        public CacheRequest(Optional<String> org, String cacheName, String key, Optional<Integer> ttlSecs) {
+            this(org, cacheName, key, ttlSecs, null);
         }
     }
 

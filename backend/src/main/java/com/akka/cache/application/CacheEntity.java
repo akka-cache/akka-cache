@@ -53,7 +53,7 @@ public class CacheEntity extends EventSourcedEntity<Cache, CacheEvent> {
             log.debug("CacheEntity Creating new cache {}", commandContext().entityId());
         }
         return effects()
-                .persist(new CacheEvent.CacheSet(cache.cacheName(), cache.key(), cache.ttlSeconds(), cache.totalBytes(), cache.chunks().getFirst()))
+                .persist(new CacheEvent.CacheSet(cache.org(), cache.cacheName(), cache.key(), cache.ttlSeconds(), cache.totalBytes(), cache.chunks().getFirst()))
                 .thenReply(__ -> done());
     }
 
@@ -78,7 +78,7 @@ public class CacheEntity extends EventSourcedEntity<Cache, CacheEvent> {
                 log.debug("CacheEntity delete {}", commandContext().entityId());
             }
             return effects()
-                    .persist(new CacheEvent.CacheDeleted())
+                    .persist(new CacheEvent.CacheDeleted(currentState().org(), currentState().totalBytes()))
                     .thenReply(__ -> done());
         }
     }

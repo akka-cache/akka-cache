@@ -159,7 +159,7 @@ public class CacheAPICoreImpl {
     private Cache createSmallCacheObject(CacheRequest cacheRequest) {
         Optional<Duration> requestTTL = cacheRequest.ttlSeconds().map(Duration::ofSeconds);
         List<PayloadChunk> chunks = new ArrayList<>(List.of(new PayloadChunk(0, cacheRequest.value())));
-        return new Cache(cacheRequest.cacheName(), cacheRequest.key(), requestTTL, false, cacheRequest.value().length, false, chunks);
+        return new Cache(cacheRequest.org(), cacheRequest.cacheName(), cacheRequest.key(), requestTTL, false, cacheRequest.value().length, false, chunks);
     }
 
     private CompletionStage<HttpResponse> isCacheNameNeededFirst(String cacheName) {
@@ -306,7 +306,7 @@ public class CacheAPICoreImpl {
      This solves the problem of having to convert into
      and out of ByteString for chunking.
     */
-    public CompletionStage<HttpResponse> cacheSet(String cacheName, String key, Integer ttlSeconds, HttpEntity.Strict strictRequestBody) {
+    public CompletionStage<HttpResponse> cacheSet(Optional<String> org, String cacheName, String key, Integer ttlSeconds, HttpEntity.Strict strictRequestBody) {
         return isCacheNameNeededFirst(cacheName)
                 .thenCompose(httpResponse -> {
                     if (httpResponse.status().isSuccess()) {
@@ -321,7 +321,7 @@ public class CacheAPICoreImpl {
                             }
                             Optional<Integer> ttlSecs = ttlSeconds > 0 ? Optional.of(ttlSeconds) : Optional.empty();
                             if (largeObject) {
-                                CacheRequest cacheRequest = new CacheRequest(cacheName, key, ttlSecs);
+                                CacheRequest cacheRequest = new CacheRequest(org, cacheName, key, ttlSecs);
                                 CompletionStage<Done> streamResult = streamLargeObjectAsChunks(cacheRequest, payloadSize, strictRequestBody.getData());
                                 return streamResult
                                         .thenCompose(result -> {
@@ -330,7 +330,7 @@ public class CacheAPICoreImpl {
                                                     .thenApply(rs -> HttpResponses.created());
                                         });
                             } else {
-                                CacheRequest cacheRequest = new CacheRequest(cacheName, key, ttlSecs, strictRequestBody.getData().toArray());
+                                CacheRequest cacheRequest = new CacheRequest(org, cacheName, key, ttlSecs, strictRequestBody.getData().toArray());
                                 return createCacheEntity(cacheRequest.cacheName(), cacheRequest.key(), createSmallCacheObject(cacheRequest));
                             }
                         }
@@ -339,8 +339,8 @@ public class CacheAPICoreImpl {
                 });
     }
     
-    public CompletionStage<HttpResponse> cacheSet(String cacheName, String key, HttpEntity.Strict strictRequestBody) {
-        return cacheSet(cacheName, key, 0, strictRequestBody);
+    public CompletionStage<HttpResponse> cacheSet(Optional<String> org, String cacheName, String key, HttpEntity.Strict strictRequestBody) {
+        return cacheSet(org, cacheName, key, 0, strictRequestBody);
     }
 
     private byte[] combineChunks(long totalBytes, List<PayloadChunk> chunks) {

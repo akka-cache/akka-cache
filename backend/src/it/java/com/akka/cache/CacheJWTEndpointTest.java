@@ -61,7 +61,7 @@ public class CacheJWTEndpointTest extends TestKitSupport {
             return header + "." + payload;
         }
         catch (JsonProcessingException ex) {
-            log.error("A JsonProcessingException exception occurred:", ex.getMessage());
+            log.error("A JsonProcessingException exception occurred: {}", ex.getMessage());
             return null;
         }
     }

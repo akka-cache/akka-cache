@@ -56,7 +56,7 @@ public class CacheNameDeleteWorkflowTest extends TestKitSupport {
             for (int i = 1; i <= NUMBER_OF_CACHES; i++) {
                 Optional<Duration> evtTTL = Optional.empty();
                 String payload = "my payload " + i;
-                var event = new CacheEvent.CacheSet(CACHENAME1, "key" + i, evtTTL, payload.length(), new PayloadChunk(0, payload.getBytes()));
+                var event = new CacheEvent.CacheSet(Optional.empty(), CACHENAME1, "key" + i, evtTTL, payload.length(), new PayloadChunk(0, payload.getBytes()));
                 log.info("creating {} {}", CACHENAME1, "key" + i);
                 cacheEvents.publish(event, String.valueOf(i));
             }
@@ -133,7 +133,7 @@ public class CacheNameDeleteWorkflowTest extends TestKitSupport {
             for (int i = 1; i <= NUMBER_OF_CACHES; i++) {
                 Optional<Duration> evtTTL = random.nextBoolean() ? Optional.of(this.ttl) : Optional.empty();
                 String payload = "my payload " + i;
-                var event = new CacheEvent.CacheSet(CACHENAME2, "key" + i, evtTTL, payload.length(), new PayloadChunk(0, payload.getBytes()));
+                var event = new CacheEvent.CacheSet(Optional.empty(), CACHENAME2, "key" + i, evtTTL, payload.length(), new PayloadChunk(0, payload.getBytes()));
                 cacheEvents.publish(event, String.valueOf(i));
             }
             return true;

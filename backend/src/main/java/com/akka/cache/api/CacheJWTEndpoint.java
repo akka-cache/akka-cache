@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 
 @Acl(allow = @Acl.Matcher(principal = Acl.Principal.INTERNET))
@@ -65,7 +66,7 @@ public class CacheJWTEndpoint {
         if (serviceLevel == null) {
             throw HttpException.badRequest(SERVICE_LEVEL + " not found in the JWT Token");
         }
-        return new OrgClaims(org, "");
+        return new OrgClaims(org, serviceLevel);
     }
 
     private void doesExceedSubscription() {
@@ -124,6 +125,7 @@ public class CacheJWTEndpoint {
     /* this is the JSON version of set */
     private CacheRequest modCachNameCacheRequestWithOrg(CacheRequest cacheRequest) {
         return new CacheRequest(
+                Optional.of(orgClaims.org()),
                 orgClaims.org.concat(cacheRequest.cacheName()),
                 cacheRequest.key(),
                 cacheRequest.ttlSeconds(),
@@ -146,13 +148,13 @@ public class CacheJWTEndpoint {
     @Post("/{cacheName}/{key}/{ttlSeconds}")
     public CompletionStage<HttpResponse> cacheSet(String cacheName, String key, Integer ttlSeconds, HttpEntity.Strict strictRequestBody) {
         doesExceedSubscription();
-        return core.cacheSet(orgClaims.org.concat(cacheName), key, ttlSeconds, strictRequestBody);
+        return core.cacheSet(Optional.of(orgClaims.org()), orgClaims.org.concat(cacheName), key, ttlSeconds, strictRequestBody);
     }
 
     @Post("/{cacheName}/{key}")
     public CompletionStage<HttpResponse> cacheSet(String cacheName, String key, HttpEntity.Strict strictRequestBody) {
         doesExceedSubscription();        
-        return core.cacheSet(orgClaims.org.concat(cacheName), key, 0, strictRequestBody);
+        return core.cacheSet(Optional.of(orgClaims.org()), orgClaims.org.concat(cacheName), key, 0, strictRequestBody);
     }
 
     // this is a JSON verison of GET
