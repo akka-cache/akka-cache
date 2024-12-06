@@ -30,7 +30,13 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
   
   // List of public routes that don't require authentication
-  const publicRoutes = ['/sign-in', '/', '/sign-up', '/privacy', '/terms'];
+  const publicRoutes = [
+    '/',
+    '/auth/sign-in',
+    '/auth/sign-up',
+    '/legal/privacy',
+    '/legal/terms'
+  ];
   
   // Don't redirect if we're on a public route
   if (publicRoutes.includes(url.pathname)) {
@@ -39,7 +45,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   
   // For now, redirect all other routes to sign-in
   // Later, you'll add authentication check here
-  return redirect('/sign-in');
+  return redirect('/auth/sign-in');
 }
 
 export default function App() {
