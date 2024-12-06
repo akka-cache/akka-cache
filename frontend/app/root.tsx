@@ -12,6 +12,9 @@ import theme from './utils/theme';
 import "./styles/tailwind.css";
 import { redirect } from '@remix-run/node';
 import type { LoaderFunctionArgs } from '@remix-run/node';
+import { isSignInWithEmailLink, onAuthStateChanged, User } from 'firebase/auth';
+import { auth } from '~/utils/firebase-config';
+import { json } from '@remix-run/node';
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -26,26 +29,48 @@ export const links: LinksFunction = () => [
   },
 ];
 
+function checkAuthState(): Promise<User | null> {
+  return new Promise((resolve) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      unsubscribe();
+      resolve(user);
+    });
+  });
+}
+
 export async function loader({ request }: LoaderFunctionArgs) {
   const url = new URL(request.url);
   
   // List of public routes that don't require authentication
   const publicRoutes = [
-    '/',
     '/auth/sign-in',
     '/auth/sign-up',
     '/legal/privacy',
     '/legal/terms'
   ];
   
+  // Check if this is an email verification link
+  if (isSignInWithEmailLink(auth, url.href)) {
+    return null; // Allow the verification process to continue
+  }
+  
   // Don't redirect if we're on a public route
   if (publicRoutes.includes(url.pathname)) {
     return null;
   }
+
+  // Check authentication for all other routes (including index '/')
+  const user = await checkAuthState();
+  if (!user) {
+    return redirect('/auth/sign-in');
+  }
   
-  // For now, redirect all other routes to sign-in
-  // Later, you'll add authentication check here
-  return redirect('/auth/sign-in');
+  return json({ 
+    user: { 
+      email: user.email || null, 
+      displayName: user.displayName || null 
+    } 
+  });
 }
 
 export default function App() {
