@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { Card, Checkbox, Alert, Text } from '@mantine/core';
-import { useAuthFlow } from '~/hooks/use-auth-flow';
+import { Card, Checkbox, Text } from '@mantine/core';
+import { useUnifiedAuth } from '~/hooks';
 import { SignUpForm } from '~/components/auth/sign-up-form';
 import { Logo, HeaderContent } from '~/components/auth/common';
-import { IconAlertCircle } from '@tabler/icons-react';
 import { useThemeColor } from '~/utils/theme';
 import { useOutletContext, useLocation, Navigate } from '@remix-run/react';
+import type { AuthStatus } from '~/types/auth';
 
 export default function SignUp() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
@@ -21,10 +21,16 @@ export default function SignUp() {
   const {
     status,
     errorMessage: authErrorMessage,
-    handleEmailSubmit
-  } = useAuthFlow({
-    mode: 'signup',
-    redirectUrl: '/'
+    handleSignUpSubmit
+  } = useUnifiedAuth({
+    redirectUrl: '/',
+    onSuccess: () => {
+      // Optional: Add any success handling here
+      setLocalErrorMessage('');
+    },
+    onError: (error) => {
+      setLocalErrorMessage(error.message);
+    }
   });
 
   const headingTextColor = useThemeColor('headingText');
@@ -40,9 +46,14 @@ export default function SignUp() {
       setLocalErrorMessage('Please accept the terms and conditions');
       return;
     }
+    
     setLocalErrorMessage('');
     try {
-      await handleEmailSubmit(email, userData);
+      // Combine the email with the user data
+      await handleSignUpSubmit({
+        ...userData,
+        email
+      });
     } catch (error: any) {
       setLocalErrorMessage(error.message);
     }
@@ -90,4 +101,4 @@ export default function SignUp() {
       </Card>
     </div>
   );
-} 
+}

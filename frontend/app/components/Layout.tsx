@@ -24,7 +24,7 @@ import {
   IconPlus
 } from '@tabler/icons-react';
 import { ThemeToggle } from './ThemeToggle';
-import { useAuth } from '~/hooks/use-auth';
+import { useAuthActions, useAuthState } from '~/hooks';
 
 type BaseLink = {
   icon: React.ComponentType<any>;
@@ -43,19 +43,15 @@ type BottomLink = BaseLink & {
 
 type LayoutProps = {
   children: React.ReactNode;
-  user?: {
-    name: string;
-    email: string;
-    avatar?: string;
-  };
 };
 
-export default function Layout({ children, user }: LayoutProps) {
+export default function Layout({ children }: LayoutProps) {
   const [opened, { toggle }] = useDisclosure();
   const navigate = useNavigate();
   const location = useLocation();
   const { colorScheme } = useMantineColorScheme();
-  const { handleSignOut } = useAuth();
+  const { handleSignOut } = useAuthActions();
+  const { user } = useAuthState();
 
   const mainLinks: MainLink[] = [
     { icon: IconPlus, label: 'Create Cache', href: '/create-cache' },
@@ -149,14 +145,14 @@ export default function Layout({ children, user }: LayoutProps) {
                 <Menu.Target>
                   <UnstyledButton className="w-full p-3">
                     <Group>
-                      <Avatar src={user.avatar} radius="xl" alt={user.name} />
+                      <Avatar radius="xl" alt={user.displayName || user.email} />
                       <div style={{ flex: 1 }}>
                         <Text
                           size="sm"
                           fw={500}
                           c={colorScheme === 'dark' ? 'dark.9' : 'gray.7'}
                         >
-                          {user.name}
+                          {user.displayName || 'User'}
                         </Text>
                         <Text
                           size="xs"

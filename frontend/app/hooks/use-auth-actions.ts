@@ -1,8 +1,8 @@
 import { useNavigate } from '@remix-run/react';
-import { auth } from '~/utils/firebase-config';
 import { signOut } from 'firebase/auth';
+import { auth } from '~/utils/firebase-config';
 
-export function useAuth() {
+export function useAuthActions() {
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -11,10 +11,11 @@ export function useAuth() {
       navigate('/auth/sign-in');
     } catch (error) {
       console.error('Error signing out:', error);
+      throw error; // Allow the component to handle the error
     }
   };
 
   return {
-    handleSignOut
+    handleSignOut,
   };
-} 
+}

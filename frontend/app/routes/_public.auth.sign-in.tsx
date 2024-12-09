@@ -1,19 +1,25 @@
-import { Card, Text, Divider } from '@mantine/core';
-import { useAuthFlow } from '~/hooks/use-auth-flow';
+import { Card, Text } from '@mantine/core';
+import { useUnifiedAuth } from '~/hooks';
 import { EmailForm } from '~/components/auth/email-form';
 import { Logo, HeaderContent } from '~/components/auth/common';
 import { useThemeColor } from '~/utils/theme';
 import { useOutletContext } from '@remix-run/react';
-import { IconCheck, IconAlertCircle } from '@tabler/icons-react';
+import type { AuthStatus } from '~/types/auth';
 
 export default function SignIn() {
   const {
     status,
     errorMessage,
-    handleEmailSubmit
-  } = useAuthFlow({
-    mode: 'signin',
-    redirectUrl: '/'
+    handleEmailCheck
+  } = useUnifiedAuth({
+    redirectUrl: '/',
+    onSuccess: () => {
+      // Optional: Add any success handling here
+    },
+    onError: (error) => {
+      // Optional: Add any error handling here
+      console.error('Sign in error:', error);
+    }
   });
 
   const headingTextColor = useThemeColor('headingText');
@@ -38,7 +44,7 @@ export default function SignIn() {
       
       <Card shadow="md" p="xl" className="w-full mb-8 hl" bg="dark.0">
         <EmailForm
-          onSubmit={handleEmailSubmit}
+          onSubmit={handleEmailCheck}
           status={status}
           errorMessage={errorMessage}
           successMessage="Check your email for the sign-in link!"
