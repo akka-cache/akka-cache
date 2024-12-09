@@ -45,6 +45,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const publicRoutes = [
     '/auth/sign-in',
     '/auth/sign-up',
+    '/auth/verify-email',
     '/legal/privacy',
     '/legal/terms'
   ];
