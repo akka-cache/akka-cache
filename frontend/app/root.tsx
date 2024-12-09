@@ -12,9 +12,9 @@ import theme from './utils/theme';
 import "./styles/tailwind.css";
 import { redirect } from '@remix-run/node';
 import type { LoaderFunctionArgs } from '@remix-run/node';
-import { isSignInWithEmailLink, onAuthStateChanged, User } from 'firebase/auth';
+import { isSignInWithEmailLink, onAuthStateChanged, signInWithEmailLink, User } from 'firebase/auth';
 import { auth } from '~/utils/firebase-config';
-import { json } from '@remix-run/node';
+import { typedjson } from 'remix-typedjson';
 
 export const links: LinksFunction = () => [
   { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -51,8 +51,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
   ];
   
   // Check if this is an email verification link
-  if (isSignInWithEmailLink(auth, url.href)) {
-    return null; // Allow the verification process to continue
+  const isEmailLink = isSignInWithEmailLink(auth, url.href);
+  if (isEmailLink) {
+    // Instead of redirecting here, we'll let the client handle the verification
+    return typedjson({ isEmailLink: true, verificationUrl: url.href });
   }
   
   // Don't redirect if we're on a public route
@@ -66,7 +68,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     return redirect('/auth/sign-in');
   }
   
-  return json({ 
+  return typedjson({ 
     user: { 
       email: user.email || null, 
       displayName: user.displayName || null 

@@ -5,8 +5,9 @@ import {
   isSignInWithEmailLink,
   signInWithEmailLink,
   updateProfile,
-  fetchSignInMethodsForEmail,
-  createUserWithEmailAndPassword
+  setPersistence,
+  browserLocalPersistence,
+  getAdditionalUserInfo
 } from 'firebase/auth';
 import { auth } from '~/utils/firebase-config';
 import type { AuthStatus, UserData } from '~/types/auth';
@@ -36,41 +37,18 @@ export function useUnifiedAuth({
   const handleEmailCheck = async (email: string) => {
     setStatus('checking');
     try {
-      console.log('Starting email check for:', email);
-      console.log('Firebase auth state:', {
-        currentUser: auth.currentUser,
-        config: {
-          apiKey: auth.config.apiKey,
-          authDomain: auth.config.authDomain
-        }
-      });
-
+      console.log('Starting email sign-in for:', email);
+      
+      const actionCodeSettings = {
+        url: `${window.location.origin}/`,  // Direct to home for sign-in
+        handleCodeInApp: true,
+      };
+      
       try {
-        // First, try to get sign-in methods for the email
-        const signInMethods = await fetchSignInMethodsForEmail(auth, email);
-        console.log('Sign-in methods:', signInMethods);
-
-        // If no sign-in methods exist, the user doesn't exist
-        if (!signInMethods.length) {
-          console.log('No sign-in methods found, user does not exist');
-          navigate('/auth/sign-up', { 
-            state: { email },
-            replace: true 
-          });
-          return;
-        }
-
-        // User exists, send sign-in link
-        const actionCodeSettings = {
-          url: `${window.location.origin}${redirectUrl}`,
-          handleCodeInApp: true,
-        };
-        console.log('User exists, sending sign-in link with settings:', actionCodeSettings);
-
         await sendSignInLinkToEmail(auth, email, actionCodeSettings);
         console.log('Sign-in link sent successfully');
         
-        window.localStorage.setItem('emailForSignIn', email);
+        window.localStorage.setItem('verificationEmail', email);
         window.localStorage.setItem('isSignUp', 'false');
         setStatus('success');
         
@@ -85,12 +63,16 @@ export function useUnifiedAuth({
           throw new Error('Please enter a valid email address');
         }
 
-        if (error.code === 'auth/operation-not-allowed') {
-          console.error('Email/Password authentication is not enabled in Firebase');
-          throw new Error('Email authentication is not properly configured');
+        // Handle specific Firebase errors
+        switch (error.code) {
+          case 'auth/invalid-email':
+            throw new Error('Please enter a valid email address');
+          case 'auth/operation-not-allowed':
+            console.error('Email link authentication is not enabled in Firebase');
+            throw new Error('Email authentication is not properly configured');
+          default:
+            throw error;
         }
-
-        throw error; // Re-throw other errors
       }
     } catch (error) {
       console.error('Sign in error:', {
@@ -111,16 +93,14 @@ export function useUnifiedAuth({
       console.log('Starting sign-up process for:', userData.email);
 
       const actionCodeSettings = {
-        url: `${window.location.origin}/auth/verify-email`,
+        url: `${window.location.origin}/auth/verify-email`,  // Keep verify-email for sign-up
         handleCodeInApp: true
       };
 
       try {
-        // Send verification email
         await sendSignInLinkToEmail(auth, userData.email, actionCodeSettings);
         console.log('Verification email sent successfully');
 
-        // Store the pending user data and mark this as a sign-up flow
         window.localStorage.setItem('verificationEmail', userData.email);
         window.localStorage.setItem('isSignUp', 'true');
         window.localStorage.setItem('pendingUserData', JSON.stringify(userData));
@@ -155,57 +135,6 @@ export function useUnifiedAuth({
     }
   };
 
-  const handleEmailVerification = async () => {
-    try {
-      const email = window.localStorage.getItem('verificationEmail');
-      const isSignUp = window.localStorage.getItem('isSignUp') === 'true';
-      const pendingUserDataString = window.localStorage.getItem('pendingUserData');
-      
-      if (!email) {
-        throw new Error('No email found. Please try signing up again.');
-      }
-
-      setStatus('loading');
-      console.log('Starting email verification for:', email);
-
-      // Verify this is a valid sign-in link
-      if (!isSignInWithEmailLink(auth, window.location.href)) {
-        throw new Error('Invalid verification link');
-      }
-
-      // Complete the sign-in process
-      const userCredential = await signInWithEmailLink(auth, email, window.location.href);
-      console.log('Email verified successfully');
-
-      // If this is a sign-up flow, update the user profile
-      if (isSignUp && userCredential.user && pendingUserDataString) {
-        const pendingUserData = JSON.parse(pendingUserDataString);
-        console.log('Updating user profile with:', pendingUserData);
-
-        await updateProfile(userCredential.user, {
-          displayName: pendingUserData.displayName
-        });
-
-        // Here you could also store additional user data in your database
-        // await saveUserDataToDatabase(userCredential.user.uid, pendingUserData);
-      }
-      // Clean up localStorage
-      window.localStorage.removeItem('verificationEmail');
-      window.localStorage.removeItem('isSignUp');
-      window.localStorage.removeItem('pendingUserData');
-      
-      setStatus('success');
-      navigate('/', { replace: true });
-      onSuccess?.();
-    } catch (error) {
-      console.error('Email verification error:', error);
-      setStatus('error');
-      setErrorMessage(error instanceof Error ? error.message : 'An error occurred');
-      navigate('/auth/sign-up', { replace: true });
-      onError?.(error instanceof Error ? error : new Error('An error occurred'));
-    }
-  };
-
   const handleEmailLink = async () => {
     try {
       const email = window.localStorage.getItem('verificationEmail');
@@ -217,19 +146,39 @@ export function useUnifiedAuth({
 
       setStatus('loading');
 
-      // Sign in with email link first
+      // Sign in with email link
       const userCredential = await signInWithEmailLink(auth, email, window.location.href);
+      console.log('Successfully signed in with email link');
+
+      // Set user persistence to LOCAL (stays signed in)
+      await setPersistence(auth, browserLocalPersistence);
+
+      // Check if this is a new user
+      const additionalUserInfo = getAdditionalUserInfo(userCredential);
+      const isNewUser = additionalUserInfo?.isNewUser;
+
+      if (isNewUser && !isSignUp) {
+        // User doesn't exist but tried to sign in
+        console.log('New user detected during sign-in attempt');
+        window.localStorage.removeItem('verificationEmail');
+        window.localStorage.removeItem('isSignUp');
+        navigate('/auth/sign-up', { 
+          state: { email },
+          replace: true 
+        });
+        return;
+      }
 
       if (isSignUp && userCredential.user) {
         const pendingUserData = JSON.parse(
           window.localStorage.getItem('pendingUserData') || '{}'
         );
 
-        // Update the user profile if needed
         if (pendingUserData.displayName) {
           await updateProfile(userCredential.user, {
             displayName: pendingUserData.displayName
           });
+          console.log('Updated user profile');
         }
       }
 
@@ -239,13 +188,23 @@ export function useUnifiedAuth({
       window.localStorage.removeItem('pendingUserData');
       
       setStatus('success');
+      console.log('Redirecting to home page');
       navigate('/', { replace: true });
       onSuccess?.();
     } catch (error) {
       console.error('Email link error:', error);
       setStatus('error');
       setErrorMessage(error instanceof Error ? error.message : 'An error occurred');
-      navigate('/auth/sign-in', { replace: true });
+      
+      // Redirect based on the context
+      const isSignUp = window.localStorage.getItem('isSignUp') === 'true';
+      const redirectPath = isSignUp ? '/auth/sign-up' : '/auth/sign-in';
+      
+      // Only redirect if there's an actual error
+      if (error instanceof Error && 
+          !error.message.includes('already signed in')) {
+        navigate(redirectPath, { replace: true });
+      }
       onError?.(error instanceof Error ? error : new Error('An error occurred'));
     }
   };
@@ -255,7 +214,7 @@ export function useUnifiedAuth({
     errorMessage,
     handleEmailCheck,
     handleSignUpSubmit,
-    handleEmailVerification,
+    handleEmailVerification: handleEmailLink,
     handleEmailLink
   };
 }
