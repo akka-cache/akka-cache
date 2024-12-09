@@ -51,7 +51,7 @@ public class CacheConsumer extends Consumer {
                         if (messageContext().metadata().asCloudEvent().subject().isPresent()) {
                             cacheId = Optional.of(messageContext().metadata().asCloudEvent().subject().get());
                         }
-                        log.debug("Consumer received CacheEvent.CacheDeleted for Org {} Id {} decreas by {}", decreaseBytesUsed.org().get(), cacheId, decreaseBytesUsed.totalBytes());
+                        log.debug("Consumer received CacheEvent.CacheDeleted for Org {} Id {} decrease by {}", decreaseBytesUsed.org().get(), cacheId, decreaseBytesUsed.totalBytes());
                     }
                     componentClient.forKeyValueEntity(decreaseBytesUsed.org().get())
                             .method(OrgEntity::decrement)
