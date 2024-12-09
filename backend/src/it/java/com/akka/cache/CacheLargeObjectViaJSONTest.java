@@ -3,6 +3,7 @@ package com.akka.cache;
 import akka.http.javadsl.model.StatusCodes;
 import akka.javasdk.testkit.TestKitSupport;
 import com.akka.cache.api.CacheEndpoint;
+import com.akka.cache.domain.CacheAPI.*;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,10 +17,18 @@ import java.nio.file.Paths;
 import java.util.Optional;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class CacheLargeObjectTest extends TestKitSupport {
-    private static final Logger log = LoggerFactory.getLogger(CacheLargeObjectTest.class);
+public class CacheLargeObjectViaJSONTest extends TestKitSupport {
+    private static final Logger log = LoggerFactory.getLogger(CacheLargeObjectViaJSONTest.class);
 
     private static final String CACHE_NAME = "cache1";
+    private static final String imageName = "./images/2025-Chevrolet-Corvette-ZR1-001-1440sw.jpg";
+    private static final String copyToFile1 = "./images/2025-Chevrolet-Corvette-ZR1-001-1440sw(copy).jpg";
+
+    private static final String key1 = "2025-Corvette-JSON";
+    final byte[] imageData = readFileToBytes(imageName);
+
+    public CacheLargeObjectViaJSONTest() throws IOException {
+    }
 
     private byte[] readFileToBytes(String filePath) throws IOException {
         File file = new File(filePath);
@@ -42,34 +51,34 @@ public class CacheLargeObjectTest extends TestKitSupport {
 
     @Test
     @Order(1)
-    public void httpCreateLargeCache1Key1() throws IOException {
+    public void httpCreateLargeCache1Key1() {
 
-
-        String imageName = "./images/2025-Chevrolet-Corvette-ZR1-001-1440sw.jpg";
-        String copyToFile = "./images/2025-Chevrolet-Corvette-ZR1-001-1440sw(copy).jpg";
-        byte[] imageData = readFileToBytes(imageName);
-
-        final String key = "2025-Corvette";
-
-        CacheEndpoint.CacheRequest setRequest = new CacheEndpoint.CacheRequest(CACHE_NAME, key, Optional.empty(), imageData);
+        CacheRequest setRequest = new CacheRequest(CACHE_NAME, key1, Optional.empty(), imageData);
 
         var response = await(
-                httpClient.POST("/cache")
+                httpClient.POST("/cache/set")
                         .withRequestBody(setRequest)
                         .invokeAsync()
         );
 
         Assertions.assertEquals(StatusCodes.CREATED, response.status());
+    }
+
+    @Test
+    void getLargeImage() throws IOException {
+
+        final byte[] imageData = readFileToBytes(imageName);
 
         var cache = await(
-                httpClient.GET("/cache/" + CACHE_NAME + "/" + key)
-                        .responseBodyAs(CacheEndpoint.CacheGetResponse.class)
+                httpClient.GET("/cache/get/" + CACHE_NAME + "/" + key1)
+                        .responseBodyAs(CacheGetResponse.class)
                         .invokeAsync()
         );
 
+        Assertions.assertEquals(StatusCodes.OK, cache.status());
         Assertions.assertEquals(imageData.length, cache.body().value().length);
 //        Assertions.assertEquals(imageData, cache.body().value()); // not sure why this doesn't work
-        writeBytesToFile(copyToFile, cache.body().value());
+        writeBytesToFile(copyToFile1, cache.body().value());
     }
 
 }

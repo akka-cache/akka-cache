@@ -1,31 +1,27 @@
-package com.akka.gatling;
-
-import static io.gatling.javaapi.core.CoreDsl.*;
-import static io.gatling.javaapi.http.HttpDsl.*;
+package io.akka.gatling;
 
 import com.typesafe.config.Config;
 import com.typesafe.config.ConfigFactory;
-
-import io.gatling.core.body.StringBody;
-import io.gatling.core.feeder.Batch;
-import io.gatling.javaapi.core.*;
-import io.gatling.javaapi.http.*;
+import io.gatling.javaapi.core.Body;
+import io.gatling.javaapi.core.FeederBuilder;
+import io.gatling.javaapi.core.ScenarioBuilder;
+import io.gatling.javaapi.core.Simulation;
+import io.gatling.javaapi.http.HttpProtocolBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import scala.concurrent.Batchable;
 
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.Iterator;
+import java.util.Base64;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
-import java.util.Base64;
+import static io.gatling.javaapi.core.CoreDsl.*;
+import static io.gatling.javaapi.http.HttpDsl.http;
+import static io.gatling.javaapi.http.HttpDsl.status;
 
-public class CacheSetScenario extends Simulation {
-    private static final Logger log = LoggerFactory.getLogger(CacheSetScenario.class);
+public class CacheLowLevlSetScenario extends Simulation {
+    private static final Logger log = LoggerFactory.getLogger(CacheLowLevlSetScenario.class);
 
     private Config config = ConfigFactory.load();
 
@@ -33,22 +29,15 @@ public class CacheSetScenario extends Simulation {
 
     private Base64.Encoder encoder = Base64.getEncoder();
 
-    private FeederBuilder.Batchable<String> namesFeeder = csv("lastnames.csv").random();
-    private FeederBuilder<Object> phraseFeeder = csv("phrases.csv")
-            .random()
-            .transform((phrase, t2) -> {
-                var encoded = encoder.encodeToString(
-                        phrase.getBytes(StandardCharsets.UTF_8) );
-                log.info("phrase:".concat(phrase));
-                log.info("t2:".concat(t2));
-                return encoded;
-            });
+    private FeederBuilder.Batchable<String> namesFeeder = csv("lastnames.csv");
+    private FeederBuilder<String> phraseFeeder = csv("phrases.csv")
+            .random();
 
     private Random random = new Random();
 
 //    private var Base64.getEncoder().encode("Test".getBytes());
 
-    Body.WithString newCacheValue = StringBody("{\"cacheName\":\"cache1\", \"key\":\"#{name}\", \"value\":\"#{phrase}\"}");
+    Body.WithString newCacheValue = StringBody("#{phrase}");
 
     HttpProtocolBuilder httpProtocol =
             http.baseUrl(baseUrl)
@@ -61,8 +50,9 @@ public class CacheSetScenario extends Simulation {
 
             .exec(
                     http("set-cache")
-                            .post("/cache/")
-                            .body(newCacheValue).asJson()
+                            .post("/cache/cache1/#{name}")
+                            .header("content-type", "application/octet-stream")
+                            .body(newCacheValue)
                             .check(status().is(201))
             );
     {
@@ -70,8 +60,9 @@ public class CacheSetScenario extends Simulation {
 //                myFirstScenario.injectOpen(constantUsersPerSec(2).during(60))
 //    scn.injectOpen(atOnceUsers(1))
 //    scn.injectOpen(rampUsers(100).during(Duration.ofMinutes(3)))
-//    scn.injectOpen(rampUsers(1000).during(Duration.ofMinutes(5)))
+    scn.injectOpen(rampUsers(1000).during(Duration.ofMinutes(5)))
 // simulation set up -> -> https://docs.gatling.io/reference/script/core/injection/#open-model
+/*
             scn.injectOpen(
                     nothingFor(Duration.ofSeconds(4)), // 1
                     atOnceUsers(10), // 2
@@ -82,6 +73,7 @@ public class CacheSetScenario extends Simulation {
                     rampUsersPerSec(10).to(20).during(Duration.ofMinutes(10)).randomized(), // 7
                     stressPeakUsers(1000).during(Duration.ofSeconds(20)) // 8
             )
+*/
             .protocols(httpProtocol)
         );
     }

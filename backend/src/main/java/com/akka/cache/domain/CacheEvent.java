@@ -7,11 +7,11 @@ import java.util.Optional;
 
 public sealed interface CacheEvent {
     @TypeName("cache-set")
-    record CacheSet(String cacheName, String key, Optional<Duration> ttlSeconds, PayloadChunk chunk) implements CacheEvent {}
+    record CacheSet(Optional<String> org, String cacheName, String key, Optional<Duration> ttlSeconds, long totalBytes, PayloadChunk chunk) implements CacheEvent {}
 
     @TypeName("chunk-added")
     record ChunkAdded(PayloadChunk chunk) implements CacheEvent {}
 
     @TypeName("cache-deleted")
-    record CacheDeleted() implements CacheEvent {}
+    record CacheDeleted(Optional<String> org, long totalBytes) implements CacheEvent {}
 }

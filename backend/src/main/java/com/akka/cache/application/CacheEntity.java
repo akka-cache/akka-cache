@@ -27,6 +27,7 @@ public class CacheEntity extends EventSourcedEntity<Cache, CacheEvent> {
                     currentState().key(),
                     currentState().ttlSeconds(),
                     currentState().deleted(),
+                    currentState().totalBytes(),
                     currentState().chunks().size(),
                     currentState().chunks().getFirst())
             );
@@ -52,7 +53,7 @@ public class CacheEntity extends EventSourcedEntity<Cache, CacheEvent> {
             log.debug("CacheEntity Creating new cache {}", commandContext().entityId());
         }
         return effects()
-                .persist(new CacheEvent.CacheSet(cache.cacheName(), cache.key(), cache.ttlSeconds(), cache.chunks().getFirst()))
+                .persist(new CacheEvent.CacheSet(cache.org(), cache.cacheName(), cache.key(), cache.ttlSeconds(), cache.totalBytes(), cache.chunks().getFirst()))
                 .thenReply(__ -> done());
     }
 
@@ -77,7 +78,7 @@ public class CacheEntity extends EventSourcedEntity<Cache, CacheEvent> {
                 log.debug("CacheEntity delete {}", commandContext().entityId());
             }
             return effects()
-                    .persist(new CacheEvent.CacheDeleted())
+                    .persist(new CacheEvent.CacheDeleted(currentState().org(), currentState().totalBytes()))
                     .thenReply(__ -> done());
         }
     }
@@ -85,7 +86,7 @@ public class CacheEntity extends EventSourcedEntity<Cache, CacheEvent> {
     @Override
     public Cache applyEvent(CacheEvent cacheEvent) {
         return switch (cacheEvent) {
-            case CacheEvent.CacheSet cache -> new Cache(cache.cacheName(), cache.key(), cache.ttlSeconds()).withChunk(cache.chunk());
+            case CacheEvent.CacheSet cache -> new Cache(cache.cacheName(), cache.key(), cache.ttlSeconds(), cache.totalBytes()).withChunk(cache.chunk());
             case CacheEvent.ChunkAdded chunk -> currentState().withChunk(chunk.chunk());
             case CacheEvent.CacheDeleted deleted -> currentState().asDeleted();
         };

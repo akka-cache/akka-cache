@@ -1,8 +1,7 @@
 package com.akka.cache;
 
 import akka.http.javadsl.model.StatusCodes;
-import akka.javasdk.JsonSupport;
-import com.akka.cache.api.CacheEndpoint;
+import com.akka.cache.domain.CacheAPI.*;
 import com.akka.cache.application.CacheNameEntity;
 import com.akka.cache.domain.CacheName;
 import org.junit.jupiter.api.*;
@@ -35,7 +34,7 @@ public class CacheNameIntegrationTest extends TestKitSupport {
   @Test
   @Order(1)
   public void httpCreateCacheName() {
-    CacheEndpoint.CacheNameRequest createRequest = new CacheEndpoint.CacheNameRequest(CACHE_NAME, TEST_DESC_1);
+    CacheNameRequest createRequest = new CacheNameRequest(CACHE_NAME, TEST_DESC_1);
 
     var response = await(
             httpClient.POST("/cache/cacheName")
@@ -50,7 +49,7 @@ public class CacheNameIntegrationTest extends TestKitSupport {
   @Test
   @Order(2)
   public void httpModifyCacheNameDescription() {
-    CacheEndpoint.CacheNameRequest updateRequest = new CacheEndpoint.CacheNameRequest(CACHE_NAME, TEST_DESC_1_MODIFIED);
+    CacheNameRequest updateRequest = new CacheNameRequest(CACHE_NAME, TEST_DESC_1_MODIFIED);
 
     var response = await(
             httpClient.PUT("/cache/cacheName")

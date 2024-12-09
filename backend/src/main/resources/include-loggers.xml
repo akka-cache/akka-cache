@@ -10,4 +10,5 @@
  -->
 <included>
     <logger name="com.akka.akka-cache" level="INFO"/>
+
 </included>
