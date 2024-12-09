@@ -11,6 +11,7 @@ import com.akka.cache.domain.Organization;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.typesafe.config.ConfigFactory;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,11 @@ import org.slf4j.LoggerFactory;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.awaitility.Awaitility.fieldIn;
+import static org.hamcrest.Matchers.equalTo;
 
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -28,6 +34,7 @@ public class CacheJWTBatchIntegrationTest extends TestKitSupport {
     private static final String CACHE_BASE_NAME = "cache";
     private static final String KEY = "key";
     private static final String PAYLOAD = "This is Akka 3's time:";
+    private static final Duration ONE_HUNDERED_MILLISECONDS = Duration.ofMillis(100);
 
     String bearerToken = bearerTokenWith(
             Map.of("iss", "gcp", "org", ORG, "serviceLevel", "FREE")
@@ -153,10 +160,11 @@ public class CacheJWTBatchIntegrationTest extends TestKitSupport {
     @Test
     @Order(3)
     public void testOrgByteCounts() throws InterruptedException {
-        Thread.sleep(Duration.ofSeconds(5));
-        Organization org = getOrg(ORG);
-        Assertions.assertEquals(ORG, org.orgName());
-        Assertions.assertEquals(99, org.cacheCount());
+        Awaitility.await()
+                .ignoreExceptions()
+                .atMost(5, TimeUnit.SECONDS)
+                .with().pollInterval(ONE_HUNDERED_MILLISECONDS).and().with().pollDelay(20, MILLISECONDS)
+                .until(() -> getOrg(ORG).cacheCount(), equalTo(99));
     }
 
     @Test
@@ -199,10 +207,11 @@ public class CacheJWTBatchIntegrationTest extends TestKitSupport {
     @Test
     @Order(6)
     public void testOrgTotalCounts() throws InterruptedException {
-        Thread.sleep(Duration.ofSeconds(5));
-        Organization org = getOrg(ORG);
-        Assertions.assertEquals(ORG, org.orgName());
-        Assertions.assertEquals(0, org.cacheCount());
+        Awaitility.await()
+                .ignoreExceptions()
+                .atMost(5, TimeUnit.SECONDS)
+                .with().pollInterval(ONE_HUNDERED_MILLISECONDS).and().with().pollDelay(20, MILLISECONDS)
+                .until(() -> getOrg(ORG).cacheCount(), equalTo(0));
     }
 
 }
