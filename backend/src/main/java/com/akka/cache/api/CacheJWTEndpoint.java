@@ -52,7 +52,7 @@ public class CacheJWTEndpoint {
     // if done at org level, then we'd need to injest the following as stateful
     private final Map<String, OrgStats> orgLimitMap = Maps.newConcurrentMap();
 */
-    private final long freeServiceMaxCachedBytes;
+    private long freeServiceMaxCachedBytes;
 
     private final Map<String, String> claims;
     private final OrgClaims orgClaims;
@@ -67,9 +67,11 @@ public class CacheJWTEndpoint {
         this.rateLimitWaitTimeoutMillis = config.getInt("app.rate-limit-wait-timeout-millis");
 */
         this.freeServiceMaxCachedBytes = config.getLong("app.free-service-level-max-bytes");
+/*
         if (log.isDebugEnabled()) {
             log.debug("Free Service level max bytes {}", this.freeServiceMaxCachedBytes);
         }
+*/
 
         this.claims = requestContext.getJwtClaims().asMap();
         this.orgClaims = getOrgClaim();

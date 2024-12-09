@@ -1,5 +1,7 @@
 package com.akka.cache;
 
+import akka.http.javadsl.model.StatusCodes;
+import akka.javasdk.testkit.TestKit;
 import akka.javasdk.testkit.TestKitSupport;
 import com.akka.cache.application.CacheEntity;
 import com.akka.cache.application.OrgEntity;
@@ -8,11 +10,13 @@ import com.akka.cache.domain.CacheInternalGetResponse;
 import com.akka.cache.domain.Organization;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.typesafe.config.ConfigFactory;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.*;
 
 
@@ -29,6 +33,13 @@ public class CacheJWTBatchIntegrationTest extends TestKitSupport {
             Map.of("iss", "gcp", "org", ORG, "serviceLevel", "FREE")
     );
 
+    @Override
+    protected TestKit.Settings testKitSettings() {
+        var appFreeServiceLevelMaxBytes = ConfigFactory.parseMap(Map.of(
+                "app.free-service-level-max-bytes", "2000"));
+        return TestKit.Settings.DEFAULT.withAdditionalConfig(appFreeServiceLevelMaxBytes);
+    }
+
     private CacheInternalGetResponse getCache(String cacheName, String key) {
         return await(
                 componentClient
@@ -38,7 +49,6 @@ public class CacheJWTBatchIntegrationTest extends TestKitSupport {
         );
     }
 
-/*
     private Organization getOrg(String org) {
         return await(
                 componentClient
@@ -47,7 +57,6 @@ public class CacheJWTBatchIntegrationTest extends TestKitSupport {
                         .invokeAsync()
         );
     }
-*/
 
     private String bearerTokenWith(Map<String, String> claims) {
         // setting algorithm to none
@@ -74,7 +83,7 @@ public class CacheJWTBatchIntegrationTest extends TestKitSupport {
     @Order(1)
     public void testCreateBatchedCache() {
 
-        List<CacheRequest> cacheRequestList = new ArrayList();
+        List<CacheRequest> cacheRequestList = new ArrayList<>();
         for (int i = 1; i < 100; i++) {
             cacheRequestList.add(new CacheRequest(CACHE_BASE_NAME + i, KEY + i, Optional.empty(), (PAYLOAD + i).getBytes()));
         }
@@ -105,7 +114,7 @@ public class CacheJWTBatchIntegrationTest extends TestKitSupport {
     @Order(2)
     public void testGetCacheBatched() {
 
-        List<BatchGetCacheRequest> getBatchCacheRequest = new ArrayList();
+        List<BatchGetCacheRequest> getBatchCacheRequest = new ArrayList<>();
         for (int i = 1; i < 100; i++) {
             getBatchCacheRequest.add(new BatchGetCacheRequest(CACHE_BASE_NAME + i, KEY + i));
         }
@@ -139,18 +148,36 @@ public class CacheJWTBatchIntegrationTest extends TestKitSupport {
         }
 
         log.info("Total bytes returned {}", countTotalBytes);
-/* We must need to wait for a while before projection happens
-        Organization org = getOrg(ORG);
-        log.info("Current org total bytes {}", org.totalBytesCached());
-        Assertions.assertEquals(countTotalBytes, org.totalBytesCached());
-*/
     }
 
     @Test
     @Order(3)
+    public void testOrgByteCounts() throws InterruptedException {
+        Thread.sleep(Duration.ofSeconds(5));
+        Organization org = getOrg(ORG);
+        Assertions.assertEquals(ORG, org.orgName());
+        Assertions.assertEquals(99, org.cacheCount());
+    }
+
+    @Test
+    @Order(4)
+    public void testMaxBytesLimitByOrg() {
+        CacheRequest setRequest = new CacheRequest(CACHE_BASE_NAME.concat("test"), "testerkey2", Optional.empty(), PAYLOAD.getBytes());
+
+        var response = await(
+                httpClient.POST("/set")
+                        .addHeader("Authorization","Bearer "+ bearerToken)
+                        .withRequestBody(setRequest)
+                        .invokeAsync()
+        );
+        Assertions.assertEquals(StatusCodes.BAD_REQUEST, response.status());
+    }
+
+    @Test
+    @Order(5)
     public void testDeleteCacheBatched() {
 
-        List<BatchGetCacheRequest> getBatchCacheRequest = new ArrayList();
+        List<BatchGetCacheRequest> getBatchCacheRequest = new ArrayList<>();
         for (int i = 1; i < 100; i++) {
             getBatchCacheRequest.add(new BatchGetCacheRequest(CACHE_BASE_NAME + i, KEY + i));
         }
@@ -167,6 +194,15 @@ public class CacheJWTBatchIntegrationTest extends TestKitSupport {
 
         Assertions.assertTrue(batchResponse.body().success());
 
+    }
+
+    @Test
+    @Order(6)
+    public void testOrgTotalCounts() throws InterruptedException {
+        Thread.sleep(Duration.ofSeconds(5));
+        Organization org = getOrg(ORG);
+        Assertions.assertEquals(ORG, org.orgName());
+        Assertions.assertEquals(0, org.cacheCount());
     }
 
 }

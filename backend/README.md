@@ -128,3 +128,15 @@ JSON GET:
 ```shell
 curl -i http://localhost:9001/cache/get/cache1/key1
 ```
+
+
+JWT Endpoint
+
+BINARY POST (with TTL at 30 seconds)
+```shell
+curl -i -d 'This is our first test' -H "Content-Type: application/octet-stream" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6ImtleTEifQ.eyJpc3MiOiJnY3AiLCJvcmciOiJUVDEyMyIsInNlcnZpY2VMZXZlbCI6IkZSRUUifQ.bBUttuYtdFThLquxqlqCYrMUx02xwpC8rJCbQpzjSKg" -X POST http://localhost:9001/cache1/key1/30
+```
+BINARY GET:
+```shell
+curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6ImtleTEifQ.eyJpc3MiOiJnY3AiLCJvcmciOiJUVDEyMyIsInNlcnZpY2VMZXZlbCI6IkZSRUUifQ.bBUttuYtdFThLquxqlqCYrMUx02xwpC8rJCbQpzjSKg" -i http://localhost:9001/cache1/key1
+```

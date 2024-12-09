@@ -9,17 +9,17 @@
      when the application runs. 
  -->
 <included>
-    <logger name="com.akka.akka-cache" level="INFO"/>
-    <logger name="com.akka.cache.api.CacheEndpoint" level="DEBUG"/>
-    <logger name="com.akka.cache.application.CacheEntity" level="DEBUG"/>
-    <logger name="com.akka.cache.application.CacheNameDeleteWorkflow" level="DEBUG"/>
-    <logger name="com.akka.cache.application.CacheView" level="DEBUG"/>
-    <logger name="com.akka.cache.application.CacheConsumer" level="DEBUG"/>
-    <logger name="com.akka.cache.application.OrgEntity" level="DEBUG"/>
-    <!--
-
+    <logger name="com.akka.cache" level="DEBUG"/>
+<!--
+        <logger name="com.akka.cache" level="INFO"/>
+        <logger name="com.akka.cache.api.CacheEndpoint" level="DEBUG"/>
+        <logger name="com.akka.cache.api.CacheJWTEndpoint" level="DEBUG"/>
+        <logger name="com.akka.cache.application.CacheEntity" level="DEBUG"/>
+        <logger name="com.akka.cache.application.CacheNameDeleteWorkflow" level="DEBUG"/>
+        <logger name="com.akka.cache.application.CacheView" level="DEBUG"/>
+        <logger name="com.akka.cache.application.CacheConsumer" level="DEBUG"/>
+        <logger name="com.akka.cache.application.OrgEntity" level="DEBUG"/>
         <logger name="com.akka.cache.application.CacheNameEntity" level="DEBUG"/>
         <logger name="com.akka.cache.application.CacheTimedAction" level="DEBUG"/>
-
-    -->
+-->
 </included>

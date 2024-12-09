@@ -11,6 +11,9 @@ import com.akka.cache.domain.PayloadChunk;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import static akka.Done.done;
 
 @ComponentId("cache")
@@ -23,6 +26,7 @@ public class CacheEntity extends EventSourcedEntity<Cache, CacheEvent> {
         }
         else {
             return effects().reply(new CacheInternalGetResponse(
+                    currentState().org(),
                     currentState().cacheName(),
                     currentState().key(),
                     currentState().ttlSeconds(),
@@ -50,7 +54,7 @@ public class CacheEntity extends EventSourcedEntity<Cache, CacheEvent> {
 
     public Effect<Done> set(Cache cache) {
         if (log.isDebugEnabled()) {
-            log.debug("CacheEntity Creating new cache {}", commandContext().entityId());
+            log.debug("CacheEntity Creating new cache for org {} key {}", cache.org(), commandContext().entityId());
         }
         return effects()
                 .persist(new CacheEvent.CacheSet(cache.org(), cache.cacheName(), cache.key(), cache.ttlSeconds(), cache.totalBytes(), cache.chunks().getFirst()))
@@ -59,7 +63,7 @@ public class CacheEntity extends EventSourcedEntity<Cache, CacheEvent> {
 
     public Effect<Done> setWithChunk(PayloadChunk chunk) {
         if (log.isDebugEnabled()) {
-            log.debug("CacheEntity adding chunk {} sequence {}", commandContext().entityId(), chunk.sequence());
+            log.debug("CacheEntity adding chunk org {} id {} sequence {}", currentState().org(), commandContext().entityId(), chunk.sequence());
         }
         return effects()
                 .persist(new CacheEvent.ChunkAdded(chunk))
@@ -75,7 +79,7 @@ public class CacheEntity extends EventSourcedEntity<Cache, CacheEvent> {
         }
         else {
             if (log.isDebugEnabled()) {
-                log.debug("CacheEntity delete {}", commandContext().entityId());
+                log.debug("CacheEntity delete for org {} {}", currentState().org(), commandContext().entityId());
             }
             return effects()
                     .persist(new CacheEvent.CacheDeleted(currentState().org(), currentState().totalBytes()))
@@ -86,7 +90,7 @@ public class CacheEntity extends EventSourcedEntity<Cache, CacheEvent> {
     @Override
     public Cache applyEvent(CacheEvent cacheEvent) {
         return switch (cacheEvent) {
-            case CacheEvent.CacheSet cache -> new Cache(cache.cacheName(), cache.key(), cache.ttlSeconds(), cache.totalBytes()).withChunk(cache.chunk());
+            case CacheEvent.CacheSet cache -> new Cache(cache.org(), cache.cacheName(), cache.key(), cache.ttlSeconds(), cache.totalBytes(), Arrays.asList(cache.chunk()));
             case CacheEvent.ChunkAdded chunk -> currentState().withChunk(chunk.chunk());
             case CacheEvent.CacheDeleted deleted -> currentState().asDeleted();
         };

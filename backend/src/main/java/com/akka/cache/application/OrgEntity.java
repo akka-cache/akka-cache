@@ -40,7 +40,7 @@ public class OrgEntity extends KeyValueEntity<Organization> {
 
     public Effect<Organization> get() {
         if (log.isDebugEnabled()) {
-            log.debug("OrgEntity get() received for {} total bytes cached {}", currentState().orgName(), currentState().totalBytesCached());
+            log.debug("OrgEntity get() received for {} total bytes currently cached {}", currentState().orgName(), currentState().totalBytesCached());
         }
         return effects()
                 .reply(currentState());
@@ -48,7 +48,7 @@ public class OrgEntity extends KeyValueEntity<Organization> {
 
     public Effect<Done> increment(long cacheSize) {
         if (log.isDebugEnabled()) {
-            log.debug("OrgEntity increment of {} received for {} total bytes cached {}", cacheSize, currentState().orgName(), currentState().totalBytesCached());
+            log.debug("OrgEntity increment of {} received for {} total bytes currently cached {}", cacheSize, currentState().orgName(), currentState().totalBytesCached());
         }
         return effects()
                 .updateState(currentState().withIncrementedBytesCached(cacheSize))
@@ -57,7 +57,7 @@ public class OrgEntity extends KeyValueEntity<Organization> {
 
     public Effect<Done> decrement(long cacheSize) {
         if (log.isDebugEnabled()) {
-            log.debug("OrgEntity decrement of {} received for {} total bytes cached {}", cacheSize, currentState().orgName(), currentState().totalBytesCached());
+            log.debug("OrgEntity decrement of {} received for {} total bytes currently cached {}", cacheSize, currentState().orgName(), currentState().totalBytesCached());
         }
         return effects()
                 .updateState(currentState().withDecrementedBytesCached(cacheSize))
