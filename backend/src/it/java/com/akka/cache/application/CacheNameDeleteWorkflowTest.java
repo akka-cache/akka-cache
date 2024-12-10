@@ -38,7 +38,8 @@ public class CacheNameDeleteWorkflowTest extends TestKitSupport {
     @Override
     protected TestKit.Settings testKitSettings() {
         return TestKit.Settings.DEFAULT
-                .withEventSourcedEntityIncomingMessages("cache");
+                .withEventSourcedEntityIncomingMessages("cache")
+                .withAclDisabled();
     }
 
     private CompletionStage<CacheView.CachedKeys> getView(String cacheName) {

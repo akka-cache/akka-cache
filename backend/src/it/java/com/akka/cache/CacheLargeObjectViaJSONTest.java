@@ -1,6 +1,7 @@
 package com.akka.cache;
 
 import akka.http.javadsl.model.StatusCodes;
+import akka.javasdk.testkit.TestKit;
 import akka.javasdk.testkit.TestKitSupport;
 import com.akka.cache.api.CacheEndpoint;
 import com.akka.cache.domain.CacheAPI.*;
@@ -28,6 +29,11 @@ public class CacheLargeObjectViaJSONTest extends TestKitSupport {
     final byte[] imageData = readFileToBytes(imageName);
 
     public CacheLargeObjectViaJSONTest() throws IOException {
+    }
+
+    @Override
+    protected TestKit.Settings testKitSettings() {
+        return super.testKitSettings().withAclDisabled();
     }
 
     private byte[] readFileToBytes(String filePath) throws IOException {

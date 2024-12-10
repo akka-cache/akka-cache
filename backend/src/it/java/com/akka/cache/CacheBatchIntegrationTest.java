@@ -1,5 +1,6 @@
 package com.akka.cache;
 
+import akka.javasdk.testkit.TestKit;
 import akka.javasdk.testkit.TestKitSupport;
 import com.akka.cache.domain.CacheAPI.*;
 
@@ -22,6 +23,11 @@ public class CacheBatchIntegrationTest extends TestKitSupport {
     private static final String CACHE_BASE_NAME = "cache";
     private static final String KEY = "key";
     private static final String PAYLOAD = "This is Akka 3's time:";
+
+    @Override
+    protected TestKit.Settings testKitSettings() {
+        return super.testKitSettings().withAclDisabled();
+    }
 
     private CacheInternalGetResponse getCache(String cacheName, String key) {
         return await(
