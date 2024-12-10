@@ -17,6 +17,10 @@ export function useSignIn(options: UseSignInOptions = {}) {
   const handleSignIn = useCallback(async (email: string) => {
     try {
       setStatus('loading');
+      
+      // Set auth action before sending email
+      window.localStorage.setItem('authAction', 'signIn');
+      
       await sendSignInLinkToEmail(auth, email, {
         url: window.location.origin + '/auth/verify-email',
         handleCodeInApp: true
@@ -31,6 +35,11 @@ export function useSignIn(options: UseSignInOptions = {}) {
       setStatus('error');
       const errorMessage = error instanceof Error ? error.message : 'Sign in failed';
       setErrorMessage(errorMessage);
+      
+      // Clean up localStorage on error
+      window.localStorage.removeItem('authAction');
+      window.localStorage.removeItem('emailForSignIn');
+      
       options.onError?.(error instanceof Error ? error : new Error(errorMessage));
       throw error;
     }
@@ -41,4 +50,4 @@ export function useSignIn(options: UseSignInOptions = {}) {
     errorMessage,
     handleSignIn
   };
-} 
+}
