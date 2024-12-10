@@ -1,33 +1,21 @@
 import { useState } from 'react';
-import { Card, Checkbox, Text } from '@mantine/core';
+import { Card, Checkbox, Text, Button } from '@mantine/core';
 import { useUnifiedAuth } from '~/hooks';
 import { SignUpForm } from '~/components/auth/sign-up-form';
 import { Logo, HeaderContent } from '~/components/auth/common';
 import { useThemeColor } from '~/utils/theme';
-import { useOutletContext, useLocation, Navigate } from '@remix-run/react';
+import { useOutletContext, useLocation, Navigate, Link } from '@remix-run/react';
 import type { AuthStatus } from '~/types/auth';
 
 export default function SignUp() {
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [localErrorMessage, setLocalErrorMessage] = useState('');
-  const location = useLocation();
-  const email = location.state?.email;
-
-  // Redirect if no email provided
-  if (!email) {
-    return <Navigate to="/auth/sign-in" replace />;
-  }
 
   const {
     status,
     errorMessage: authErrorMessage,
-    handleSignUpSubmit
+    handleSignUp
   } = useUnifiedAuth({
-    redirectUrl: '/',
-    onSuccess: () => {
-      // Optional: Add any success handling here
-      setLocalErrorMessage('');
-    },
+    redirectUrl: '/auth/verify-email',
     onError: (error) => {
       setLocalErrorMessage(error.message);
     }
@@ -37,30 +25,6 @@ export default function SignUp() {
   const bodyTextColor = useThemeColor('bodyText');
   const context = useOutletContext<string>();
 
-  const handleSubmit = async (userData: {
-    displayName: string;
-    organization: string;
-    mobileNumber?: string;
-  }) => {
-    if (!acceptedTerms) {
-      setLocalErrorMessage('Please accept the terms and conditions');
-      return;
-    }
-    
-    setLocalErrorMessage('');
-    try {
-      // Combine the email with the user data
-      await handleSignUpSubmit({
-        ...userData,
-        email
-      });
-    } catch (error: any) {
-      setLocalErrorMessage(error.message);
-    }
-  };
-
-  const displayErrorMessage = localErrorMessage || authErrorMessage;
-
   if (context === 'right') {
     return (
       <div>
@@ -69,34 +33,63 @@ export default function SignUp() {
     );
   }
 
+  const handleSubmit = async (userData: {
+    email: string;
+    displayName: string;
+    organization: string;
+    mobileNumber?: string;
+    acceptedTerms: boolean;
+  }) => {
+    if (!userData.acceptedTerms) {
+      setLocalErrorMessage('Please accept the terms and conditions');
+      return;
+    }
+    
+    setLocalErrorMessage('');
+    try {
+      await handleSignUp({
+        email: userData.email,
+        displayName: userData.displayName,
+        organization: userData.organization,
+        mobileNumber: userData.mobileNumber
+      });
+    } catch (error: any) {
+      setLocalErrorMessage(error.message);
+    }
+  };
+
   return (
     <div className="w-full max-w-2xl mx-auto p-6">
       <Logo />
       <HeaderContent 
-        title="Complete Your Profile"
-        subtitle="Tell us a bit about yourself"
+        title="Create Account"
+        subtitle="Sign up for a new account"
         headingColor={headingTextColor}
         textColor={bodyTextColor}
       />
       
-      <Card shadow="md" p="xl" className="w-full mb-8 hl" bg="dark.0">
-        <div className="space-y-4">
-          <SignUpForm
-            email={email}
-            onSubmit={handleSubmit}
-            status={status}
-            errorMessage={displayErrorMessage}
-            successMessage="Check your email to complete your account creation!"
-          />
-          
-          <Checkbox
-            label="I accept the terms of service and privacy policy"
-            checked={acceptedTerms}
-            onChange={(e) => setAcceptedTerms(e.currentTarget.checked)}
-            classNames={{
-              label: 'text-gray-100'
-            }}
-          />
+      <Card shadow="md" p="xl" className="w-full mb-8" bg="dark.0">
+        <SignUpForm
+          onSubmit={handleSubmit}
+          status={status}
+          errorMessage={localErrorMessage || authErrorMessage}
+          successMessage={status === 'success' ? 
+            "We've sent you a verification email. Please check your inbox." : 
+            undefined}
+        />
+        
+        <div className="mt-4 text-center">
+          <Text size="sm" c="dimmed" mb="md">
+            Already have an account?
+          </Text>
+          <Button 
+            variant="subtle" 
+            size="sm" 
+            component={Link} 
+            to="/auth/sign-in"
+          >
+            Sign In
+          </Button>
         </div>
       </Card>
     </div>
