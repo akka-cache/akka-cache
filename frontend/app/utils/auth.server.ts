@@ -1,9 +1,9 @@
-import { auth } from '~/utils/firebase-admin.server';
+import { adminAuth } from '~/utils/firebase-admin.server';
 import { redirect } from '@remix-run/node';
 
 export async function requireAuth(request: Request) {
   try {
-    const session = await auth.verifySessionCookie(
+    const session = await adminAuth.verifySessionCookie(
       request.headers.get('Cookie') || ''
     );
 

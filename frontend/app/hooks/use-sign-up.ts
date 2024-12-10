@@ -1,11 +1,6 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { useNavigate } from '@remix-run/react';
-import { 
-  sendSignInLinkToEmail,
-  isSignInWithEmailLink,
-  signInWithEmailLink,
-  updateProfile
-} from 'firebase/auth';
+import { sendSignInLinkToEmail } from 'firebase/auth';
 import { auth } from '~/utils/firebase-config';
 import type { AuthStatus, UserData } from '~/types/auth';
 
@@ -14,87 +9,37 @@ interface UseSignUpOptions {
   onError?: (error: Error) => void;
 }
 
-export function useSignUp({ onSuccess, onError }: UseSignUpOptions) {
+export function useSignUp(options: UseSignUpOptions = {}) {
   const [status, setStatus] = useState<AuthStatus>('idle');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState<string>('');
   const navigate = useNavigate();
 
-  const handleSignUp = async (userData: UserData) => {
-    setStatus('loading');
+  const handleSignUp = useCallback(async (userData: UserData) => {
     try {
-      const actionCodeSettings = {
-        url: `${window.location.origin}/finish-sign-up`,
+      setStatus('loading');
+      await sendSignInLinkToEmail(auth, userData.email, {
+        url: window.location.origin + '/auth/verify-email',
         handleCodeInApp: true
-      };
-
-      await sendSignInLinkToEmail(auth, userData.email, actionCodeSettings);
+      });
       
-      // Store the email and user data for later use
+      // Store the email and user data for verification
       window.localStorage.setItem('emailForSignIn', userData.email);
-      window.localStorage.setItem('pendingUserData', JSON.stringify(userData));
-      window.localStorage.setItem('authMode', 'signUp');
+      window.localStorage.setItem('signUpData', JSON.stringify(userData));
       
       setStatus('success');
-      navigate('/auth/verify-email');
-      onSuccess?.();
-    } catch (error: any) {
-      console.error('Sign-up error:', error);
+      options.onSuccess?.();
+    } catch (error) {
       setStatus('error');
-      
-      if (error.code === 'auth/email-already-in-use') {
-        setErrorMessage('An account with this email already exists. Please sign in instead.');
-        navigate('/auth/sign-in');
-      } else {
-        setErrorMessage('Error creating account. Please try again.');
-      }
-      
-      onError?.(error instanceof Error ? error : new Error(error.message));
+      const errorMessage = error instanceof Error ? error.message : 'Sign up failed';
+      setErrorMessage(errorMessage);
+      options.onError?.(error instanceof Error ? error : new Error(errorMessage));
+      throw error;
     }
-  };
-
-  const completeSignUp = async () => {
-    if (!isSignInWithEmailLink(auth, window.location.href)) {
-      return;
-    }
-
-    try {
-      const email = window.localStorage.getItem('emailForSignIn');
-      const pendingUserData = window.localStorage.getItem('pendingUserData');
-
-      if (!email || !pendingUserData) {
-        throw new Error('Missing registration information');
-      }
-
-      const userData = JSON.parse(pendingUserData);
-      const result = await signInWithEmailLink(auth, email, window.location.href);
-
-      // Update the user profile with additional information
-      if (userData.displayName) {
-        await updateProfile(result.user, {
-          displayName: userData.displayName
-        });
-      }
-
-      // Clean up localStorage
-      window.localStorage.removeItem('emailForSignIn');
-      window.localStorage.removeItem('pendingUserData');
-
-      setStatus('success');
-      navigate('/');
-      onSuccess?.();
-    } catch (error: any) {
-      console.error('Sign-up completion error:', error);
-      setStatus('error');
-      setErrorMessage('Error completing registration. Please try again.');
-      onError?.(error instanceof Error ? error : new Error(error.message));
-      navigate('/auth/sign-up');
-    }
-  };
+  }, [options]);
 
   return {
     status,
     errorMessage,
-    handleSignUp,
-    completeSignUp
+    handleSignUp
   };
 } 

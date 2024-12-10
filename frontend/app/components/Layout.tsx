@@ -72,37 +72,46 @@ export default function Layout({ children }: LayoutProps) {
   ];
 
   const renderNavLink = (link: MainLink | BottomLink) => {
-    const commonProps = {
-      key: link.label,
-      label: link.label,
-      c: colorScheme === 'dark' ? 'dark.9' : 'gray.7',
-      leftSection: (
-        <link.icon
-          style={{
-            width: rem(20),
-            color: `var(--mantine-color-${colorScheme === 'dark' ? 'akkaAccent-4' : 'akkaAccent-4'})`
-          }}
-          stroke={1.5}
-        />
-      ),
-      active: 'href' in link ? location.pathname === link.href : false,
-      ...(link.onClick && { onClick: link.onClick }),
-      ...(link.color && { color: link.color })
-    };
-
     if (link.href) {
       return (
         <NavLink
-          {...commonProps}
+          key={link.label}
+          label={link.label}
+          c={colorScheme === 'dark' ? 'dark.9' : 'gray.7'}
+          leftSection={
+            <link.icon
+              style={{
+                width: rem(20),
+                color: `var(--mantine-color-${colorScheme === 'dark' ? 'akkaAccent-4' : 'akkaAccent-4'})`
+              }}
+              stroke={1.5}
+            />
+          }
+          active={location.pathname === link.href}
           component={Link}
           to={link.href}
+          color={link.color}
+          onClick={link.onClick}
         />
       );
     }
 
     return (
       <NavLink
-        {...commonProps}
+        key={link.label}
+        label={link.label}
+        c={colorScheme === 'dark' ? 'dark.9' : 'gray.7'}
+        leftSection={
+          <link.icon
+            style={{
+              width: rem(20),
+              color: `var(--mantine-color-${colorScheme === 'dark' ? 'akkaAccent-4' : 'akkaAccent-4'})`
+            }}
+            stroke={1.5}
+          />
+        }
+        color={link.color}
+        onClick={link.onClick}
       />
     );
   };

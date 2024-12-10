@@ -1,6 +1,5 @@
 import {
   Links,
-  LiveReload,
   Meta,
   Outlet,
   Scripts,
@@ -52,49 +51,13 @@ const getCurrentUser = () => {
 };
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  const url = new URL(request.url);
-  
-  // Check if this is a sign-in completion
-  if (url.pathname === '/' && isSignInWithEmailLink(auth, url.href)) {
-    return typedjson({ 
-      isEmailLink: true,
-      user: await getCurrentUser()
-    });
-  }
-  
-  // Check if this is a sign-up completion
-  if (url.pathname === '/finishSignUp' && isSignInWithEmailLink(auth, url.href)) {
-    return null;
-  }
-
-  // For all other routes, return current user state
   const user = await getCurrentUser();
   return typedjson({ user });
 }
 
 export default function App() {
-  const { isEmailLink, user } = useLoaderData<typeof loader>();
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    // Handle email link sign-in on the client side
-    if (isEmailLink && isSignInWithEmailLink(auth, window.location.href)) {
-      const email = window.localStorage.getItem('emailForSignIn');
-      if (email) {
-        signInWithEmailLink(auth, email, window.location.href)
-          .then((result) => {
-            window.localStorage.removeItem('emailForSignIn');
-            // Force a reload to update the user state
-            window.location.reload();
-          })
-          .catch((error) => {
-            console.error('Error completing sign-in:', error);
-            navigate('/auth/sign-in');
-          });
-      }
-    }
-  }, [isEmailLink, navigate]);
-
+  const { user } = useLoaderData<typeof loader>();
+  
   return (
     <html lang="en" data-mantine-color-scheme="dark">
       <head>
@@ -104,11 +67,10 @@ export default function App() {
       </head>
       <body>
         <MantineProvider theme={theme} defaultColorScheme="dark">
-          <AuthProvider value={{ user }}>
+          <AuthProvider>
             <Outlet />
             <ScrollRestoration />
             <Scripts />
-            <LiveReload />
           </AuthProvider>
         </MantineProvider>
       </body>

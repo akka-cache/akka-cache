@@ -1,50 +1,79 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from '@remix-run/react';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '~/utils/firebase-config';
-import { useUnifiedAuth } from '~/hooks';
 import { Card, Text, Loader } from '@mantine/core';
+import { useNavigate } from '@remix-run/react';
+import { isSignInWithEmailLink, signInWithEmailLink, getAdditionalUserInfo } from 'firebase/auth';
+import { auth } from '~/utils/firebase-config';
 import { useThemeColor } from '~/utils/theme';
 
 export default function VerifyEmail() {
   const navigate = useNavigate();
-  const [verificationEmail, setVerificationEmail] = useState<string | null>(null);
+  const [status, setStatus] = useState<'loading' | 'error'>('loading');
+  const [errorMessage, setErrorMessage] = useState<string>('');
   const bodyTextColor = useThemeColor('bodyText');
-  
-  const {
-    status,
-    errorMessage,
-    handleEmailLink
-  } = useUnifiedAuth({
-    redirectUrl: '/',
-    onSuccess: () => {
-      console.log('Account creation successful');
-    },
-    onError: (error) => {
-      console.error('Verification error:', error);
-    }
-  });
 
   useEffect(() => {
-    // Check if this is an email verification link
-    const email = window.localStorage.getItem('verificationEmail');
-    const authAction = window.localStorage.getItem('authAction');
-    setVerificationEmail(email);
+    async function verifyEmail() {
+      console.log('Starting email verification...');
+      console.log('Current URL:', window.location.href);
+      
+      if (!isSignInWithEmailLink(auth, window.location.href)) {
+        console.log('Invalid verification link');
+        setStatus('error');
+        setErrorMessage('Invalid verification link');
+        navigate('/auth/sign-in', { replace: true });
+        return;
+      }
 
-    if (window.location.href.includes('emailLink=')) {
-      handleEmailLink();
+      const email = window.localStorage.getItem('emailForSignIn');
+      console.log('Retrieved email:', email);
+      
+      if (!email) {
+        console.log('No email found in localStorage');
+        setStatus('error');
+        setErrorMessage('No email found. Please try signing in again.');
+        navigate('/auth/sign-in', { replace: true });
+        return;
+      }
+
+      try {
+        console.log('Attempting to sign in with email link...');
+        const result = await signInWithEmailLink(auth, email, window.location.href);
+        console.log('Sign in successful:', result);
+        
+        const idToken = await result.user.getIdToken();
+        console.log('Got ID token');
+
+        const response = await fetch('/api/auth/session', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ 
+            idToken,
+            userData: {
+              email: result.user.email,
+              displayName: result.user.displayName || email.split('@')[0]
+            }
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to create session');
+        }
+
+        console.log('Session created successfully');
+        window.localStorage.removeItem('emailForSignIn');
+        navigate('/', { replace: true });
+      } catch (error) {
+        console.error('Verification error:', error);
+        setStatus('error');
+        setErrorMessage(error instanceof Error ? error.message : 'Verification failed');
+        navigate('/auth/sign-in', { replace: true });
+      }
     }
 
-    // Set up auth state listener
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // User is signed in, redirect to home
-        navigate('/', { replace: true });
-      }
-    });
-
-    return () => unsubscribe();
-  }, [navigate, handleEmailLink]);
+    verifyEmail();
+  }, [navigate]);
 
   return (
     <div className="w-full max-w-2xl mx-auto p-6">
@@ -56,16 +85,9 @@ export default function VerifyEmail() {
           </div>
         ) : (
           <div className="text-center">
-            <Text c={bodyTextColor} mb="md">
-              {status === 'success' 
-                ? 'Email verified successfully!' 
-                : `Please check your email (${verificationEmail}) and click the verification link.`}
+            <Text c="red" size="sm">
+              {errorMessage}
             </Text>
-            {errorMessage && (
-              <Text c="red" size="sm">
-                {errorMessage}
-              </Text>
-            )}
           </div>
         )}
       </Card>

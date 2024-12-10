@@ -1,20 +1,20 @@
 import { useState } from 'react';
-import { Card, Checkbox, Text, Button } from '@mantine/core';
-import { useUnifiedAuth } from '~/hooks';
+import { Card, Text } from '@mantine/core';
+import { useSignupAuth } from '~/hooks/use-signup-auth';
 import { SignUpForm } from '~/components/auth/sign-up-form';
 import { Logo, HeaderContent } from '~/components/auth/common';
 import { useThemeColor } from '~/utils/theme';
-import { useOutletContext, useLocation, Navigate, Link } from '@remix-run/react';
-import type { AuthStatus } from '~/types/auth';
+import { useOutletContext } from '@remix-run/react';
+import type { UserData } from '~/types/auth';
 
 export default function SignUp() {
   const [localErrorMessage, setLocalErrorMessage] = useState('');
-
+  
   const {
     status,
     errorMessage: authErrorMessage,
-    handleSignUp
-  } = useUnifiedAuth({
+    sendSignUpLink
+  } = useSignupAuth({
     redirectUrl: '/auth/verify-email',
     onError: (error) => {
       setLocalErrorMessage(error.message);
@@ -33,26 +33,28 @@ export default function SignUp() {
     );
   }
 
-  const handleSubmit = async (userData: {
+  const handleSubmit = async (formData: {
     email: string;
     displayName: string;
     organization: string;
     mobileNumber?: string;
     acceptedTerms: boolean;
   }) => {
-    if (!userData.acceptedTerms) {
+    if (!formData.acceptedTerms) {
       setLocalErrorMessage('Please accept the terms and conditions');
       return;
     }
     
     setLocalErrorMessage('');
+    const userData: UserData = {
+      email: formData.email,
+      displayName: formData.displayName,
+      organization: formData.organization,
+      mobileNumber: formData.mobileNumber
+    };
+
     try {
-      await handleSignUp({
-        email: userData.email,
-        displayName: userData.displayName,
-        organization: userData.organization,
-        mobileNumber: userData.mobileNumber
-      });
+      await sendSignUpLink(userData);
     } catch (error: any) {
       setLocalErrorMessage(error.message);
     }
@@ -62,8 +64,8 @@ export default function SignUp() {
     <div className="w-full max-w-2xl mx-auto p-6">
       <Logo />
       <HeaderContent 
-        title="Create Account"
-        subtitle="Sign up for a new account"
+        title="Create an Account"
+        subtitle="Sign up to get started"
         headingColor={headingTextColor}
         textColor={bodyTextColor}
       />
@@ -74,23 +76,9 @@ export default function SignUp() {
           status={status}
           errorMessage={localErrorMessage || authErrorMessage}
           successMessage={status === 'success' ? 
-            "We've sent you a verification email. Please check your inbox." : 
+            "We've sent you an email with a verification link. Click the link to complete your registration." : 
             undefined}
         />
-        
-        <div className="mt-4 text-center">
-          <Text size="sm" c="dimmed" mb="md">
-            Already have an account?
-          </Text>
-          <Button 
-            variant="subtle" 
-            size="sm" 
-            component={Link} 
-            to="/auth/sign-in"
-          >
-            Sign In
-          </Button>
-        </div>
       </Card>
     </div>
   );

@@ -1,24 +1,42 @@
 import { Card, Text, Button, Group } from '@mantine/core';
-import { useSignIn } from '~/hooks';
+import { useAuthState } from '~/hooks/use-auth-state';
+import { useSignIn } from '~/hooks/use-sign-in';
 import { EmailForm } from '~/components/auth/email-form';
 import { Logo, HeaderContent } from '~/components/auth/common';
 import { useThemeColor } from '~/utils/theme';
 import { useOutletContext, Link } from '@remix-run/react';
+import { useState } from 'react';
+
+type AuthStatus = 'idle' | 'loading' | 'success' | 'error';
 
 export default function SignIn() {
-  const {
-    status,
-    errorMessage,
-    handleSignIn
-  } = useSignIn({
+  const [status, setStatus] = useState<AuthStatus>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
+  const { user } = useAuthState();
+  const { handleSignIn } = useSignIn({
+    onSuccess: () => {
+      console.log('Sign-in link sent successfully');
+    },
     onError: (error) => {
-      console.error('Sign in error:', error);
+      console.error('Sign-in error:', error);
     }
   });
 
   const headingTextColor = useThemeColor('headingText');
   const bodyTextColor = useThemeColor('bodyText');
   const context = useOutletContext<string>();
+
+  const handleSubmit = async (email: string) => {
+    try {
+      setStatus('loading');
+      await handleSignIn(email);
+      setStatus('success');
+    } catch (error: unknown) {
+      setStatus('error');
+      setErrorMessage(error instanceof Error ? error.message : 'Sign in failed');
+      console.error('Sign in error:', error);
+    }
+  };
 
   if (context === 'right') {
     return (
@@ -40,7 +58,7 @@ export default function SignIn() {
       
       <Card shadow="md" p="xl" className="w-full mb-8" bg="dark.0">
         <EmailForm
-          onSubmit={handleSignIn}
+          onSubmit={handleSubmit}
           status={status}
           errorMessage={errorMessage}
           successMessage={status === 'success' ? 

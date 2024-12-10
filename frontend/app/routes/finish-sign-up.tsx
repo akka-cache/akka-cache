@@ -8,7 +8,7 @@ export default function FinishSignUp() {
   const {
     status,
     errorMessage,
-    completeSignUp
+    handleSignUp
   } = useSignUp({
     onError: (error) => {
       console.error('Sign-up completion error:', error);
@@ -16,8 +16,8 @@ export default function FinishSignUp() {
   });
 
   useEffect(() => {
-    completeSignUp();
-  }, [completeSignUp]);
+    handleSignUp({ email: '', displayName: '' });  // Add minimal required user data
+  }, [handleSignUp]);
 
   return (
     <div className="w-full max-w-2xl mx-auto p-6">
