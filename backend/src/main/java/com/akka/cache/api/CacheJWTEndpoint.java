@@ -144,13 +144,13 @@ public class CacheJWTEndpoint {
     // This deletes the cacheName as well as all the keys
     @Delete("/cacheName/{cacheName}")
     public CompletionStage<HttpResponse> deleteCacheKeys(String cacheName) {
-        return core.deleteCacheKeys(orgClaims.org.concat(cacheName));
+        return core.deleteCacheKeys(orgClaims.org.concat(cacheName), false);
     }
 
     // This deletes all the cached data but leaves the cacheName in place
     @Put("/cacheName/{cacheName}/flush")
     public CompletionStage<HttpResponse> flushCacheKeys(String cacheName) {
-        return core.flushCacheKeys(orgClaims.org.concat(cacheName));
+        return core.deleteCacheKeys(orgClaims.org.concat(cacheName), true);
     }
 
     // Cache Names -- END

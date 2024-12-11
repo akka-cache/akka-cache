@@ -32,6 +32,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
+import java.util.UUID;
 
 import com.akka.cache.domain.CacheAPI.*;
 
@@ -95,24 +96,19 @@ public class CacheAPICoreImpl {
                 });
     }
 
-    // This deletes the cacheName as well as all the keys
-    public CompletionStage<HttpResponse> deleteCacheKeys(String cacheName) {
-        var startDeletionSetup = new CacheNameDeleteWorkflow.StartDeletionsSetup(cacheName, false);
-        return componentClient.forWorkflow(cacheName)
+    // This deletes all the keys, and optionally the cacheName
+    public CompletionStage<HttpResponse> deleteCacheKeys(String cacheName, boolean flushOnly) {
+/*
+        workflowId can't be reused and thus must be unique for each invocation.
+        Keeping cacheName for potential troubleshooting in the console
+*/
+        String workflowId = cacheName.concat(UUID.randomUUID().toString());
+        var startDeletionSetup = new CacheNameDeleteWorkflow.StartDeletionsSetup(cacheName, flushOnly);
+        return componentClient.forWorkflow(workflowId)
                 .method(CacheNameDeleteWorkflow::startDeletions)
                 .invokeAsync(startDeletionSetup)
                 .thenApply(transferState -> HttpResponses.accepted());
     }
-
-    // This deletes all the cached data but leaves the cacheName in place
-    public CompletionStage<HttpResponse> flushCacheKeys(String cacheName) {
-        var startDeletionSetup = new CacheNameDeleteWorkflow.StartDeletionsSetup(cacheName, true);
-        return componentClient.forWorkflow(cacheName)
-                .method(CacheNameDeleteWorkflow::startDeletions)
-                .invokeAsync(startDeletionSetup)
-                .thenApply(transferState -> HttpResponses.accepted());
-    }
-
 
     // Cache Names -- END
 

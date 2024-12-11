@@ -54,13 +54,13 @@ public class CacheEndpoint {
     // This deletes the cacheName as well as all the keys
     @Delete("/cacheName/{cacheName}")
     public CompletionStage<HttpResponse> deleteCacheKeys(String cacheName) {
-        return core.deleteCacheKeys(cacheName);
+        return core.deleteCacheKeys(cacheName, false);
     }
 
     // This deletes all the cached data but leaves the cacheName in place
     @Put("/cacheName/{cacheName}/flush")
     public CompletionStage<HttpResponse> flushCacheKeys(String cacheName) {
-        return core.flushCacheKeys(cacheName);
+        return core.deleteCacheKeys(cacheName, true);
     }
 
     // Cache Names -- END
