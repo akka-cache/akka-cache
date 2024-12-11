@@ -1,6 +1,7 @@
 package com.akka.cache;
 
 import akka.http.javadsl.model.StatusCodes;
+import akka.javasdk.testkit.TestKit;
 import akka.javasdk.testkit.TestKitSupport;
 import com.akka.cache.domain.CacheAPI.*;
 import com.akka.cache.application.CacheEntity;
@@ -30,6 +31,11 @@ public class CacheEndpointTest extends TestKitSupport {
 
   private static final String PAYLOAD1 = "This is Akka 3's time.";
   private static final String PAYLOAD2 = "Akka 3 is on it's way";
+
+  @Override
+  protected TestKit.Settings testKitSettings() {
+    return super.testKitSettings().withAclDisabled();
+  }
 
   private CacheInternalGetResponse getCache(String cacheName, String key) {
     return await(

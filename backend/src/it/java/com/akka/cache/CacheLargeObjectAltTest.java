@@ -4,6 +4,7 @@ import akka.http.javadsl.model.ContentType;
 import akka.http.javadsl.model.ContentTypes;
 import akka.http.javadsl.model.MediaTypes;
 import akka.http.javadsl.model.StatusCodes;
+import akka.javasdk.testkit.TestKit;
 import akka.javasdk.testkit.TestKitSupport;
 import org.junit.jupiter.api.*;
 import org.slf4j.Logger;
@@ -28,6 +29,11 @@ public class CacheLargeObjectAltTest extends TestKitSupport {
     final String key4 = "2025-Corvette-4";
 
     public CacheLargeObjectAltTest() throws IOException {
+    }
+
+    @Override
+    protected TestKit.Settings testKitSettings() {
+        return super.testKitSettings().withAclDisabled();
     }
 
     private byte[] readFileToBytes(String filePath) throws IOException {

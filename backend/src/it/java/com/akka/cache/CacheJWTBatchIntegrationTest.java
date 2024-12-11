@@ -22,7 +22,6 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.awaitility.Awaitility.fieldIn;
 import static org.hamcrest.Matchers.equalTo;
 
 

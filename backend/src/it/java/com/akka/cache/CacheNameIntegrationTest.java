@@ -1,6 +1,7 @@
 package com.akka.cache;
 
 import akka.http.javadsl.model.StatusCodes;
+import akka.javasdk.testkit.TestKit;
 import com.akka.cache.domain.CacheAPI.*;
 import com.akka.cache.application.CacheNameEntity;
 import com.akka.cache.domain.CacheName;
@@ -21,6 +22,11 @@ public class CacheNameIntegrationTest extends TestKitSupport {
   private static final String CACHE_NAME = "cache1";
   private static final String TEST_DESC_1 = "This is our first test";
   private static final String TEST_DESC_1_MODIFIED = "This is our first test modification";
+
+  @Override
+  protected TestKit.Settings testKitSettings() {
+    return super.testKitSettings().withAclDisabled();
+  }
 
   private CacheName getCacheName(String cacheName) {
     return await(
