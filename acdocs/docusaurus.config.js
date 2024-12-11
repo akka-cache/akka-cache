@@ -12,7 +12,7 @@ import {themes as prismThemes} from 'prism-react-renderer';
 const config = {
   title: 'AkkaCache.io',
   tagline: 'Akka.io is cool',
-  favicon: 'img/akka_favicon.png',
+  favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
   // TODO: this needs to be updated
@@ -60,6 +60,11 @@ const config = {
     ({
       // Replace with your project's social card
       //image: 'img/docusaurus-social-card.jpg',
+      colorMode: {
+        defaultMode: 'dark',
+        disableSwitch: false,
+        respectPrefersColorScheme: true,
+      },
       navbar: {
         title: 'AkkaCache.io',
         // logo: {
@@ -119,7 +124,7 @@ const config = {
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} Akka.io.`,
+        copyright: `Copyright © ${new Date().getFullYear()} Lightbend Inc dba Akka.io. All rights reserved.`,
       },
       prism: {
         theme: prismThemes.github,
