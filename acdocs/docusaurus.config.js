@@ -66,16 +66,21 @@ const config = {
         respectPrefersColorScheme: true,
       },
       navbar: {
-        title: 'AkkaCache.io',
-        // logo: {
-        //   alt: 'AkkaCache.io Logo',
-        //   src: 'img/logo.svg',
-        // },
+        // title: 'AkkaCache.io',
+        logo: {
+          alt: 'AkkaCache Logo',
+          src: 'img/akkacache-black.svg',
+          srcDark: 'img/akkacache-white.svg',
+          href: 'https://akkacache.io',
+          target: '_self',
+          width: 150,
+          className: 'custom-navbar-logo-class',
+        },
         items: [
          {
             type: 'docSidebar',
             sidebarId: 'cacheSidebar',
-            position: 'left',
+            position: 'right',
             label: 'Cache',
           },
           {
