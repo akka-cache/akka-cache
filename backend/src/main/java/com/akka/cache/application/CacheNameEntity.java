@@ -16,7 +16,7 @@ public class CacheNameEntity extends EventSourcedEntity<CacheName, CacheNameEven
 
     public Effect<Done> create(CacheName cacheName) {
         if (log.isDebugEnabled()) {
-            log.info("Creating cache with id {} description {}}", commandContext().entityId(), cacheName.description());
+            log.debug("Creating cache with id {} description {}}", commandContext().entityId(), cacheName.description());
         }
         return effects()
                 .persist(new CacheNameEvent.CacheNameCreated(cacheName.cacheName(), cacheName.description()))
@@ -25,7 +25,7 @@ public class CacheNameEntity extends EventSourcedEntity<CacheName, CacheNameEven
 
     public Effect<Done> update(CacheName cacheName) {
         if (log.isDebugEnabled()) {
-            log.info("Updating cacheName with id {} description {}}", commandContext().entityId(), cacheName.description());
+            log.debug("Updating cacheName with id {} description {}}", commandContext().entityId(), cacheName.description());
         }
         if (currentState() == null || currentState().deleted()) {
             return errorNotFound();
