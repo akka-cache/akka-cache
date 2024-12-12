@@ -145,6 +145,53 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/cacheGetResponse'
+  /batch:
+    post:
+      summary: Create batch of cached objects, results are returned for each batch element
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/batchCacheRequest'
+      responses:
+        "200":
+          description: returned a JSON formated object of overall cached results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/batchCacheResponse'
+    delete:
+      summary: delete a batch of individual cached objects
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/batchGetCacheRequests'
+      responses:
+        "200":
+          description: returned a JSON formated object of overall cached results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/batchDeleteCacheResponse'
+  /batch/get:
+    post:
+      summary: retrieve a batch of cached objects
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/batchGetCacheRequests'
+      responses:
+        "200":
+          description: returned a JSON formated object of overall cached results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/batchGetCacheResponse'
 components:
   parameters:
     cacheNameParam:
@@ -230,3 +277,58 @@ components:
         value: # byte[]
           type: string
           format: byte
+    batchCacheRequest:
+      type: array
+      schema:
+        $ref: '#/components/schemas/cacheRequest'
+    batchCacheResult:
+      type: object
+      properties:
+        cacheName:
+          type: string
+        key:
+          type: string
+        success:
+          type: boolean
+    batchCacheResponse:
+      type: object
+      properties:
+        complete:
+          type: boolean
+        results:
+          type: array
+          schema:
+            $ref: '#/components/schemas/batchCacheResult'
+    batchGetCacheRequest:
+      type: object
+      properties:
+        cacheName:
+          type: string
+        key:
+          type: string
+    batchGetCacheRequests:
+      type: array
+      schema:
+        $ref: '#/components/schemas/batchGetCacheRequest'
+    cacheDeleteResponse:
+      type: object
+      properties:
+        cacheName:
+          type: string
+        key:
+          type: string
+        success:
+          type: boolean
+    batchDeleteCacheResponse:
+      type: array
+      schema:
+        $ref: '#/components/schemas/cacheDeleteResponse'
+    batchGetCacheResponse:
+      type: object
+      properties:
+        complete:
+          type: boolean
+        results:
+          type: array
+          schema:
+            $ref: '#/components/schemas/cacheGetResponse'
