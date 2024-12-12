@@ -33,7 +33,7 @@ Finally, you can use the [Akka Console](https://console.kalix.io)
 to create a project and then deploy your service into the project by first packaging and publishing the docker image through `mvn deploy` and then deploying the image through the `akka` CLI.
 
 _____
-Current APIs:
+## Current APIs:
 paths: [
 POST /cache/{cacheName}/{key}, 
 POST /cache/{cacheName}/{key}/{ttlSeconds}, 
@@ -54,13 +54,13 @@ GET /cache/get/{cacheName}/{key}
 ]
 
 -----
-Curl Examples
+## Curl Examples
 
 We have two approaches to APIs; JSON, and Binary. Akka 3 really promotes the use of JSON and Jackson for doing message serialization. This is fine for most things but really isn’t as fast when working with large objects.
 
 The most heavily used APIs for caches are the POST & GET of the cache itself. We’re currently supporting both JSON and Binary for these two APIs, and are the only ones that leverage binary.  The primary problem of using JSON for saving a cache is that it must be encoded as BASE64, and then decoded to be readable.
   
-Cache Name:
+### Cache Name:
 
 POST /cache/cacheName/create
 ```shell
@@ -84,7 +84,7 @@ GET /cache/cacheName/keys/{cacheName}
 curl -i http://localhost:9001/cache/cacheName/keys/cache1
 ```
 
-Cache:
+### Cache:
 
 BINARY POST (without TTL)
 
@@ -130,7 +130,14 @@ curl -i http://localhost:9001/cache/get/cache1/key1
 ```
 
 
-JWT Endpoint
+### JWT Endpoint
+
+#### Cache Name:
+
+POST /cache/cacheName
+```shell
+curl -i -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6ImtleTEifQ.eyJpc3MiOiJnY3AiLCJvcmciOiJUVDEyMyIsInNlcnZpY2VMZXZlbCI6IkZSRUUifQ.bBUttuYtdFThLquxqlqCYrMUx02xwpC8rJCbQpzjSKg" -d '{"cacheName":"cache1", "description":"This is our first test"}' -H "Content-Type: application/json" -X POST http://localhost:9001/cacheName
+```
 
 BINARY POST (with TTL at 30 seconds)
 ```shell

@@ -1,0 +1,232 @@
+openapi: 3.1.0
+info:
+  title: Akka Cache
+  version: 0.0.1
+paths:
+  # cacheName APIs START here
+  /cacheName:
+    post:
+      summary: Create or update a cache namespace description
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/cacheNameCreate'
+      responses:
+        "201":
+          description: (created) Successfully created or updated.
+    put:
+      summary: Create or update a cache namespace description
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/cacheNameCreate'
+      responses:
+        "202":
+          description: "(accepted) Successfully created or updated."
+  /cacheName/{cacheName}:
+    parameters:
+      - $ref: '#/components/parameters/cacheNameParam'
+    get:
+      summary: get the current cache namespace description, and delete status
+      responses:
+        "200":
+          description: returned a JSON format of the cache namespace, and description
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/cacheNameResponse'
+        "400":
+          description: (bad request) doesn't exist
+    delete:
+      summary: delete the current cache namespace and all associated caches
+      responses:
+        "202":
+          description: (accepted) deleted
+  /cacheName/{cacheName}/keys:
+    parameters:
+      - $ref: '#/components/parameters/cacheNameParam'
+    get:
+      summary: get the current cache namespace description, and delete status
+      responses:
+        "200":
+          description: returned a JSON format of the cache namespace, and description
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/cacheNameKeys'
+        "400":
+          description: (bad request) doesn't exist
+  /cacheName/{cacheName}/flush:
+    parameters:
+      - $ref: '#/components/parameters/cacheNameParam'
+    put:
+      summary: deletes all existing cached objects but leaves the cache namespace in place
+      responses:
+        "202":
+          description: accepted
+        "400":
+          description: (bad request) doesn't exist
+  # cacheName APIs END here
+  # cacheName / cache specific APIs START here
+  /{cacheName}/{key}:
+    parameters:
+      - $ref: '#/components/parameters/cacheNameParam'
+      - $ref: '#/components/parameters/keyParam'
+    post:
+      summary: Create or update a cached object under the cacheName
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+      responses:
+        "201":
+          description: (created) Successfully created or updated.
+        "400":
+          description: (bad request) Potentially exceeded maximum cached bytes allowed
+    delete:
+      summary: delete the current cache by key within the cacheName
+      responses:
+        "202":
+          description: (accepted) deleted
+    get:
+      summary: get the current cache by key within the cacheName
+      responses:
+        "200":
+          description: Okay
+          content:
+            application/octet-stream:
+        "404":
+          description: Not Found
+  /{cacheName}/{key}/{ttlSeconds}:
+    parameters:
+      - $ref: '#/components/parameters/cacheNameParam'
+      - $ref: '#/components/parameters/keyParam'
+      - $ref: '#/components/parameters/ttlSecondsParam'
+    post:
+      summary: Create or update a cached object under the cacheName
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+      responses:
+        "201":
+          description: (created) Successfully created or updated.
+        "400":
+          description: (bad request) Potentially exceeded maximum cached bytes allowed
+  /set:
+    post:
+      summary: Create or update a cached object by cacheName / key
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/cacheRequest'
+      responses:
+        "201":
+          description: (created) Successfully created or updated.
+        "400":
+          description: (bad request) Invalid cacheRequest, or potentially exceeded maximum cached bytes allowed.
+  # cacheName / cache specific APIs END here
+  /get/{cacheName}/{key}:
+    parameters:
+      - $ref: '#/components/parameters/cacheNameParam'
+      - $ref: '#/components/parameters/keyParam'
+    get:
+      summary: get the current cache namespace description, and delete status
+      responses:
+        "200":
+          description: returned a JSON format of the cache namespace, and description
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/cacheGetResponse'
+components:
+  parameters:
+    cacheNameParam:
+      description: name of a cache (group)
+      name: cacheName
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/cacheName'
+    keyParam:
+      description: key of a specific cache object within a cacheName
+      name: key
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/key'
+    ttlSecondsParam:
+      description: Time to Live of the cached object
+      name: ttlSeconds
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/ttlSeconds'
+  schemas:
+    cacheName:
+      type: string
+      description: name of a cache
+    description:
+      type: string
+      description: description of a cache name
+    deleted:
+      type: boolean
+      description: false if not deleted
+    cacheNameCreate:
+      type: object
+      properties:
+        cacheName:
+          type: string
+        description:
+          type: string
+    cacheNameResponse:
+      type: object
+      description: the complete cacheName object
+      properties:
+        cacheName:
+          type: string
+        description:
+          type: string
+        deleted:
+          type: boolean
+    cacheNameKeys:
+      type: array
+      description: an array of all known keys under the given cacheName
+      items:
+        type: string
+    key:
+      type: string
+      description: unique key to the cache within the cacheName
+    ttlSeconds:
+      type: integer
+      description: Time to Live of the cached object
+    cacheRequest:
+      type: object
+      properties:
+        cacheName:
+          type: string
+        key:
+          type: string
+        ttlSeconds:
+          type: integer
+        value: # byte[]
+          type: string
+          format: byte
+    cacheGetResponse:
+      type: object
+      properties:
+        cacheName:
+          type: string
+        key:
+          type: string
+        success:
+          type: boolean
+        value: # byte[]
+          type: string
+          format: byte

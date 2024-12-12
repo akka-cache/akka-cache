@@ -136,6 +136,10 @@ public class CacheAPICoreImpl {
             );
         }
         else {
+            if (log.isDebugEnabled()) {
+                log.debug("removing TTL timer for cacheName {} key {} if active.", cacheName, key);
+            }
+            timerScheduler.cancel("keys".concat(cacheId)); // cancel thr timer if active
             return CompletableFuture.completedFuture(Done.done());
         }
 

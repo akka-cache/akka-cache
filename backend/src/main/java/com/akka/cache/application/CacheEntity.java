@@ -56,9 +56,20 @@ public class CacheEntity extends EventSourcedEntity<Cache, CacheEvent> {
         if (log.isDebugEnabled()) {
             log.debug("CacheEntity Creating new cache for org {} key {}", cache.org(), commandContext().entityId());
         }
-        return effects()
-                .persist(new CacheEvent.CacheSet(cache.org(), cache.cacheName(), cache.key(), cache.ttlSeconds(), cache.totalBytes(), cache.chunks().getFirst()))
-                .thenReply(__ -> done());
+        if (currentState() == null || currentState().org().isEmpty()) {
+            return effects()
+                    .persist(new CacheEvent.CacheSet(cache.org(), cache.cacheName(), cache.key(), cache.ttlSeconds(), cache.totalBytes(), cache.chunks().getFirst()))
+                    .thenReply(__ -> done());
+        }
+        else {
+            // we need to make sure to delete the exsiting payload first so that we back out an existing cache for the org
+            return effects()
+                    .persist(
+                            new CacheEvent.CacheDeleted(currentState().org(), currentState().totalBytes()),
+                            new CacheEvent.CacheSet(cache.org(), cache.cacheName(), cache.key(), cache.ttlSeconds(), cache.totalBytes(), cache.chunks().getFirst())
+                    )
+                    .thenReply(__ -> done());
+        }
     }
 
     public Effect<Done> setWithChunk(PayloadChunk chunk) {

@@ -170,8 +170,8 @@ public class CacheJWTEndpoint {
 
     @Post("/set")
     public CompletionStage<HttpResponse> cache(CacheRequest cacheRequest) {
-        return doesExceedSubscription().thenCompose(trueOrFalse -> {
-           if (trueOrFalse) {
+        return doesExceedSubscription().thenCompose(isExceeded -> {
+           if (isExceeded) {
                return CompletableFuture.completedFuture(HttpResponses.badRequest(EXCEEDED_CACHED_ALLOTMENT));
            }
            return core.cache(modCachNameCacheRequestWithOrg(cacheRequest));
@@ -186,8 +186,8 @@ public class CacheJWTEndpoint {
     */
     @Post("/{cacheName}/{key}/{ttlSeconds}")
     public CompletionStage<HttpResponse> cacheSet(String cacheName, String key, Integer ttlSeconds, HttpEntity.Strict strictRequestBody) {
-        return doesExceedSubscription().thenCompose(trueOrFalse -> {
-            if (trueOrFalse) {
+        return doesExceedSubscription().thenCompose(isExceeded -> {
+            if (isExceeded) {
                 return CompletableFuture.completedFuture(HttpResponses.badRequest(EXCEEDED_CACHED_ALLOTMENT));
             }
             return core.cacheSet(Optional.of(orgClaims.org()), orgClaims.org.concat(cacheName), key, ttlSeconds, strictRequestBody);
@@ -196,8 +196,8 @@ public class CacheJWTEndpoint {
 
     @Post("/{cacheName}/{key}")
     public CompletionStage<HttpResponse> cacheSet(String cacheName, String key, HttpEntity.Strict strictRequestBody) {
-        return doesExceedSubscription().thenCompose(trueOrFalse -> {
-            if (trueOrFalse) {
+        return doesExceedSubscription().thenCompose(isExceeded -> {
+            if (isExceeded) {
                 return CompletableFuture.completedFuture(HttpResponses.badRequest(EXCEEDED_CACHED_ALLOTMENT));
             }
             return core.cacheSet(Optional.of(orgClaims.org()), orgClaims.org.concat(cacheName), key, 0, strictRequestBody);
@@ -249,8 +249,8 @@ public class CacheJWTEndpoint {
 
     @Post("/batch/")
     public CompletionStage<BatchCacheResponse> cacheBatch(BatchCacheRequest batchCacheRequest) {
-        return doesExceedSubscription().thenCompose(trueOrFalse -> {
-            if (trueOrFalse) {
+        return doesExceedSubscription().thenCompose(isExceeded -> {
+            if (isExceeded) {
                 return CompletableFuture.completedFuture(failAllBatchRequests(batchCacheRequest));
             }
             return core.cacheBatch(addOrgToBatchRequest(batchCacheRequest));
