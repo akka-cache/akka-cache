@@ -56,7 +56,7 @@ public class CacheEntity extends EventSourcedEntity<Cache, CacheEvent> {
         if (log.isDebugEnabled()) {
             log.debug("CacheEntity Creating new cache for org {} key {}", cache.org(), commandContext().entityId());
         }
-        if (currentState() == null || currentState().org().isEmpty()) {
+        if (currentState() == null || currentState().org().isEmpty() || currentState().deleted()) {
             return effects()
                     .persist(new CacheEvent.CacheSet(cache.org(), cache.cacheName(), cache.key(), cache.ttlSeconds(), cache.totalBytes(), cache.chunks().getFirst()))
                     .thenReply(__ -> done());
