@@ -1,7 +1,12 @@
+# use https://editor-next.swagger.io/ to validate this file
 openapi: 3.1.0
 info:
   title: Akka Cache
   version: 0.0.1
+# probably need to comment out servers below when generating
+servers: [ { url: http://localhost:9001 } ]
+security:
+  - bearerHttpAuthentication: []
 paths:
   # cacheName APIs START here
   /cacheName:
@@ -193,6 +198,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/batchGetCacheResponse'
 components:
+  securitySchemes:
+    bearerHttpAuthentication:
+      description: Bearer token using a JWT
+      type: http
+      scheme: Bearer
+      bearerFormat: JWT
   parameters:
     cacheNameParam:
       description: name of a cache (group)
@@ -218,7 +229,7 @@ components:
   schemas:
     cacheName:
       type: string
-      description: name of a cache
+      description: name of a cache namespace
     description:
       type: string
       description: description of a cache name
