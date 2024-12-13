@@ -87,6 +87,8 @@ paths:
         required: true
         content:
           application/octet-stream:
+            schema:
+              $ref: '#/components/schemas/byteArray'
       responses:
         "201":
           description: (created) Successfully created or updated.
@@ -104,6 +106,8 @@ paths:
           description: Okay
           content:
             application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/byteArray'
         "404":
           description: Not Found
   /{cacheName}/{key}/{ttlSeconds}:
@@ -117,6 +121,8 @@ paths:
         required: true
         content:
           application/octet-stream:
+            schema:
+              $ref: '#/components/schemas/byteArray'
       responses:
         "201":
           description: (created) Successfully created or updated.
@@ -264,6 +270,9 @@ components:
     ttlSeconds:
       type: integer
       description: Time to Live of the cached object
+    byteArray:
+      type: string
+      format: byte
     cacheRequest:
       type: object
       properties:
