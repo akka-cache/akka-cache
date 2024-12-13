@@ -55,6 +55,19 @@ const config = {
     ],
   ],
 
+  scripts: [
+    {
+      src: 'https://cdn.cookielaw.org/scripttemplates/otSDKStub.js',
+      type: 'text/javascript',
+      charset: 'UTF-8',
+      'data-domain-script': '0193b386-cf4c-79d3-b3b1-1875bd9cc23f-test'
+    },
+    {
+      src: '/js/optanon-wrapper.js',
+      type: 'text/javascript',
+    },
+  ],
+
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
@@ -66,16 +79,16 @@ const config = {
         respectPrefersColorScheme: true,
       },
       navbar: {
-        // title: 'AkkaCache.io',
-        logo: {
-          alt: 'AkkaCache Logo',
-          src: 'img/akkacache-black.svg',
-          srcDark: 'img/akkacache-white.svg',
-          href: 'https://akkacache.io',
-          target: '_self',
-          width: 150,
-          className: 'custom-navbar-logo-class',
-        },
+        title: 'AkkaCache',
+        // logo: {
+        //   alt: 'AkkaCache Logo',
+        //   src: '',
+        //   srcDark: '',
+        //   href: 'https://akkacache.io',
+        //   target: '_self',
+        //   width: 150,
+        //   className: 'custom-navbar-logo-class',
+        // },
         items: [
          {
             type: 'docSidebar',
@@ -91,7 +104,6 @@ const config = {
         ],
       },
       footer: {
-        style: 'dark',
         links: [
           {
             title: 'AkkaCache.io',
@@ -129,7 +141,7 @@ const config = {
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} Lightbend Inc dba Akka.io. All rights reserved.`,
+        copyright: `© ${new Date().getFullYear()} Lightbend Inc dba Akka.io. All rights reserved. | <a class="ot-sdk-show-settings">Cookie Settings</a>`,
       },
       prism: {
         theme: prismThemes.github,
