@@ -12,7 +12,7 @@ import {themes as prismThemes} from 'prism-react-renderer';
 const config = {
   title: 'AkkaCache.io',
   tagline: 'Akka.io is cool',
-  favicon: 'img/akka_favicon.png',
+  favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
   // TODO: this needs to be updated
@@ -55,22 +55,45 @@ const config = {
     ],
   ],
 
+  scripts: [
+    {
+      src: 'https://cdn.cookielaw.org/scripttemplates/otSDKStub.js',
+      type: 'text/javascript',
+      charset: 'UTF-8',
+      'data-domain-script': '0193b386-cf4c-79d3-b3b1-1875bd9cc23f-test'
+    },
+    {
+      src: '/js/optanon-wrapper.js',
+      type: 'text/javascript',
+    },
+  ],
+
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       // Replace with your project's social card
       //image: 'img/docusaurus-social-card.jpg',
+      colorMode: {
+        defaultMode: 'dark',
+        disableSwitch: false,
+        respectPrefersColorScheme: true,
+      },
       navbar: {
-        title: 'AkkaCache.io',
+        title: 'AkkaCache',
         // logo: {
-        //   alt: 'AkkaCache.io Logo',
-        //   src: 'img/logo.svg',
+        //   alt: 'AkkaCache Logo',
+        //   src: '',
+        //   srcDark: '',
+        //   href: 'https://akkacache.io',
+        //   target: '_self',
+        //   width: 150,
+        //   className: 'custom-navbar-logo-class',
         // },
         items: [
          {
             type: 'docSidebar',
             sidebarId: 'cacheSidebar',
-            position: 'left',
+            position: 'right',
             label: 'Cache',
           },
           {
@@ -81,7 +104,6 @@ const config = {
         ],
       },
       footer: {
-        style: 'dark',
         links: [
           {
             title: 'AkkaCache.io',
@@ -119,7 +141,7 @@ const config = {
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} Akka.io.`,
+        copyright: `© ${new Date().getFullYear()} Lightbend Inc dba Akka.io. All rights reserved. | <a class="ot-sdk-show-settings">Cookie Settings</a>`,
       },
       prism: {
         theme: prismThemes.github,
