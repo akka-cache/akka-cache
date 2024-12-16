@@ -5,10 +5,10 @@ info:
   description: |-
     This is Akka Cache a high speed, globally elastic, multi-region distributed key-value cache built upon Akka 3.
   contact:
-    email: TBD
+    email: support@akka.io
   license:
-    name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
+    name: Business Source License 1.1
+    url: https://github.com/akka-cache/akka-cache/LICENSE
   version: 0.0.1
 # probably need to comment out servers below when generating
 servers: [ { url: http://localhost:9001 } ]
@@ -193,8 +193,7 @@ paths:
       - $ref: '#/components/parameters/cacheNameParam'
       - $ref: '#/components/parameters/keyParam'
     get:
-      tags:
-        - cache
+
       summary: get the current cache namespace description, and delete status
       responses:
         "200":
@@ -205,8 +204,6 @@ paths:
                 $ref: '#/components/schemas/cacheGetResponse'
   /batch:
     post:
-      tags:
-        - batch
       summary: Create batch of cached objects, results are returned for each batch element
       requestBody:
         required: true
@@ -222,8 +219,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/batchCacheResponse'
     delete:
-      tags:
-        - batch
       summary: delete a batch of individual cached objects
       requestBody:
         required: true
@@ -240,8 +235,6 @@ paths:
                 $ref: '#/components/schemas/batchDeleteCacheResponse'
   /batch/get:
     post:
-      tags:
-        - batch
       summary: retrieve a batch of cached objects
       requestBody:
         required: true

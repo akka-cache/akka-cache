@@ -5,10 +5,10 @@ info:
   description: |-
     This is Akka Cache a high speed, globally elastic, multi-region distributed key-value cache built upon Akka 3.
   contact:
-    email: TBD
+    email: support@akka.io
   license:
-    name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
+    name: Business Source License 1.1
+    url: https://github.com/akka-cache/akka-cache/LICENSE
   version: 0.0.1
 # probably need to comment out servers below when generating
 servers: [ { url: http://localhost:9001 } ]
