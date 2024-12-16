@@ -39,6 +39,11 @@ h1 {
   border-bottom: 1px solid var(--ifm-color-emphasis-300);
 }
 
+::marker {
+  color: #f5b60b;
+  font-weight: 700;
+}
+
 /* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark']:root {
   --ifm-color-primary: #ffce4a;
@@ -56,6 +61,24 @@ h1 {
   --ifm-navbar-background-color: #000000;
   --ifm-background-color: #000000;
   --ifm-background-surface-color: #1a1a1a;
+  --ifm-pagination-nav-color-hover: #00d8dd;
+  --ifm-card-background-color: #1a1a1a;
+  --ifm-code-background: rgba(255, 255, 255, 0.2);
+  --ifm-color-secondary-contrast-background: #1a1a1a;
+  
+}
+
+.theme-admonition-note {
+  border-color: #ffce4a;
+}
+a.card {
+  border-color: #1a1a1a;
+}
+a.card:hover {
+  border-color: #00d8dd;
+}
+a.card h2 {
+  color: #ffce4a;
 }
 
 [data-theme='dark'] h1 {
@@ -64,4 +87,8 @@ h1 {
 
 [data-theme='dark'] .navbar {
   border-bottom: 1px solid var(--ifm-toc-border-color);
+}
+
+[data-theme='dark']::marker {
+  color: #ffce4a;
 }
