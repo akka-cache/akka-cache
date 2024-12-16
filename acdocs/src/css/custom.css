@@ -24,6 +24,7 @@
   --ifm-footer-background-color: #ffffff;
   --ifm-background-surface-color: #ffffff;
   --ifm-background-color: #ffffff;
+  --code-background-color: #242424;
 }
 h1 {
   color: #f5b60b;
@@ -62,33 +63,31 @@ h1 {
   --ifm-background-color: #000000;
   --ifm-background-surface-color: #1a1a1a;
   --ifm-pagination-nav-color-hover: #00d8dd;
-  --ifm-card-background-color: #1a1a1a;
+  --ifm-card-background-color: var(--code-background-color);
   --ifm-code-background: rgba(255, 255, 255, 0.2);
   --ifm-color-secondary-contrast-background: #1a1a1a;
-  
 }
 
-.theme-admonition-note {
+[data-theme='dark'] .theme-admonition-note {
   border-color: #ffce4a;
+  background-color: var(--code-background-color);
 }
-a.card {
+[data-theme='dark'] a.card {
   border-color: #1a1a1a;
 }
-a.card:hover {
+[data-theme='dark'] a.card:hover {
   border-color: #00d8dd;
 }
-a.card h2 {
+[data-theme='dark'] a.card h2 {
   color: #ffce4a;
 }
-
 [data-theme='dark'] h1 {
   color: #ffce4a;
 }
-
 [data-theme='dark'] .navbar {
   border-bottom: 1px solid var(--ifm-toc-border-color);
 }
 
-[data-theme='dark']::marker {
+[data-theme='dark'] ::marker {
   color: #ffce4a;
 }
