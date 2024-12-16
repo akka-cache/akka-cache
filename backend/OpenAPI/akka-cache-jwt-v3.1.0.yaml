@@ -1,11 +1,41 @@
+# use https://editor-next.swagger.io/ to validate this file
 openapi: 3.1.0
 info:
   title: Akka Cache
+  description: |-
+    This is Akka Cache a high speed, globally elastic, multi-region distributed key-value cache built upon Akka 3.
+  contact:
+    email: support@akka.io
+  license:
+    name: Business Source License 1.1
+    url: https://github.com/akka-cache/akka-cache/LICENSE
   version: 0.0.1
+# probably need to comment out servers below when generating
+servers: [ { url: http://localhost:9001 } ]
+tags:
+  - name: cacheName
+    description: APIs used to maintain a cache namespace or group.
+    externalDocs:
+      description: Find out more about cacheNames
+      url: TBD
+  - name: cache
+    description: APIs used to create, retrieve, and delete cached objects.
+    externalDocs:
+      description: Find out more about caches.
+      url: TBD
+  - name: batch
+    description: Batch APIs used to create, retrieve, and delete cached objects.
+    externalDocs:
+      description: Find out more about the batched APIs
+      url: TBD
+security:
+  - bearerHttpAuthentication: []
 paths:
   # cacheName APIs START here
   /cacheName:
     post:
+      tags:
+        - cacheName
       summary: Create or update a cache namespace description
       requestBody:
         required: true
@@ -17,6 +47,8 @@ paths:
         "201":
           description: (created) Successfully created or updated.
     put:
+      tags:
+        - cacheName
       summary: Create or update a cache namespace description
       requestBody:
         required: true
@@ -31,6 +63,8 @@ paths:
     parameters:
       - $ref: '#/components/parameters/cacheNameParam'
     get:
+      tags:
+        - cacheName
       summary: get the current cache namespace description, and delete status
       responses:
         "200":
@@ -42,6 +76,8 @@ paths:
         "400":
           description: (bad request) doesn't exist
     delete:
+      tags:
+        - cacheName
       summary: delete the current cache namespace and all associated caches
       responses:
         "202":
@@ -50,6 +86,8 @@ paths:
     parameters:
       - $ref: '#/components/parameters/cacheNameParam'
     get:
+      tags:
+        - cacheName
       summary: get the current cache namespace description, and delete status
       responses:
         "200":
@@ -64,6 +102,8 @@ paths:
     parameters:
       - $ref: '#/components/parameters/cacheNameParam'
     put:
+      tags:
+        - cacheName
       summary: deletes all existing cached objects but leaves the cache namespace in place
       responses:
         "202":
@@ -77,28 +117,38 @@ paths:
       - $ref: '#/components/parameters/cacheNameParam'
       - $ref: '#/components/parameters/keyParam'
     post:
+      tags:
+        - cache
       summary: Create or update a cached object under the cacheName
       requestBody:
         required: true
         content:
           application/octet-stream:
+            schema:
+              $ref: '#/components/schemas/byteArray'
       responses:
         "201":
           description: (created) Successfully created or updated.
         "400":
           description: (bad request) Potentially exceeded maximum cached bytes allowed
     delete:
+      tags:
+        - cache
       summary: delete the current cache by key within the cacheName
       responses:
         "202":
           description: (accepted) deleted
     get:
+      tags:
+        - cache
       summary: get the current cache by key within the cacheName
       responses:
         "200":
           description: Okay
           content:
             application/octet-stream:
+              schema:
+                $ref: '#/components/schemas/byteArray'
         "404":
           description: Not Found
   /{cacheName}/{key}/{ttlSeconds}:
@@ -107,11 +157,15 @@ paths:
       - $ref: '#/components/parameters/keyParam'
       - $ref: '#/components/parameters/ttlSecondsParam'
     post:
+      tags:
+        - cache
       summary: Create or update a cached object under the cacheName
       requestBody:
         required: true
         content:
           application/octet-stream:
+            schema:
+              $ref: '#/components/schemas/byteArray'
       responses:
         "201":
           description: (created) Successfully created or updated.
@@ -119,6 +173,8 @@ paths:
           description: (bad request) Potentially exceeded maximum cached bytes allowed
   /set:
     post:
+      tags:
+        - cache
       summary: Create or update a cached object by cacheName / key
       requestBody:
         required: true
@@ -137,6 +193,8 @@ paths:
       - $ref: '#/components/parameters/cacheNameParam'
       - $ref: '#/components/parameters/keyParam'
     get:
+      tags:
+        - cache
       summary: get the current cache namespace description, and delete status
       responses:
         "200":
@@ -145,7 +203,66 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/cacheGetResponse'
+  /batch:
+    post:
+      tags:
+        - batch
+      summary: Create batch of cached objects, results are returned for each batch element
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/batchCacheRequest'
+      responses:
+        "200":
+          description: returned a JSON formated object of overall cached results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/batchCacheResponse'
+    delete:
+      tags:
+        - batch
+      summary: delete a batch of individual cached objects
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/batchGetCacheRequests'
+      responses:
+        "200":
+          description: returned a JSON formated object of overall cached results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/batchDeleteCacheResponse'
+  /batch/get:
+    post:
+      tags:
+        - batch
+      summary: retrieve a batch of cached objects
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/batchGetCacheRequests'
+      responses:
+        "200":
+          description: returned a JSON formated object of overall cached results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/batchGetCacheResponse'
 components:
+  securitySchemes:
+    bearerHttpAuthentication:
+      description: Bearer token using a JWT
+      type: http
+      scheme: Bearer
+      bearerFormat: JWT
   parameters:
     cacheNameParam:
       description: name of a cache (group)
@@ -171,7 +288,7 @@ components:
   schemas:
     cacheName:
       type: string
-      description: name of a cache
+      description: name of a cache namespace
     description:
       type: string
       description: description of a cache name
@@ -206,6 +323,9 @@ components:
     ttlSeconds:
       type: integer
       description: Time to Live of the cached object
+    byteArray:
+      type: string
+      format: byte
     cacheRequest:
       type: object
       properties:
@@ -230,3 +350,58 @@ components:
         value: # byte[]
           type: string
           format: byte
+    batchCacheRequest:
+      type: array
+      schema:
+        $ref: '#/components/schemas/cacheRequest'
+    batchCacheResult:
+      type: object
+      properties:
+        cacheName:
+          type: string
+        key:
+          type: string
+        success:
+          type: boolean
+    batchCacheResponse:
+      type: object
+      properties:
+        complete:
+          type: boolean
+        results:
+          type: array
+          schema:
+            $ref: '#/components/schemas/batchCacheResult'
+    batchGetCacheRequest:
+      type: object
+      properties:
+        cacheName:
+          type: string
+        key:
+          type: string
+    batchGetCacheRequests:
+      type: array
+      schema:
+        $ref: '#/components/schemas/batchGetCacheRequest'
+    cacheDeleteResponse:
+      type: object
+      properties:
+        cacheName:
+          type: string
+        key:
+          type: string
+        success:
+          type: boolean
+    batchDeleteCacheResponse:
+      type: array
+      schema:
+        $ref: '#/components/schemas/cacheDeleteResponse'
+    batchGetCacheResponse:
+      type: object
+      properties:
+        complete:
+          type: boolean
+        results:
+          type: array
+          schema:
+            $ref: '#/components/schemas/cacheGetResponse'
