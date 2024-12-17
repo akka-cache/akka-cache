@@ -3,13 +3,12 @@ import { TextInput, Stack, Checkbox, Alert, Button } from '@mantine/core';
 import { Link } from '@remix-run/react';
 import { IconCheck, IconAlertCircle } from '@tabler/icons-react';
 import type { AuthStatus } from '~/types/auth';
+import { useThemeColor } from '~/utils/theme';
 
 interface SignUpFormProps {
   onSubmit: (userData: {
     email: string;
     displayName: string;
-    organization: string;
-    mobileNumber?: string;
     acceptedTerms: boolean;
   }) => Promise<void>;
   status: AuthStatus;
@@ -25,17 +24,15 @@ export function SignUpForm({
 }: SignUpFormProps) {
   const [email, setEmail] = useState('');
   const [displayName, setDisplayName] = useState('');
-  const [organization, setOrganization] = useState('');
-  const [mobileNumber, setMobileNumber] = useState('');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+
+  const bodyTextColor = useThemeColor('bodyText');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await onSubmit({
       email,
       displayName,
-      organization,
-      mobileNumber: mobileNumber || undefined,
       acceptedTerms
     });
   };
@@ -70,34 +67,9 @@ export function SignUpForm({
           }}
         />
 
-        <TextInput
-          label="Organization"
-          placeholder="Enter your company or organization name"
-          size="md"
-          value={organization}
-          onChange={(e) => setOrganization(e.target.value)}
-          disabled={status === 'loading' || status === 'success'}
-          required
-          classNames={{
-            label: 'text-gray-100'
-          }}
-        />
-
-        <TextInput
-          label="Mobile Number (Optional)"
-          placeholder="+1 (555) 555-5555"
-          size="md"
-          value={mobileNumber}
-          onChange={(e) => setMobileNumber(e.target.value)}
-          disabled={status === 'loading' || status === 'success'}
-          classNames={{
-            label: 'text-gray-100'
-          }}
-        />
-
         <Checkbox
           label={
-            <span>
+            <span style={{ color: bodyTextColor }}>
               I agree to the{' '}
               <Link to="/legal/terms" className="text-blue-400 hover:underline">
                 Terms of Service

@@ -10,8 +10,6 @@ export type AuthStatus =
 export interface UserData {
   email: string;
   displayName?: string;
-  organization?: string;
-  mobileNumber?: string;
 }
 
 export interface AuthState {

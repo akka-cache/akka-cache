@@ -92,8 +92,6 @@ export default function SignUp() {
   const handleSubmit = async (formData: {
     email: string;
     displayName: string;
-    organization: string;
-    mobileNumber?: string;
     acceptedTerms: boolean;
   }) => {
     if (!formData.acceptedTerms) {
@@ -104,9 +102,7 @@ export default function SignUp() {
     setLocalErrorMessage('');
     const userData: UserData = {
       email: formData.email,
-      displayName: formData.displayName,
-      organization: formData.organization,
-      mobileNumber: formData.mobileNumber
+      displayName: formData.displayName
     };
 
     try {
