@@ -8,7 +8,7 @@ info:
     email: support@akka.io
   license:
     name: Business Source License 1.1
-    url: https://github.com/akka-cache/akka-cache/LICENSE
+    url: https://github.com/akka-cache/akka-cache/blob/main/LICENSE
   version: 0.0.1
 # probably need to comment out servers below when generating
 servers: [ { url: http://localhost:9001 } ]
