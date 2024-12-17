@@ -79,7 +79,7 @@ const config = {
         respectPrefersColorScheme: true,
       },
       navbar: {
-        title: 'AkkaCache',
+        title: 'AKKA Cache',
         // logo: {
         //   alt: 'AkkaCache Logo',
         //   src: '',
@@ -90,12 +90,12 @@ const config = {
         //   className: 'custom-navbar-logo-class',
         // },
         items: [
-         {
-            type: 'docSidebar',
-            sidebarId: 'cacheSidebar',
-            position: 'right',
-            label: 'Cache',
-          },
+        //  {
+        //     type: 'docSidebar',
+        //     sidebarId: 'cacheSidebar',
+        //     position: 'right',
+        //     label: 'Cache',
+        //   },
           {
             href: 'https://github.com/lightbend/akka-cache',
             label: 'GitHub',

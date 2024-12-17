@@ -7,6 +7,33 @@
 /* You can override the default Infima variables here. */
 
 :root {
+  --akka-soft-white: #f1f1f1;
+  --akka-black: #1A1A1A;
+  --akka-gray-dark: #313131;
+  --akka-gray-900: #1A1A1A;
+  --akka-gray-800: #2F2F2F;
+  --akka-gray-700: #434343;
+  --akka-gray-600: #606060;
+  --akka-gray-500: #808080;
+  --akka-gray-400: #ADADAD;
+  --akka-gray-300: #C9C9C9;
+  --akka-gray-200: #E5E5E5;
+  --akka-gray-100: #F5F5F5;
+  --akka-gray-50: #FAFAFA;
+  --akka-blue: #00D8DD;
+  --akka-green: #72D35B;
+  --akka-yellow: #FFCE4A;
+  --akka-orange: #FF5400;
+  --akka-pink: #FB4852;
+  --akka-blue-dkr: #02A4A7;
+  --akka-green-dkr: #5AA547;
+  --akka-yellow-dkr: #F5B60B;
+  --akka-orange-dkr: #D84800;
+  --akka-heavy-black: #0d0d0d;
+  --akka-medium-black: #141414;
+  --akka-soft-black: #1a1a1a;
+  --akka-medium-gray: #4e4e4e;
+  --akka-soft-gray: #a6a6a6;
   --ifm-color-primary: #f5b60b;
   --ifm-color-primary-dark: #dda409;
   --ifm-color-primary-darker: #d19b09;
@@ -25,24 +52,7 @@
   --ifm-background-surface-color: #ffffff;
   --ifm-background-color: #ffffff;
   --code-background-color: #242424;
-}
-h1 {
-  color: #f5b60b;
-}
-.footer--dark {
-  background-color: #000000;
-}
-.footer a {
-  cursor: pointer;
-}
-
-.navbar {
-  border-bottom: 1px solid var(--ifm-color-emphasis-300);
-}
-
-::marker {
-  color: #f5b60b;
-  font-weight: 700;
+  /* --ifm-table-stripe-background: #f5f5f5; */
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
@@ -56,38 +66,83 @@ h1 {
   --ifm-color-primary-lightest: #ffe9ad;
   --ifm-background-color: #000000;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
-  --ifm-link-color: #00d8dd;
-  --ifm-link-hover-color: #00d8dd;
+  --ifm-link-color: var(--akka-blue);
+  --ifm-link-hover-color: var(--akka-blue);
   --ifm-footer-background-color: #1a1a1a;
   --ifm-navbar-background-color: #000000;
   --ifm-background-color: #000000;
   --ifm-background-surface-color: #1a1a1a;
-  --ifm-pagination-nav-color-hover: #00d8dd;
+  --ifm-pagination-nav-color-hover: var(--akka-blue);
   --ifm-card-background-color: var(--code-background-color);
   --ifm-code-background: rgba(255, 255, 255, 0.2);
   --ifm-color-secondary-contrast-background: #1a1a1a;
 }
 
-[data-theme='dark'] .theme-admonition-note {
-  border-color: #ffce4a;
-  background-color: var(--code-background-color);
+h1 {
+  color: var(--akka-yellow-dkr);
 }
-[data-theme='dark'] a.card {
-  border-color: #1a1a1a;
-}
-[data-theme='dark'] a.card:hover {
-  border-color: #00d8dd;
-}
-[data-theme='dark'] a.card h2 {
-  color: #ffce4a;
-}
+
 [data-theme='dark'] h1 {
-  color: #ffce4a;
+  color: var(--akka-yellow);
 }
+
+.footer--dark {
+  background-color: #000000;
+}
+
+[data-theme='dark'] .footer--dark {
+  border-top: 1px solid var(--ifm-toc-border-color);
+}
+
+.footer a {
+  cursor: pointer;
+}
+
+.navbar {
+  border-bottom: 1px solid var(--ifm-toc-border-color);
+}
+
 [data-theme='dark'] .navbar {
   border-bottom: 1px solid var(--ifm-toc-border-color);
 }
 
-[data-theme='dark'] ::marker {
-  color: #ffce4a;
+::marker {
+  color: var(--akka-yellow-dkr);
+  font-weight: 700;
 }
+
+[data-theme='dark'] ::marker {
+  color: var(--akka-yellow);
+}
+
+[data-theme='dark'] .theme-admonition-note {
+  border-color: var(--akka-yellow);
+  background-color: var(--code-background-color);
+}
+
+
+a.card {
+  background-color: #fff;
+  border-color: var(--ifm-color-gray-300);
+}
+a.card:hover {
+  border-color: var(--akka-blue);
+}
+a.card h2 {
+  color: var(--akka-yellow);
+}
+
+
+[data-theme='dark'] a.card {
+  background-color: var(--akka-black);
+  border-color: var(--akka-black);
+}
+[data-theme='dark'] a.card:hover {
+  border-color: var(--akka-blue);
+}
+[data-theme='dark'] a.card h2 {
+  color: var(--akka-yellow);
+}
+
+
+
