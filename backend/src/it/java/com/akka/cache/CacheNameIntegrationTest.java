@@ -5,10 +5,14 @@ import akka.javasdk.testkit.TestKit;
 import com.akka.cache.domain.CacheAPI.*;
 import com.akka.cache.application.CacheNameEntity;
 import com.akka.cache.domain.CacheName;
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.*;
 import akka.javasdk.testkit.TestKitSupport;
 
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * This is a skeleton for implementing integration tests for an Akka application built with the Akka SDK for Java.
@@ -85,4 +89,24 @@ public class CacheNameIntegrationTest extends TestKitSupport {
     Assertions.assertEquals(Optional.of(TEST_DESC_1_MODIFIED), getCacheName(CACHE_NAME).description());
 
   }
+
+  @Test
+  @Order(4)
+  public void httpDeleteCacheName() {
+    var response = await(
+            httpClient.DELETE("/cache/cacheName/".concat(CACHE_NAME))
+                    .invokeAsync()
+    );
+
+    Awaitility.await()
+            .ignoreExceptions()
+            .atMost(5, TimeUnit.SECONDS)
+            .untilAsserted(() -> {
+              var getCacheNameResponse =
+                      await(httpClient.GET("/cache/cacheName/" + CACHE_NAME)
+                              .invokeAsync());
+              Assertions.assertEquals(StatusCodes.BAD_REQUEST, getCacheNameResponse.status());
+            });
+  }
+
 }
