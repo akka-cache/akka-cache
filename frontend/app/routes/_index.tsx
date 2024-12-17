@@ -1,37 +1,37 @@
 // app/routes/index.tsx
 import { Container, Title, Text, Button, Anchor } from '@mantine/core';
-import { Link } from '@remix-run/react';
+import { Link, useLoaderData } from '@remix-run/react';
+import { redirect, type LoaderFunctionArgs } from '@remix-run/node';
 import Layout from '~/components/Layout';
 import { useThemeColor } from '~/utils/theme';
+import { adminAuth } from '~/utils/firebase-admin.server';
+import { getSession } from '~/utils/session.server';
 
-const MainHeading = ({ color }: { color: string }) => (
-  <Title order={1} className="text-center mb-6" c={color}>
-    Enterprise-Grade Serverless Caching
-  </Title>
-);
+export async function loader({ request }: LoaderFunctionArgs) {
+  const session = await getSession(request.headers.get("Cookie"));
+  const sessionCookie = session.get("session");
 
-const Subtitle = ({ color }: { color: string }) => (
-  <Text size="lg" className="text-center mb-8" c={color}>
-    Simplify your architecture
-  </Text>
-);
+  if (!sessionCookie) {
+    return redirect("/auth/sign-in");
+  }
 
-const SignInSection = ({ secondaryTextColor }: { secondaryTextColor: string }) => (
-  <>
-    <Button component={Link} to="/sign-in" size="lg">
-      Sign In
-    </Button>
-
-    <Text size="sm" c={secondaryTextColor}>
-      Don't have an account?{' '}
-      <Anchor component={Link} to="/sign-up">
-        Sign Up
-      </Anchor>
-    </Text>
-  </>
-);
+  try {
+    const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie);
+    return { 
+      user: {
+        email: decodedClaims.email,
+        displayName: decodedClaims.name || decodedClaims.email?.split('@')[0]
+      },
+      claims: decodedClaims
+    };
+  } catch (error) {
+    console.error("Session verification failed:", error);
+    return redirect("/auth/sign-in");
+  }
+}
 
 export default function Index() {
+  const { user, claims } = useLoaderData<typeof loader>();
   const colors = {
     heading: useThemeColor('headingText'),
     body: useThemeColor('bodyText'),
@@ -39,18 +39,27 @@ export default function Index() {
     muted: useThemeColor('mutedText'),
   };
 
+  console.log('Index route - Rendering with user:', user);
+
   return (
-    <Layout>
+    <Layout user={user}>
       <Container 
         size="lg" 
         className="min-h-screen flex flex-col justify-center items-center"
       >
         <div className="w-full max-w-2xl">
-          <MainHeading color={colors.heading} />
-          <Subtitle color={colors.body} />
+          <Title order={1} className="text-center mb-6" c={colors.heading}>
+            Enterprise-Grade Serverless Caching
+          </Title>
+          <Text size="lg" className="text-center mb-8" c={colors.body}>
+            Simplify your architecture
+          </Text>
           
-          <div className="flex flex-col items-center space-y-4">
-            <SignInSection secondaryTextColor={colors.secondary} />
+          <div className="mt-8 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
+            <Text size="sm" className="mb-2" c={colors.secondary}>JWT Token Contents:</Text>
+            <pre className="whitespace-pre-wrap overflow-x-auto">
+              <code>{JSON.stringify(claims, null, 2)}</code>
+            </pre>
           </div>
         </div>
       </Container>

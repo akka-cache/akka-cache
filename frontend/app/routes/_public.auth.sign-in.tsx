@@ -1,42 +1,88 @@
-import { Card, Text, Button, Group } from '@mantine/core';
-import { useAuthState } from '~/hooks/use-auth-state';
-import { useSignIn } from '~/hooks/use-sign-in';
+import { json } from "@remix-run/node";
+import { useActionData } from "@remix-run/react";
+import { Card, Text } from '@mantine/core';
+import { sendSignInLinkToEmail } from 'firebase/auth';
+import { auth } from '~/utils/firebase-config';
+import { createTempEmailSession } from '~/utils/session.server';
 import { EmailForm } from '~/components/auth/email-form';
 import { Logo, HeaderContent } from '~/components/auth/common';
 import { useThemeColor } from '~/utils/theme';
-import { useOutletContext, Link } from '@remix-run/react';
-import { useState } from 'react';
+import { useOutletContext } from '@remix-run/react';
 
-type AuthStatus = 'idle' | 'loading' | 'success' | 'error';
+type ActionData = {
+  success?: boolean;
+  message?: string;
+  error?: string;
+};
+
+export async function action({ request }: { request: Request }) {
+  console.log('Starting sign-in action');
+  const formData = await request.formData();
+  const email = formData.get("email") as string;
+
+  if (!email) {
+    console.log('No email provided');
+    return json<ActionData>({ error: "Email is required" }, { status: 400 });
+  }
+
+  try {
+    console.log('Creating temp session for email:', email);
+    // Store auth action in temp session
+    const headers = new Headers();
+    headers.append("Set-Cookie", await createTempEmailSession(email));
+
+    const origin = process.env.APP_URL || request.headers.get("origin") || 'http://localhost:5173';
+    const actionCodeSettings = {
+      url: `${origin}/auth/verify-email`,
+      handleCodeInApp: true,
+    };
+
+    console.log('Sending sign-in link with settings:', actionCodeSettings);
+
+    await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+    console.log('Sign-in link sent successfully');
+
+    return json<ActionData>(
+      { success: true, message: "Check your email for the sign-in link" },
+      { headers }
+    );
+  } catch (error: any) {
+    console.error("Sign-in error details:", {
+      name: error.name,
+      code: error.code,
+      message: error.message,
+      stack: error.stack,
+      cause: error.cause
+    });
+
+    // Return a more specific error message based on the Firebase error code
+    let errorMessage = "Failed to send sign-in link. Please try again.";
+    if (error.code === 'auth/invalid-email') {
+      errorMessage = "Invalid email address.";
+    } else if (error.code === 'auth/operation-not-allowed') {
+      errorMessage = "Email link sign-in is not enabled. Please contact support.";
+    } else if (error.code === 'auth/missing-continue-uri') {
+      errorMessage = "Configuration error: Missing continue URL.";
+    } else if (error.code === 'auth/invalid-continue-uri') {
+      errorMessage = "Configuration error: Invalid continue URL.";
+    }
+
+    return json<ActionData>(
+      { error: `${errorMessage} (${error.code})` },
+      { status: 500 }
+    );
+  }
+}
 
 export default function SignIn() {
-  const [status, setStatus] = useState<AuthStatus>('idle');
-  const [errorMessage, setErrorMessage] = useState('');
-  const { user } = useAuthState();
-  const { handleSignIn } = useSignIn({
-    onSuccess: () => {
-      console.log('Sign-in link sent successfully');
-    },
-    onError: (error) => {
-      console.error('Sign-in error:', error);
-    }
-  });
-
+  const actionData = useActionData<typeof action>();
   const headingTextColor = useThemeColor('headingText');
   const bodyTextColor = useThemeColor('bodyText');
   const context = useOutletContext<string>();
 
-  const handleSubmit = async (email: string) => {
-    try {
-      setStatus('loading');
-      await handleSignIn(email);
-      setStatus('success');
-    } catch (error: unknown) {
-      setStatus('error');
-      setErrorMessage(error instanceof Error ? error.message : 'Sign in failed');
-      console.error('Sign in error:', error);
-    }
-  };
+  const formStatus = actionData?.success ? 'success' 
+    : actionData?.error ? 'error' 
+    : 'idle';
 
   if (context === 'right') {
     return (
@@ -58,27 +104,10 @@ export default function SignIn() {
       
       <Card shadow="md" p="xl" className="w-full mb-8" bg="dark.0">
         <EmailForm
-          onSubmit={handleSubmit}
-          status={status}
-          errorMessage={errorMessage}
-          successMessage={status === 'success' ? 
-            "We've sent you an email with a sign-in link. Click the link to continue." : 
-            undefined}
+          status={formStatus}
+          errorMessage={actionData?.error}
+          successMessage={actionData?.message}
         />
-        
-        <div className="mt-4 text-center">
-          <Text size="sm" c="dimmed" mb="md">
-            Don't have an account?
-          </Text>
-          <Button 
-            variant="subtle" 
-            size="sm" 
-            component={Link} 
-            to="/auth/sign-up"
-          >
-            Create an Account
-          </Button>
-        </div>
       </Card>
     </div>
   );

@@ -5,19 +5,15 @@ import {
   Scripts,
   ScrollRestoration,
   useLoaderData,
-  useNavigate,
 } from "@remix-run/react";
-import type { LinksFunction } from "@remix-run/node";
+import type { LinksFunction, LoaderFunctionArgs } from "@remix-run/node";
 import { MantineProvider, ColorSchemeScript } from '@mantine/core';
 import '@mantine/core/styles.css';
 import theme from './utils/theme';
 import "./styles/tailwind.css";
 import { redirect } from '@remix-run/node';
-import type { LoaderFunctionArgs } from '@remix-run/node';
-import { isSignInWithEmailLink, onAuthStateChanged, signInWithEmailLink } from 'firebase/auth';
-import { auth } from '~/utils/firebase-config';
-import { typedjson } from 'remix-typedjson';
-import { useEffect } from 'react';
+import { adminAuth } from '~/utils/firebase-admin.server';
+import { getSession } from '~/utils/session.server';
 import { AuthProvider } from '~/contexts/auth-context';
 
 export const links: LinksFunction = () => [
@@ -33,31 +29,39 @@ export const links: LinksFunction = () => [
   },
 ];
 
-// Helper function to get current user data
-const getCurrentUser = () => {
-  return new Promise((resolve, reject) => {
-    const unsubscribe = onAuthStateChanged(
-      auth,
-      (user) => {
-        unsubscribe();
-        resolve(user ? {
-          email: user.email,
-          displayName: user.displayName
-        } : null);
-      },
-      reject
-    );
-  });
-};
-
 export async function loader({ request }: LoaderFunctionArgs) {
-  const user = await getCurrentUser();
-  return typedjson({ user });
+  const session = await getSession(request.headers.get("Cookie"));
+  const sessionCookie = session.get("session");
+
+  // Add debug logging
+  console.log("Root loader - Session cookie exists:", !!sessionCookie);
+
+  if (sessionCookie) {
+    try {
+      const decodedClaims = await adminAuth.verifySessionCookie(sessionCookie);
+      console.log("Root loader - Verified user:", decodedClaims.email);
+      
+      return { 
+        user: {
+          email: decodedClaims.email,
+          displayName: decodedClaims.name || decodedClaims.email?.split('@')[0]
+        }
+      };
+    } catch (error) {
+      console.error("Root loader - Session verification failed:", error);
+      return { user: null };
+    }
+  }
+
+  return { user: null };
 }
 
 export default function App() {
   const { user } = useLoaderData<typeof loader>();
   
+  // Add debug logging
+  console.log("Root component - User data:", user);
+
   return (
     <html lang="en" data-mantine-color-scheme="dark">
       <head>

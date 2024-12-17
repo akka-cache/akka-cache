@@ -9,7 +9,9 @@ import {
   Stack,
   Text,
   rem,
-  useMantineColorScheme
+  useMantineColorScheme,
+  Paper,
+  ActionIcon
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { Link, useNavigate, useLocation } from '@remix-run/react';
@@ -43,78 +45,40 @@ type BottomLink = BaseLink & {
 
 type LayoutProps = {
   children: React.ReactNode;
+  user: any;
 };
 
-export default function Layout({ children }: LayoutProps) {
+export default function Layout({ children, user }: LayoutProps) {
   const [opened, { toggle }] = useDisclosure();
   const navigate = useNavigate();
   const location = useLocation();
   const { colorScheme } = useMantineColorScheme();
   const { handleSignOut } = useAuthActions();
-  const { user } = useAuthState();
 
-  const mainLinks: MainLink[] = [
-    { icon: IconPlus, label: 'Create Cache', href: '/create-cache' },
-    { icon: IconDatabase, label: 'My Caches', href: '/caches' },
-    { icon: IconChartLine, label: 'Observability', href: '/observability' },
-    { icon: IconBook, label: 'Documentation', href: '/docs' },
-  ];
+  console.log('Layout - Component rendered with user:', user);
 
-  const bottomLinks: BottomLink[] = [
-    { icon: IconSettings, label: 'Settings', href: '/settings' },
-    { icon: IconCreditCard, label: 'Billing', href: '/billing' },
-    { 
-      icon: IconLogout, 
-      label: 'Sign Out', 
-      onClick: handleSignOut,
-      color: 'red' 
-    },
-  ];
-
-  const renderNavLink = (link: MainLink | BottomLink) => {
-    if (link.href) {
-      return (
-        <NavLink
-          key={link.label}
-          label={link.label}
-          c={colorScheme === 'dark' ? 'dark.9' : 'gray.7'}
-          leftSection={
-            <link.icon
-              style={{
-                width: rem(20),
-                color: `var(--mantine-color-${colorScheme === 'dark' ? 'akkaAccent-4' : 'akkaAccent-4'})`
-              }}
-              stroke={1.5}
-            />
-          }
-          active={location.pathname === link.href}
-          component={Link}
-          to={link.href}
-          color={link.color}
-          onClick={link.onClick}
-        />
-      );
-    }
-
+  if (!user) {
+    console.log('Layout - No user provided');
     return (
-      <NavLink
-        key={link.label}
-        label={link.label}
-        c={colorScheme === 'dark' ? 'dark.9' : 'gray.7'}
-        leftSection={
-          <link.icon
-            style={{
-              width: rem(20),
-              color: `var(--mantine-color-${colorScheme === 'dark' ? 'akkaAccent-4' : 'akkaAccent-4'})`
-            }}
-            stroke={1.5}
-          />
-        }
-        color={link.color}
-        onClick={link.onClick}
-      />
+      <AppShell
+        navbar={{
+          width: 300,
+          breakpoint: 'sm',
+          collapsed: { mobile: !opened }
+        }}
+        bg={colorScheme === 'dark' ? 'dark.0' : 'gray.0'}
+      >
+        <AppShell.Navbar p="md" bg={colorScheme === 'dark' ? 'dark.1' : 'gray.1'}>
+          <div style={{ padding: '8px', background: '#333', color: 'white' }}>
+            Debug - Auth State: Not authenticated
+          </div>
+        </AppShell.Navbar>
+        <AppShell.Main>
+          {children}
+        </AppShell.Main>
+      </AppShell>
     );
-  };
+  }
 
   return (
     <AppShell
@@ -126,73 +90,82 @@ export default function Layout({ children }: LayoutProps) {
       bg={colorScheme === 'dark' ? 'dark.0' : 'gray.0'}
     >
       <AppShell.Navbar p="md" bg={colorScheme === 'dark' ? 'dark.1' : 'gray.1'}>
-        <AppShell.Section>
-          <Group pb="md" px="md">
-            <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
-            <Link
-              to="/dashboard"
-              className="text-xl font-bold navbar-logo"
-              style={{ color: colorScheme === 'dark' ? 'var(--mantine-color-dark-9)' : 'var(--mantine-color-gray-8)' }}
-            >
-              Akka Cache
-            </Link>
+        <Stack>
+          <NavLink
+            label="Create Cache"
+            leftSection={<IconPlus style={{ width: rem(20), color: colorScheme === 'dark' ? 'white' : 'black' }} stroke={1.5} />}
+            component={Link}
+            to="/create-cache"
+            active={location.pathname === '/create-cache'}
+            c={colorScheme === 'dark' ? 'white' : 'dark'}
+          />
+          <NavLink
+            label="My Caches"
+            leftSection={<IconDatabase style={{ width: rem(20), color: colorScheme === 'dark' ? 'white' : 'black' }} stroke={1.5} />}
+            component={Link}
+            to="/caches"
+            active={location.pathname === '/caches'}
+            c={colorScheme === 'dark' ? 'white' : 'dark'}
+          />
+          <NavLink
+            label="Observability"
+            leftSection={<IconChartLine style={{ width: rem(20), color: colorScheme === 'dark' ? 'white' : 'black' }} stroke={1.5} />}
+            component={Link}
+            to="/observability"
+            active={location.pathname === '/observability'}
+            c={colorScheme === 'dark' ? 'white' : 'dark'}
+          />
+          <NavLink
+            label="Documentation"
+            leftSection={<IconBook style={{ width: rem(20), color: colorScheme === 'dark' ? 'white' : 'black' }} stroke={1.5} />}
+            component={Link}
+            to="/docs"
+            active={location.pathname === '/docs'}
+            c={colorScheme === 'dark' ? 'white' : 'dark'}
+          />
+        </Stack>
+
+        <Stack mt="auto">
+          <NavLink
+            label="Settings"
+            leftSection={<IconSettings style={{ width: rem(20), color: colorScheme === 'dark' ? 'white' : 'black' }} stroke={1.5} />}
+            component={Link}
+            to="/settings"
+            active={location.pathname === '/settings'}
+            c={colorScheme === 'dark' ? 'white' : 'dark'}
+          />
+          <NavLink
+            label="Billing"
+            leftSection={<IconCreditCard style={{ width: rem(20), color: colorScheme === 'dark' ? 'white' : 'black' }} stroke={1.5} />}
+            component={Link}
+            to="/billing"
+            active={location.pathname === '/billing'}
+            c={colorScheme === 'dark' ? 'white' : 'dark'}
+          />
+        </Stack>
+
+        <Paper withBorder p="md" mt="md">
+          <Group>
+            <Avatar color="blue" radius="xl">
+              {user.displayName?.[0] || user.email[0]}
+            </Avatar>
+            <div style={{ flex: 1 }}>
+              <Text size="sm" fw={500}>
+                {user.displayName || user.email}
+              </Text>
+              <Text c="dimmed" size="xs">
+                {user.email}
+              </Text>
+            </div>
+            <Group gap="xs">
+              <ThemeToggle />
+              <ActionIcon variant="default" size="lg" onClick={handleSignOut}>
+                <IconLogout size={18} />
+              </ActionIcon>
+            </Group>
           </Group>
-        </AppShell.Section>
-
-        <AppShell.Section grow>
-          <Stack gap={0}>
-            {mainLinks.map(renderNavLink)}
-          </Stack>
-        </AppShell.Section>
-
-        <AppShell.Section>
-          <Stack gap={0}>
-            {bottomLinks.map(renderNavLink)}
-            <ThemeToggle />
-            {user && (
-              <Menu position="right-end" shadow="md" width={200}>
-                <Menu.Target>
-                  <UnstyledButton className="w-full p-3">
-                    <Group>
-                      <Avatar radius="xl" alt={user.displayName || user.email} />
-                      <div style={{ flex: 1 }}>
-                        <Text
-                          size="sm"
-                          fw={500}
-                          c={colorScheme === 'dark' ? 'dark.9' : 'gray.7'}
-                        >
-                          {user.displayName || 'User'}
-                        </Text>
-                        <Text
-                          size="xs"
-                          c={colorScheme === 'dark' ? 'gray.6' : 'gray.5'}
-                        >
-                          {user.email}
-                        </Text>
-                      </div>
-                    </Group>
-                  </UnstyledButton>
-                </Menu.Target>
-                <Menu.Dropdown>
-                  <Menu.Label>Account</Menu.Label>
-                  <Menu.Item leftSection={<IconUser size={14} />}>
-                    Profile
-                  </Menu.Item>
-                  <Menu.Divider />
-                  <Menu.Item
-                    leftSection={<IconLogout size={14} />}
-                    onClick={handleSignOut}
-                    color="red"
-                  >
-                    Sign Out
-                  </Menu.Item>
-                </Menu.Dropdown>
-              </Menu>
-            )}
-          </Stack>
-        </AppShell.Section>
+        </Paper>
       </AppShell.Navbar>
-
       <AppShell.Main>
         {children}
       </AppShell.Main>

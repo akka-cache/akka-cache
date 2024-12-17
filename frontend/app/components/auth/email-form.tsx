@@ -1,38 +1,29 @@
-import { useState } from 'react';
+import { Form } from '@remix-run/react';
 import { TextInput, Button, Alert, Stack } from '@mantine/core';
 import { IconCheck, IconAlertCircle } from '@tabler/icons-react';
-import type { AuthStatus } from '~/types/auth';
+
+type FormStatus = 'idle' | 'loading' | 'success' | 'error';
 
 interface EmailFormProps {
-  onSubmit: (email: string) => Promise<void>;
-  status: AuthStatus;
+  status: FormStatus;
   errorMessage?: string;
   successMessage?: string;
 }
 
-export function EmailForm({
-  onSubmit,
-  status,
-  errorMessage,
-  successMessage
+export function EmailForm({ 
+  status, 
+  errorMessage, 
+  successMessage 
 }: EmailFormProps) {
-  const [email, setEmail] = useState('');
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await onSubmit(email);
-  };
-
   return (
-    <form onSubmit={handleSubmit}>
+    <Form method="post">
       <Stack gap="md">
         <TextInput
           label="Email"
+          name="email"
           placeholder="Enter your email"
           type="email"
           size="md"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
           disabled={status === 'loading' || status === 'success'}
           required
           classNames={{
@@ -56,12 +47,12 @@ export function EmailForm({
           fullWidth 
           size="md" 
           type="submit"
-          loading={status === 'checking' || status === 'loading'}
+          loading={status === 'loading'}
           disabled={status === 'success'}
         >
           Send Sign In Link
         </Button>
       </Stack>
-    </form>
+    </Form>
   );
 } 

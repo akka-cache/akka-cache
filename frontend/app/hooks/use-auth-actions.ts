@@ -1,25 +1,28 @@
-import { useCallback } from 'react';
 import { useNavigate } from '@remix-run/react';
-import { signOut } from 'firebase/auth';
 import { auth } from '~/utils/firebase-config';
 
 export function useAuthActions() {
   const navigate = useNavigate();
 
-  const handleSignOut = useCallback(async () => {
+  const handleSignOut = async () => {
     try {
-      await signOut(auth);
-      // Clear any auth-related items from localStorage
-      window.localStorage.removeItem('emailForSignIn');
-      window.localStorage.removeItem('signUpData');
-      navigate('/auth/sign-in');
-    } catch (error) {
-      console.error('Sign out error:', error);
-      throw error;
-    }
-  }, [navigate]);
+      // Sign out from Firebase client
+      await auth.signOut();
+      
+      // Call server-side sign out
+      await fetch("/api/auth/sign-out", {
+        method: "POST",
+        credentials: "same-origin"
+      });
 
-  return {
-    handleSignOut
+      // Navigate to sign-in page
+      navigate("/auth/sign-in");
+    } catch (error) {
+      console.error("Sign out error:", error);
+      // Still navigate to sign-in even if there's an error
+      navigate("/auth/sign-in");
+    }
   };
+
+  return { handleSignOut };
 }
