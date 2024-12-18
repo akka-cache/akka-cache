@@ -18,7 +18,8 @@ import java.util.concurrent.CompletionStage;
 
 import com.akka.cache.domain.CacheAPI.*;
 
-@Acl(allow = @Acl.Matcher(service = "*"))
+// @Acl(allow = @Acl.Matcher(service = "*"))
+@Acl(allow = @Acl.Matcher(principal = Acl.Principal.INTERNET))
 @HttpEndpoint("/cache")
 public class CacheEndpoint {
     private static final Logger log = LoggerFactory.getLogger(CacheEndpoint.class);
