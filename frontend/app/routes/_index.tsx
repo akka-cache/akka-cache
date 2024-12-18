@@ -22,7 +22,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
         email: decodedClaims.email,
         displayName: decodedClaims.name || decodedClaims.email?.split('@')[0]
       },
-      claims: decodedClaims
+      claims: decodedClaims,
+      sessionCookie
     };
   } catch (error) {
     console.error("Session verification failed:", error);
@@ -31,7 +32,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export default function Index() {
-  const { user, claims } = useLoaderData<typeof loader>();
+  const { user, claims, sessionCookie } = useLoaderData<typeof loader>();
   const colors = {
     heading: useThemeColor('headingText'),
     body: useThemeColor('bodyText'),
@@ -40,6 +41,11 @@ export default function Index() {
   };
 
   console.log('Index route - Rendering with user:', user);
+
+  const sampleRequest = `GET /api/your-endpoint HTTP/1.1
+Host: your-domain.com
+Authorization: Bearer ${sessionCookie}
+Accept: application/json`;
 
   return (
     <Layout user={user}>
@@ -55,10 +61,24 @@ export default function Index() {
             Simplify your architecture
           </Text>
           
-          <div className="mt-8 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
-            <Text size="sm" className="mb-2" c={colors.secondary}>JWT Token Contents:</Text>
-            <pre className="whitespace-pre-wrap overflow-x-auto">
-              <code>{JSON.stringify(claims, null, 2)}</code>
+          <div className="mt-8 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+            <Text size="sm" className="mb-2 font-semibold text-gray-700 dark:text-gray-200">JWT Token:</Text>
+            <pre className="whitespace-pre-wrap overflow-x-auto p-3 bg-white dark:bg-gray-900 rounded border border-gray-100 dark:border-gray-600">
+              <code className="text-gray-900 dark:text-gray-100">{sessionCookie}</code>
+            </pre>
+          </div>
+
+          <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+            <Text size="sm" className="mb-2 font-semibold text-gray-700 dark:text-gray-200">Decoded JWT Claims:</Text>
+            <pre className="whitespace-pre-wrap overflow-x-auto p-3 bg-white dark:bg-gray-900 rounded border border-gray-100 dark:border-gray-600">
+              <code className="text-gray-900 dark:text-gray-100">{JSON.stringify(claims, null, 2)}</code>
+            </pre>
+          </div>
+
+          <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+            <Text size="sm" className="mb-2 font-semibold text-gray-700 dark:text-gray-200">Sample GET Request:</Text>
+            <pre className="whitespace-pre-wrap overflow-x-auto p-3 bg-white dark:bg-gray-900 rounded border border-gray-100 dark:border-gray-600">
+              <code className="text-gray-900 dark:text-gray-100">{sampleRequest}</code>
             </pre>
           </div>
         </div>
