@@ -12,16 +12,14 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Random;
 
 import static io.gatling.javaapi.core.CoreDsl.*;
 import static io.gatling.javaapi.http.HttpDsl.http;
 import static io.gatling.javaapi.http.HttpDsl.status;
 
-public class CacheLowLevlSetScenario extends Simulation {
-    private static final Logger log = LoggerFactory.getLogger(CacheLowLevlSetScenario.class);
+public class CacheLowLevelSetScenario extends Simulation {
+    private static final Logger log = LoggerFactory.getLogger(CacheLowLevelSetScenario.class);
 
     private Config config = ConfigFactory.load();
 
