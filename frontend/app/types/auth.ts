@@ -17,3 +17,10 @@ export interface AuthState {
   isLoading: boolean;
   user: UserData | null;
 }
+
+export interface AuthUser {
+  email: string;
+  displayName?: string;
+  emailVerified?: boolean;
+  uid: string;
+}

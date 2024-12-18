@@ -15,4 +15,4 @@ export async function requireAuth(request: Request) {
   } catch (error) {
     throw redirect('/auth/sign-in');
   }
-} 
+}
