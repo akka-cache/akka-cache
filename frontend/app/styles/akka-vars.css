@@ -1,0 +1,200 @@
+:root {
+  /* Base colors that don't change between themes */
+  --color-river-blue: #00DBDD;
+  --color-spark-yellow: #FFCE4A;
+  --color-fire-red: #FF5400;
+  --color-electric-green: #72D35B;
+  --color-accent-pink: #FB4852;
+
+  /* Default theme colors (dark mode) */
+  --color-black: #000000;
+  --color-heavy-black: #0D0D0D;
+  --color-medium-black: #141414;
+  --color-soft-black: #1A1A1A;
+  --color-medium-gray: #4E4E4E;
+  --color-soft-gray: #A6A6A6;
+  --color-white: #F1F1F1;
+
+  /* Light mode color mapping */
+  @media (prefers-color-scheme: light) {
+    --color-black: #F1F1F1;      /* Inverted from dark mode white */
+    --color-heavy-black: #FFFFFF; /* Pure white for maximum contrast */
+    --color-medium-black: #F8F9FA;
+    --color-soft-black: #F4F4F4;
+    --color-medium-gray: #ADB5BD;
+    --color-soft-gray: #495057;
+    --color-white: #1A1A1A;      /* Inverted from dark mode soft-black */
+
+    /* Button and Link Colors for light mode */
+    --button-bg: var(--color-river-blue);
+    --button-text: var(--color-heavy-black);
+    --button-hover-bg: var(--color-white);
+    --button-hover-text: var(--color-river-blue);
+  }
+
+  /* Typography */
+  --font-family-sans: 'Instrument Sans', sans-serif;
+
+  /* Default (Mobile) Typography */
+  --font-size-display-1: 60px;
+  --font-size-display-2: 52px;
+  --font-size-subtitle: 18px;
+  --font-size-h1: 48px;
+  --font-size-h2: 36px;
+  --font-size-h3: 20px;
+  --font-size-h4: 16px;
+  --font-size-body: 16px;
+
+  /* Line Heights */
+  --line-height-display-1: 100%;
+  --line-height-display-2: 100%;
+  --line-height-subtitle: 160%;
+  --line-height-h1: 100%;
+  --line-height-h2: 100%;
+  --line-height-h3: 125%;
+  --line-height-h4: 160%;
+  --line-height-body: 160%;
+
+  /* Font Weights - Same for both mobile and desktop */
+  --font-weight-display: 500;     /* Medium */
+  --font-weight-subtitle: 400;    /* Regular */
+  --font-weight-h1: 500;         /* Medium */
+  --font-weight-h2: 500;         /* Medium */
+  --font-weight-h3: 700;         /* Bold */
+  --font-weight-h4: 700;         /* Bold */
+  --font-weight-body: 500;       /* Medium */
+
+  /* Letter Spacing - Same for both mobile and desktop */
+  --letter-spacing-display: 0%;
+  --letter-spacing-subtitle: 0%;
+  --letter-spacing-h1: 0%;
+  --letter-spacing-h2: 0%;
+  --letter-spacing-h3: 0%;
+  --letter-spacing-h4: 0%;
+  --letter-spacing-body: 0%;
+
+  /* Subtitle and Display Typography */
+  --font-size-display-1: 135px;
+  --font-size-display-2: 110px;
+  --font-size-subtitle: 22px;
+
+  --line-height-display-1: 100%;
+  --line-height-display-2: 100%;
+  --line-height-subtitle: 160%;
+
+  --font-weight-display: 500;  /* Medium */
+  --font-weight-subtitle: 400; /* Regular */
+
+  --letter-spacing-display: 0%;
+  --letter-spacing-subtitle: 0%;
+
+  /* Button and Link Colors */
+  --button-bg: var(--color-river-blue);
+  --button-text: var(--color-black);
+  --button-hover-bg: var(--color-black);
+  --button-hover-border: var(--color-river-blue);
+  --button-hover-text: var(--color-river-blue);
+
+  --text-button-color: var(--color-river-blue);
+  --text-button-hover: var(--color-white);
+
+  --link-color: var(--color-river-blue);
+
+  /* Dark mode overrides */
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --color-black: #000000;
+      --color-heavy-black: #0D0D0D;
+      --color-medium-black: #141414;
+      --color-soft-black: #1A1A1A;
+      --color-medium-gray: #4E4E4E;
+      --color-soft-gray: #A6A6A6;
+      --color-white: #F1F1F1;
+    }
+  }
+}
+
+/* Desktop Typography (768px and above) */
+@media (min-width: 768px) {
+  :root {
+    --font-size-display-1: 135px;
+    --font-size-display-2: 110px;
+    --font-size-subtitle: 22px;
+    --font-size-h1: 92px;
+    --font-size-h2: 64px;
+    --font-size-h3: 24px;
+    --font-size-h4: 18px;
+    --font-size-body: 18px;
+
+    --line-height-h2: 120%;  /* Only line height that changes in desktop */
+  }
+}
+
+/* Button Utility Classes */
+.button {
+  background-color: var(--button-bg);
+  color: var(--button-text);
+  border: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.button:hover {
+  background-color: var(--button-hover-bg);
+  color: var(--button-hover-text);
+  border-color: var(--button-hover-border);
+}
+
+.text-button {
+  background: transparent;
+  color: var(--text-button-color);
+  transition: color 0.2s ease;
+}
+
+.text-button:hover {
+  color: var(--text-button-hover);
+}
+
+.link {
+  color: var(--link-color);
+  text-decoration: none;
+  transition: text-decoration 0.2s ease;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+/* Define color classes to match Style Guide */
+.cta {
+  color: var(--color-river-blue);
+}
+
+.hl {
+  color: var(--color-spark-yellow);
+}
+
+.muted {
+  color: var(--color-medium-gray);
+}
+
+/* Card styles */
+.mantine-Card-root {
+  border: 1px solid transparent;
+}
+
+.mantine-Card-root .mantine-Title-root {
+  color: var(--color-spark-yellow);
+}
+
+/* Card border variants */
+.mantine-Card-root.cta {
+  border-color: var(--color-river-blue);
+}
+
+.mantine-Card-root.hl {
+  border-color: var(--color-spark-yellow);
+}
+
+.mantine-Card-root.muted {
+  border-color: var(--color-medium-gray);
+}

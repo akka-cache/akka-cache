@@ -10,6 +10,19 @@ Modern web application built with Remix, Vite, TypeScript, Tailwind CSS, and Pla
 - **Tailwind CSS**: Utility-first CSS framework
 - **Playwright**: End-to-end testing framework
 
+## Prerequisites
+
+Before starting the development environment, ensure you have:
+
+1. A Firebase service account key file (`serviceAccountKey.json`)
+   - Obtain this from your Firebase Console (Project Settings > Service Accounts)
+   - Place it in the `/frontend` directory (not in `/frontend/app`)
+   - The file path should be `frontend/serviceAccountKey.json`
+
+2. A SESSION_SECRET environment variable in your `.env` file
+   - Generate it using: `openssl rand -base64 32`
+   - Add it to your `.env` file as: `SESSION_SECRET=your_generated_secret`
+
 ## Development
 
 Start the development environment:
@@ -22,11 +35,18 @@ Access the app at http://localhost:5173
 
 ## Testing
 
-Run end-to-end tests:
+Run end-to-end tests independently:
 
 ```bash
+# Build and run tests
+docker build -t frontend-test -f Dockerfile.test .
+docker run frontend-test
+
+# Or use docker compose
 docker compose -f docker-compose.test.yml up --build
 ```
+
+Note: Tests can be run independently from the development environment, as testing dependencies are isolated in their own container.
 
 ## Production
 
@@ -44,8 +64,8 @@ Access the production build at http://localhost:3000
 # Stop all containers
 docker compose stop
 
-# Remove containers
-docker compose rm -f
+# Remove containers, networks, and volumes
+docker compose down -v
 
 # Clean up networks
 docker network prune
