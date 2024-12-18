@@ -1,15 +1,16 @@
-// ~/app/routes/_public.auth.sign-up.tsx
 import { useState } from 'react';
 import { Card, Text } from '@mantine/core';
 import { SignUpForm } from '~/components/auth/sign-up-form';
 import { Logo, HeaderContent } from '~/components/auth/common';
 import { useThemeColor } from '~/utils/theme';
-import { useOutletContext, useActionData } from '@remix-run/react';
+import { useOutletContext, useActionData, useNavigation } from '@remix-run/react';
 import type { ActionFunction } from "@remix-run/node";
 import { adminAuth } from "~/utils/firebase-admin.server";
 import { createTempEmailSession } from "~/utils/session.server";
 import type { UserData } from '~/types/auth';
 import { getAuth, sendEmailVerification, signInWithCustomToken } from "firebase/auth";
+import { nanoid } from 'nanoid';
+import { Link } from '@remix-run/react';
 
 interface FirebaseAuthError extends Error {
   errorInfo?: {
@@ -60,6 +61,22 @@ export const action: ActionFunction = async ({ request }) => {
     });
 
     console.log("User created:", userRecord.uid);
+
+    // Set custom claims
+    const now = new Date().toISOString();
+    const customClaims = {
+      org_id: nanoid(8),
+      org_name: "not set",
+      created_at: now,
+      updated_at: now,
+      service_tier: "free",
+      consent_scope: "Terms of Service and Privacy Policy",
+      consent_date: now
+    };
+
+    // Set the custom claims for the user
+    await adminAuth.setCustomUserClaims(userRecord.uid, customClaims);
+    console.log("Custom claims set for user:", userRecord.uid);
 
     // Generate a custom token for the new user
     const customToken = await adminAuth.createCustomToken(userRecord.uid);
@@ -120,6 +137,7 @@ export const action: ActionFunction = async ({ request }) => {
 export default function SignUp() {
   const [localErrorMessage, setLocalErrorMessage] = useState('');
   const actionData = useActionData<typeof action>();
+  const navigation = useNavigation();
   
   const headingTextColor = useThemeColor('headingText');
   const bodyTextColor = useThemeColor('bodyText');
@@ -133,9 +151,12 @@ export default function SignUp() {
     );
   }
 
-  const status = actionData?.success ? 'success' : 
-                 actionData?.error || localErrorMessage ? 'error' : 
-                 'idle';
+  const isSubmitting = navigation.state === 'submitting';
+  
+  const status = isSubmitting ? 'loading' :
+                actionData?.success ? 'success' : 
+                actionData?.error || localErrorMessage ? 'error' : 
+                'idle';
 
   const handleSubmit = async (formData: {
     email: string;
@@ -168,6 +189,14 @@ export default function SignUp() {
             "We've sent you an email with a verification link. Click the link to complete your registration." : 
             undefined}
         />
+        <div className="text-center mt-4">
+          <Text size="sm" c={bodyTextColor}>
+            Already have an account?{' '}
+            <Link to="/auth/sign-in" className="text-blue-400 hover:underline">
+              Sign in
+            </Link>
+          </Text>
+        </div>
       </Card>
     </div>
   );

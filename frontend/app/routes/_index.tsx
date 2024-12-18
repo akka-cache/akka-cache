@@ -12,7 +12,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   const sessionCookie = session.get("session");
 
   if (!sessionCookie) {
-    return redirect("/auth/sign-in");
+    return redirect("/auth/sign-up");
   }
 
   try {

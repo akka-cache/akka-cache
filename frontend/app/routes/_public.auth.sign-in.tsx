@@ -8,6 +8,7 @@ import { EmailForm } from '~/components/auth/email-form';
 import { Logo, HeaderContent } from '~/components/auth/common';
 import { useThemeColor } from '~/utils/theme';
 import { useOutletContext } from '@remix-run/react';
+import { Link } from '@remix-run/react';
 
 type ActionData = {
   success?: boolean;
@@ -108,6 +109,14 @@ export default function SignIn() {
           errorMessage={actionData?.error}
           successMessage={actionData?.message}
         />
+        <div className="text-center mt-4">
+          <Text size="sm" c={bodyTextColor}>
+            Don't have an account?{' '}
+            <Link to="/auth/sign-up" className="text-blue-400 hover:underline">
+              Sign up
+            </Link>
+          </Text>
+        </div>
       </Card>
     </div>
   );

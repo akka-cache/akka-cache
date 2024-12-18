@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { TextInput, Stack, Checkbox, Alert, Button } from '@mantine/core';
+import { TextInput, Stack, Checkbox, Alert, Button, LoadingOverlay } from '@mantine/core';
 import { Link, Form } from '@remix-run/react'; 
 import { IconCheck, IconAlertCircle } from '@tabler/icons-react';
 import type { AuthStatus } from '~/types/auth';
@@ -27,8 +27,9 @@ export function SignUpForm({
   const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   const bodyTextColor = useThemeColor('bodyText');
+  const isLoading = status === 'loading';
+  const isSuccess = status === 'success';
 
-  // Remove handleSubmit entirely or modify it to not prevent default submission
   const handleClientValidation = async () => {
     if (!acceptedTerms) {
       return false;
@@ -37,84 +38,91 @@ export function SignUpForm({
   };
 
   return (
-    <Form method="post" className="space-y-4">
-      <Stack gap="md">
-        <TextInput
-          label="Email"
-          name="email" 
-          placeholder="Enter your email"
-          type="email"
-          size="md"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          disabled={status === 'loading' || status === 'success'}
-          required
-          classNames={{
-            label: 'text-gray-100'
-          }}
-        />
+    <div className="relative">
+      <LoadingOverlay 
+        visible={isLoading} 
+        loaderProps={{ size: 'md', color: 'blue' }}
+        overlayProps={{ blur: 2 }}
+      />
+      <Form method="post" className="space-y-4">
+        <Stack gap="md">
+          <TextInput
+            label="Email"
+            name="email" 
+            placeholder="Enter your email"
+            type="email"
+            size="md"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            disabled={isLoading || isSuccess}
+            required
+            classNames={{
+              label: 'text-gray-100'
+            }}
+          />
 
-        <TextInput
-          label="Display Name"
-          name="displayName" 
-          placeholder="Enter your full name"
-          size="md"
-          value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
-          disabled={status === 'loading' || status === 'success'}
-          required
-          classNames={{
-            label: 'text-gray-100'
-          }}
-        />
+          <TextInput
+            label="Display Name"
+            name="displayName" 
+            placeholder="Enter your full name"
+            size="md"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            disabled={isLoading || isSuccess}
+            required
+            classNames={{
+              label: 'text-gray-100'
+            }}
+          />
 
-        <input 
-          type="hidden" 
-          name="acceptedTerms" 
-          value={acceptedTerms.toString()} 
-        />
+          <input 
+            type="hidden" 
+            name="acceptedTerms" 
+            value={acceptedTerms.toString()} 
+          />
 
-        <Checkbox
-          label={
-            <span style={{ color: bodyTextColor }}>
-              I agree to the{' '}
-              <Link to="/legal/terms" className="text-blue-400 hover:underline">
-                Terms of Service
-              </Link>
-              {' '}and{' '}
-              <Link to="/legal/privacy" className="text-blue-400 hover:underline">
-                Privacy Policy
-              </Link>
-            </span>
-          }
-          checked={acceptedTerms}
-          onChange={(e) => setAcceptedTerms(e.target.checked)}
-          disabled={status === 'loading' || status === 'success'}
-          required
-        />
+          <Checkbox
+            label={
+              <span style={{ color: bodyTextColor }}>
+                I agree to the{' '}
+                <Link to="/legal/terms" className="text-blue-400 hover:underline">
+                  Terms of Service
+                </Link>
+                {' '}and{' '}
+                <Link to="/legal/privacy" className="text-blue-400 hover:underline">
+                  Privacy Policy
+                </Link>
+              </span>
+            }
+            checked={acceptedTerms}
+            onChange={(e) => setAcceptedTerms(e.target.checked)}
+            disabled={isLoading || isSuccess}
+            required
+          />
 
-        {status === 'success' && successMessage && (
-          <Alert icon={<IconCheck size={16} />} color="green">
-            {successMessage}
-          </Alert>
-        )}
+          {isSuccess && successMessage && (
+            <Alert icon={<IconCheck size={16} />} color="green">
+              {successMessage}
+            </Alert>
+          )}
 
-        {status === 'error' && errorMessage && (
-          <Alert icon={<IconAlertCircle size={16} />} color="red">
-            {errorMessage}
-          </Alert>
-        )}
+          {status === 'error' && errorMessage && (
+            <Alert icon={<IconAlertCircle size={16} />} color="red">
+              {errorMessage}
+            </Alert>
+          )}
 
-        <Button 
-          fullWidth 
-          size="md" 
-          type="submit"
-          loading={status === 'checking' || status === 'loading'}
-          disabled={status === 'success' || !acceptedTerms}
-        >
-          Create Account
-        </Button>
-      </Stack>
-    </Form>
+          <Button 
+            fullWidth 
+            size="md" 
+            type="submit"
+            loading={isLoading}
+            disabled={isSuccess || !acceptedTerms}
+          >
+            {isLoading ? 'Creating Account...' : 'Create Account'}
+          </Button>
+        </Stack>
+      </Form>
+    </div>
   );
 }

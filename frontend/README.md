@@ -19,6 +19,10 @@ Before starting the development environment, ensure you have:
    - Place it in the `/frontend` directory (not in `/frontend/app`)
    - The file path should be `frontend/serviceAccountKey.json`
 
+2. A SESSION_SECRET environment variable in your `.env` file
+   - Generate it using: `openssl rand -base64 32`
+   - Add it to your `.env` file as: `SESSION_SECRET=your_generated_secret`
+
 ## Development
 
 Start the development environment:

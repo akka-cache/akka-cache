@@ -41,7 +41,6 @@ export async function requireAuth(request: Request) {
     if (error instanceof AuthError) {
       console.error('Auth error:', { code: error.code, message: error.message });
       
-      // Different redirects based on error type
       if (error.code === 'auth/email-not-verified') {
         throw redirect('/auth/verify-email');
       }
@@ -49,7 +48,7 @@ export async function requireAuth(request: Request) {
       console.error('Unexpected auth error:', error);
     }
     
-    throw redirect('/auth/sign-in');
+    throw redirect('/auth/sign-up');
   }
 }
 
