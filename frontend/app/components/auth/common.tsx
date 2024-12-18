@@ -7,15 +7,15 @@ interface HeaderContentProps {
   textColor?: string;
 }
 
-export function Logo() {
+interface LogoProps {
+  logoUrl: string;
+  alt: string;
+}
+
+export function Logo({ logoUrl, alt }: LogoProps) {
   return (
     <div className="flex justify-center mb-8">
-      {/* Replace with your actual logo component */}
-      <img 
-        src="/images/logo.svg" 
-        alt="Logo" 
-        className="h-12 w-auto"
-      />
+      <img src={logoUrl} alt={alt} className="w-[150px] h-auto" />
     </div>
   );
 }

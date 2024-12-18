@@ -1,6 +1,6 @@
 import { json } from "@remix-run/node";
 import { useActionData } from "@remix-run/react";
-import { Card, Text } from '@mantine/core';
+import { Card, Text, useMantineColorScheme } from '@mantine/core';
 import { sendSignInLinkToEmail } from 'firebase/auth';
 import { auth } from '~/utils/firebase-config';
 import { createTempEmailSession } from '~/utils/session.server';
@@ -80,6 +80,7 @@ export default function SignIn() {
   const headingTextColor = useThemeColor('headingText');
   const bodyTextColor = useThemeColor('bodyText');
   const context = useOutletContext<string>();
+  const { colorScheme } = useMantineColorScheme();
 
   const formStatus = actionData?.success ? 'success' 
     : actionData?.error ? 'error' 
@@ -95,7 +96,10 @@ export default function SignIn() {
 
   return (
     <div className="w-full max-w-2xl mx-auto p-6">
-      <Logo />
+      <Logo 
+        logoUrl={colorScheme === 'dark' ? '/logo-dark.svg' : '/logo-light.svg'} 
+        alt="Logo" 
+      />
       <HeaderContent 
         title="Welcome Back"
         subtitle="Sign in to your account"
