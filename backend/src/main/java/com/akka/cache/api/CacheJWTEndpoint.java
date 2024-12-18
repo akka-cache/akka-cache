@@ -32,12 +32,13 @@ import java.util.concurrent.CompletionStage;
 
 @Acl(allow = @Acl.Matcher(principal = Acl.Principal.INTERNET))
 @HttpEndpoint
-@JWT(validate = JWT.JwtMethodMode.BEARER_TOKEN, bearerTokenIssuers = "gcp")
+@JWT(validate = JWT.JwtMethodMode.BEARER_TOKEN, bearerTokenIssuers = "https://session.firebase.google.com/akka-cache")
 public class CacheJWTEndpoint {
     private static final Logger log = LoggerFactory.getLogger(CacheJWTEndpoint.class);
 
-    private static final String ORG = "org";
+    private static final String ORG = "user_id";
     private static final String SERVICE_LEVEL = "serviceLevel";
+    private static final String FREE = "FREE";
     private static final String EXCEEDED_CACHED_ALLOTMENT = "You've exceeded maximum allow bytes cached for your account level.";
 
     private final ComponentClient componentClient;
@@ -86,7 +87,8 @@ public class CacheJWTEndpoint {
         }
         String serviceLevel = claims.get(SERVICE_LEVEL);
         if (serviceLevel == null) {
-            throw HttpException.badRequest(SERVICE_LEVEL + " not found in the JWT Token");
+//            throw HttpException.badRequest(SERVICE_LEVEL + " not found in the JWT Token");
+            serviceLevel = FREE;
         }
         return new OrgClaims(org, serviceLevel.toUpperCase());
     }
@@ -101,7 +103,7 @@ public class CacheJWTEndpoint {
     private CompletionStage<Boolean> doesExceedSubscription() {
         return getOrg(orgClaims.org()).thenApply(org -> {
             return switch (orgClaims.serviceLevel()) {
-                case "FREE" -> {
+                case FREE -> {
                     if (org.totalBytesCached() > freeServiceMaxCachedBytes) {
                         yield true;
                     }

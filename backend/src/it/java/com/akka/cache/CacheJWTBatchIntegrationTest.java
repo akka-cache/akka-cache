@@ -36,7 +36,7 @@ public class CacheJWTBatchIntegrationTest extends TestKitSupport {
     private static final Duration ONE_HUNDERED_MILLISECONDS = Duration.ofMillis(100);
 
     String bearerToken = bearerTokenWith(
-            Map.of("iss", "gcp", "org", ORG, "serviceLevel", "FREE")
+            Map.of("iss", "https://session.firebase.google.com/akka-cache", "user_id", ORG, "serviceLevel", "FREE")
     );
 
     @Override

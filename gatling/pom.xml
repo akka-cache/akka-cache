@@ -19,6 +19,7 @@
         <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <gatling.version>3.12.0</gatling.version>
+<!--        <gatling.version>3.13.1</gatling.version>-->
         <gatling.plugin.version>4.9.6</gatling.plugin.version>
     </properties>
 
