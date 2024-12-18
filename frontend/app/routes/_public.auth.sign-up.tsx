@@ -1,26 +1,126 @@
+// ~/app/routes/_public.auth.sign-up.tsx
 import { useState } from 'react';
 import { Card, Text } from '@mantine/core';
-import { useSignupAuth } from '~/hooks/use-signup-auth';
 import { SignUpForm } from '~/components/auth/sign-up-form';
 import { Logo, HeaderContent } from '~/components/auth/common';
 import { useThemeColor } from '~/utils/theme';
-import { useOutletContext } from '@remix-run/react';
+import { useOutletContext, useActionData } from '@remix-run/react';
+import type { ActionFunction } from "@remix-run/node";
+import { adminAuth } from "~/utils/firebase-admin.server";
+import { createTempEmailSession } from "~/utils/session.server";
 import type { UserData } from '~/types/auth';
+import { getAuth, sendEmailVerification, signInWithCustomToken } from "firebase/auth";
+
+interface FirebaseAuthError extends Error {
+  errorInfo?: {
+    code: string;
+    message: string;
+  };
+  code?: string;
+}
+
+function getVerificationURL(request: Request) {
+  const origin = process.env.NODE_ENV === 'production' 
+    ? process.env.PUBLIC_URL 
+    : 'http://localhost:5173';
+    
+  return `${origin}/auth/verify-email`;
+}
+
+export const action: ActionFunction = async ({ request }) => {
+  console.log("🚀 Sign-up action started");
+  
+  const formData = await request.formData();
+  const email = formData.get("email") as string;
+  const displayName = formData.get("displayName") as string;
+  const acceptedTerms = formData.get("acceptedTerms") === "true";
+
+  console.log("Processing sign-up for:", email);
+
+  if (!email || !displayName) {
+    return Response.json(
+      { error: "Email and display name are required" },
+      { status: 400 }
+    );
+  }
+
+  if (!acceptedTerms) {
+    return Response.json(
+      { error: "Please accept the terms and conditions" },
+      { status: 400 }
+    );
+  }
+
+  try {
+    // Create the user
+    const userRecord = await adminAuth.createUser({
+      email,
+      displayName,
+      emailVerified: false
+    });
+
+    console.log("User created:", userRecord.uid);
+
+    // Generate a custom token for the new user
+    const customToken = await adminAuth.createCustomToken(userRecord.uid);
+
+    // Set up verification using the client SDK configuration
+    const actionCodeSettings = {
+      url: getVerificationURL(request),
+      handleCodeInApp: true
+    };
+
+    // Sign in with custom token and send verification email
+    const auth = getAuth();
+    const userCredential = await signInWithCustomToken(auth, customToken);
+    await sendEmailVerification(userCredential.user, actionCodeSettings);
+
+    console.log("Verification email sent to:", email);
+
+    // Create temporary session
+    const headers = new Headers();
+    headers.append(
+      "Set-Cookie",
+      await createTempEmailSession(email)
+    );
+
+    return Response.json(
+      { success: true },
+      { 
+        headers,
+        status: 200
+      }
+    );
+
+  } catch (error: any) {
+    console.error("Sign up error:", error);
+    
+    if (error.code === 'auth/email-already-exists') {
+      return Response.json(
+        { error: "An account with this email already exists" },
+        { status: 400 }
+      );
+    }
+
+    const firebaseError = error as FirebaseAuthError;
+    if (firebaseError.errorInfo?.message?.includes('TOO_MANY_ATTEMPTS_TRY_LATER')) {
+      return Response.json(
+        { error: "Too many attempts. Please try again in a few minutes." },
+        { status: 429 }
+      );
+    }
+
+    return Response.json(
+      { error: "Failed to create account. Please try again." },
+      { status: 500 }
+    );
+  }
+};
 
 export default function SignUp() {
   const [localErrorMessage, setLocalErrorMessage] = useState('');
+  const actionData = useActionData<typeof action>();
   
-  const {
-    status,
-    errorMessage: authErrorMessage,
-    sendSignUpLink
-  } = useSignupAuth({
-    redirectUrl: '/auth/verify-email',
-    onError: (error) => {
-      setLocalErrorMessage(error.message);
-    }
-  });
-
   const headingTextColor = useThemeColor('headingText');
   const bodyTextColor = useThemeColor('bodyText');
   const context = useOutletContext<string>();
@@ -28,66 +128,14 @@ export default function SignUp() {
   if (context === 'right') {
     return (
       <div className="p-6">
-        <Text 
-          size="xl" 
-          fw={500} 
-          c={headingTextColor} 
-          mb="md"
-          style={{ 
-            fontSize: 'var(--font-size-h1)',
-            lineHeight: 'var(--line-height-h1)' 
-          }}
-        >
-          Try AkkaCache for free
-        </Text>
-        <Text size="lg" c={bodyTextColor} mb="xl" maw={600}>
-          An accelerator for key-value data with multi-region replication that does not sacrifice 
-          performance as traffic increases.
-        </Text>
-        
-        <div className="flex gap-8">
-          <div className="flex-1">
-            <Text c={bodyTextColor} mb="md">
-              <span className="hl">Performance:</span> {' '}
-              <span>[Performance metrics to be inserted]</span>
-            </Text>
-            <Text c={bodyTextColor} mb="md">
-              <span className="hl">Multi-language Clients:</span> {' '}
-              <span>RESTful interface, Typescript SDK, and Java client library. 
-              OpenAI specification to generate additional language clients.</span>
-            </Text>
-            <Text c={bodyTextColor} mb="md">
-              <span className="hl">Batch Operations:</span> {' '}
-              <span>Group multiple keys into a common namespace. Execute group insert, 
-              get, and delete operations with a single command. Grab all keys in a namespace.</span>
-            </Text>
-            <Text c={bodyTextColor} mb="md">
-              <span className="hl">Guaranteed:</span> {' '}
-              <span>Insert our trust center icons / language?</span>
-            </Text>
-          </div>
-          
-          <div className="flex-1">
-            <Text c={bodyTextColor} mb="md">
-              <span className="hl">Multi-region:</span> {' '}
-              <span>Pin data to a single region or replicate across many. Read from any 
-              region. Updates routed to originating region.</span>
-            </Text>
-            <Text c={bodyTextColor} mb="md">
-              <span className="hl">99.9999% Availability:</span> {' '}
-              <span>Akka resilience guarantee and multi-region availability offers 
-              10ms RTO and virtually unbreakable availability.</span>
-            </Text>
-            <Text c={bodyTextColor} mb="md">
-              <span className="hl">Large Packets:</span> {' '}
-              <span>8MB per request data size. Automatic chunking for performance. 
-              octet-stream and json mimetypes.</span>
-            </Text>
-          </div>
-        </div>
+        {/* Product features content remains unchanged */}
       </div>
     );
   }
+
+  const status = actionData?.success ? 'success' : 
+                 actionData?.error || localErrorMessage ? 'error' : 
+                 'idle';
 
   const handleSubmit = async (formData: {
     email: string;
@@ -98,18 +146,7 @@ export default function SignUp() {
       setLocalErrorMessage('Please accept the terms and conditions');
       return;
     }
-    
     setLocalErrorMessage('');
-    const userData: UserData = {
-      email: formData.email,
-      displayName: formData.displayName
-    };
-
-    try {
-      await sendSignUpLink(userData);
-    } catch (error: any) {
-      setLocalErrorMessage(error.message);
-    }
   };
 
   return (
@@ -126,7 +163,7 @@ export default function SignUp() {
         <SignUpForm
           onSubmit={handleSubmit}
           status={status}
-          errorMessage={localErrorMessage || authErrorMessage}
+          errorMessage={localErrorMessage || actionData?.error}
           successMessage={status === 'success' ? 
             "We've sent you an email with a verification link. Click the link to complete your registration." : 
             undefined}

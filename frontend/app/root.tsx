@@ -30,11 +30,10 @@ export const links: LinksFunction = () => [
 ];
 
 export async function loader({ request }: LoaderFunctionArgs) {
+  console.log("🔍 Root loader - Request headers:", request.headers);
   const session = await getSession(request.headers.get("Cookie"));
   const sessionCookie = session.get("session");
-
-  // Add debug logging
-  console.log("Root loader - Session cookie exists:", !!sessionCookie);
+  console.log("🔍 Root loader - Session cookie:", !!sessionCookie);
 
   if (sessionCookie) {
     try {

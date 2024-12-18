@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { TextInput, Stack, Checkbox, Alert, Button } from '@mantine/core';
-import { Link } from '@remix-run/react';
+import { Link, Form } from '@remix-run/react'; 
 import { IconCheck, IconAlertCircle } from '@tabler/icons-react';
 import type { AuthStatus } from '~/types/auth';
 import { useThemeColor } from '~/utils/theme';
@@ -28,20 +28,20 @@ export function SignUpForm({
 
   const bodyTextColor = useThemeColor('bodyText');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await onSubmit({
-      email,
-      displayName,
-      acceptedTerms
-    });
+  // Remove handleSubmit entirely or modify it to not prevent default submission
+  const handleClientValidation = async () => {
+    if (!acceptedTerms) {
+      return false;
+    }
+    return true;
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <Form method="post" className="space-y-4">
       <Stack gap="md">
         <TextInput
           label="Email"
+          name="email" 
           placeholder="Enter your email"
           type="email"
           size="md"
@@ -56,6 +56,7 @@ export function SignUpForm({
 
         <TextInput
           label="Display Name"
+          name="displayName" 
           placeholder="Enter your full name"
           size="md"
           value={displayName}
@@ -65,6 +66,12 @@ export function SignUpForm({
           classNames={{
             label: 'text-gray-100'
           }}
+        />
+
+        <input 
+          type="hidden" 
+          name="acceptedTerms" 
+          value={acceptedTerms.toString()} 
         />
 
         <Checkbox
@@ -108,6 +115,6 @@ export function SignUpForm({
           Create Account
         </Button>
       </Stack>
-    </form>
+    </Form>
   );
-} 
+}
