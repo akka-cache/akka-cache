@@ -11,6 +11,7 @@ import type { UserData } from '~/types/auth';
 import { getAuth, sendEmailVerification, signInWithCustomToken } from "firebase/auth";
 import { nanoid } from 'nanoid';
 import { Link } from '@remix-run/react';
+import { useMantineColorScheme } from '@mantine/core';
 
 interface FirebaseAuthError extends Error {
   errorInfo?: {
@@ -142,11 +143,86 @@ export default function SignUp() {
   const headingTextColor = useThemeColor('headingText');
   const bodyTextColor = useThemeColor('bodyText');
   const context = useOutletContext<string>();
+  const { colorScheme } = useMantineColorScheme();
 
   if (context === 'right') {
     return (
       <div className="p-6">
-        {/* Product features content remains unchanged */}
+        <Text 
+          className="mb-4 leading-tight"
+          style={{
+            fontSize: 'var(--font-size-h1)',
+            lineHeight: 'var(--line-height-h1)',
+            fontWeight: 'var(--font-weight-h1)'
+          }}
+          c={headingTextColor}
+        >
+          Try AkkaCache for free
+        </Text>
+        <Text 
+          className="leading-relaxed max-w-[600px] mb-8"
+          style={{
+            fontSize: 'var(--font-size-subtitle)',
+            lineHeight: 'var(--line-height-subtitle)',
+            fontWeight: 'var(--font-weight-subtitle)'
+          }}
+          c={bodyTextColor}
+        >
+          An accelerator for key-value data with multi-region replication that does not sacrifice performance as traffic increases.
+        </Text>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Left Column */}
+          <div className="space-y-6">
+            <div>
+              <Text fw={700} className="mb-2 hl">Performance</Text>
+              <Text c={bodyTextColor}>TBD</Text>
+            </div>
+            
+            <div>
+              <Text fw={700} className="mb-2 hl">Multi-language Clients</Text>
+              <Text c={bodyTextColor}>
+                RESTful interface, Typescript SDK, and Java client library. OpenAI specification to generate additional language clients.
+              </Text>
+            </div>
+            
+            <div>
+              <Text fw={700} className="mb-2 hl">Batch Operations</Text>
+              <Text c={bodyTextColor}>
+                Group multiple keys into a common namespace. Execute group insert, get, and delete operations with a single command. Grab all keys in a namespace.
+              </Text>
+            </div>
+            
+            <div>
+              <Text fw={700} className="mb-2 hl">Guaranteed</Text>
+              <Text c={bodyTextColor}>Insert our trust center icons / language?</Text>
+            </div>
+          </div>
+
+          {/* Right Column */}
+          <div className="space-y-6">
+            <div>
+              <Text fw={700} className="mb-2 hl">Multi-region</Text>
+              <Text c={bodyTextColor}>
+                Pin data to a single region or replicate across many. Read from any region. Updates routed to originating region.
+              </Text>
+            </div>
+            
+            <div>
+              <Text fw={700} className="mb-2 hl">99.9999% Availability</Text>
+              <Text c={bodyTextColor}>
+                Akka resilience guarantee and multi-region availability offers 10ms RTO and virtually unbreakable availability.
+              </Text>
+            </div>
+            
+            <div>
+              <Text fw={700} className="mb-2 hl">Large Packets</Text>
+              <Text c={bodyTextColor}>
+                8MB per request data size. Automatic chunking for performance. octet-stream and json mimetypes.
+              </Text>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -172,7 +248,10 @@ export default function SignUp() {
 
   return (
     <div className="w-full max-w-2xl mx-auto p-6">
-      <Logo />
+      <Logo 
+        logoUrl={colorScheme === 'dark' ? '/logo-dark.svg' : '/logo-light.svg'} 
+        alt="Logo" 
+      />
       <HeaderContent 
         title="Create an Account"
         subtitle="Sign up to get started"
