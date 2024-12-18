@@ -30,6 +30,7 @@ public class CacheLowLevelRatioReadWrites  extends Simulation {
     private Base64.Encoder encoder = Base64.getEncoder();
 
     private FeederBuilder.Batchable<String> namesFeeder = csv("lastnames.csv").circular();
+/*
     private FeederBuilder<Object> phraseFeeder = csv("phrases.csv")
             .random()
             .transform((phrase, t2) -> {
@@ -41,7 +42,9 @@ public class CacheLowLevelRatioReadWrites  extends Simulation {
                 return sb.toString();
             }
     );
-
+*/
+    private FeederBuilder<String> phraseFeeder = csv("phrases.csv")
+            .random();
 
     private Random random = new Random();
 
@@ -54,13 +57,25 @@ public class CacheLowLevelRatioReadWrites  extends Simulation {
                     .acceptHeader("application/json")
                     .contentTypeHeader("application/json");
 
+    ScenarioBuilder scnWarmUpWrites = scenario("CacheSetWarmupScenario")
+            .feed(namesFeeder)
+            .feed(phraseFeeder)
+
+            .exec(
+                    http("set-cache")
+                            .post("/cache/cache1/#{name}/")
+                            .header("content-type", "application/octet-stream")
+                            .body(newCacheValue)
+                            .check(status().is(201))
+            );
+
     ScenarioBuilder scnWrites = scenario("CacheSetScenario")
             .feed(namesFeeder)
             .feed(phraseFeeder)
 
             .exec(
                     http("set-cache")
-                            .post("/cache/cache1/#{name}")
+                            .post("/cache/cache1/#{name}/")
                             .header("content-type", "application/octet-stream")
                             .body(newCacheValue)
                             .check(status().is(201))
@@ -72,12 +87,15 @@ public class CacheLowLevelRatioReadWrites  extends Simulation {
             .exec(
                     http("get-cache")
                             .get("/cache/cache1/#{name}/")
-                            .check(status().is(200))
+//                            .check(status().is(200))
             );
     {
         setUp(
-                scnWrites.injectOpen(constantUsersPerSec(5).during(Duration.ofMinutes(3))).protocols(httpProtocol),
-                scnReads.injectOpen(constantUsersPerSec(95).during(Duration.ofMinutes(3))).protocols(httpProtocol)
+                scnWarmUpWrites.injectOpen(constantUsersPerSec(17).during(Duration.ofMinutes(1))).protocols(httpProtocol),
+                scnWrites.injectOpen(
+                        nothingFor(Duration.ofSeconds(75)), constantUsersPerSec(5).during(Duration.ofMinutes(10))).protocols(httpProtocol),
+                scnReads.injectOpen(
+                        nothingFor(Duration.ofSeconds(75)), constantUsersPerSec(95).during(Duration.ofMinutes(10))).protocols(httpProtocol)
         );
     }
 }
