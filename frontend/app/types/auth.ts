@@ -19,7 +19,7 @@ export interface AuthState {
 }
 
 export interface AuthUser {
-  email: string;
+  email?: string;
   displayName?: string;
   emailVerified?: boolean;
   uid: string;
