@@ -7,8 +7,6 @@
 /* You can override the default Infima variables here. */
 
 :root {
-  --akka-soft-white: #f1f1f1;
-  --akka-black: #1A1A1A;
   --akka-gray-dark: #313131;
   --akka-gray-900: #1A1A1A;
   --akka-gray-800: #2F2F2F;
@@ -32,8 +30,16 @@
   --akka-heavy-black: #0d0d0d;
   --akka-medium-black: #141414;
   --akka-soft-black: #1a1a1a;
+  --akka-soft-medium-black: #242424;
   --akka-medium-gray: #4e4e4e;
   --akka-soft-gray: #a6a6a6;
+  --akka-soft-white: #f1f1f1;
+  --akka-soft-medium-white: #E5E5E5;
+  --ifm-font-family-base: 'Instrument Sans', sans-serif;
+  --ifm-font-family-monospace: 'Roboto Mono', monospace;
+  --ifm-code-font-size: 95%;
+
+  /* primary */
   --ifm-color-primary: #f5b60b;
   --ifm-color-primary-dark: #dda409;
   --ifm-color-primary-darker: #d19b09;
@@ -41,22 +47,29 @@
   --ifm-color-primary-light: #f6bd24;
   --ifm-color-primary-lighter: #f7c130;
   --ifm-color-primary-lightest: #f8cc55;
-  --ifm-code-font-size: 95%;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
-  --ifm-link-color: #02a4a7;
-  --ifm-link-hover-color: #02a4a7;
-  --ifm-footer-background-color: #000000;
-  --ifm-font-family-base: 'Instrument Sans', sans-serif;
-  --ifm-font-family-monospace: 'Roboto Mono', monospace;
-  --ifm-footer-background-color: #ffffff;
-  --ifm-background-surface-color: #ffffff;
+  /* links */
+  --ifm-link-color: var(--akka-blue-dkr);
+  --ifm-link-hover-color: var(--akka-blue-dkr);
+  --ifm-pagination-nav-color-hover: var(--akka-blue-dkr);
+  /* background colors */
   --ifm-background-color: #ffffff;
-  --code-background-color: #242424;
-  /* --ifm-table-stripe-background: #f5f5f5; */
+  --ifm-navbar-background-color: #ffffff;
+  --ifm-background-surface-color: var(--akka-soft-white);
+  --ifm-card-background-color: var(--akka-soft-white);
+  /* tables */
+  --ifm-table-border-color: #ffffff;
+  --ifm-table-background: var(--akka-soft-white);
+  --ifm-table-stripe-background: var(--akka-soft-medium-white);
+  --ifm-table-head-background: var(--akka-soft-medium-black);
+  --ifm-table-head-color: var(--akka-yellow);
+  --ifm-table-head-font-weight: 700;
+  /* code */
+  --ifm-code-background: var(--akka-soft-white);
 }
 
 /* For readability concerns, you should choose a lighter palette in dark mode. */
 [data-theme='dark']:root {
+  /* primary */
   --ifm-color-primary: #ffce4a;
   --ifm-color-primary-dark: #ffc529;
   --ifm-color-primary-darker: #ffc119;
@@ -64,18 +77,40 @@
   --ifm-color-primary-light: #ffd76b;
   --ifm-color-primary-lighter: #ffdb7b;
   --ifm-color-primary-lightest: #ffe9ad;
-  --ifm-background-color: #000000;
-  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+  /* links */
   --ifm-link-color: var(--akka-blue);
   --ifm-link-hover-color: var(--akka-blue);
-  --ifm-footer-background-color: #1a1a1a;
-  --ifm-navbar-background-color: #000000;
-  --ifm-background-color: #000000;
-  --ifm-background-surface-color: #1a1a1a;
   --ifm-pagination-nav-color-hover: var(--akka-blue);
-  --ifm-card-background-color: var(--code-background-color);
-  --ifm-code-background: rgba(255, 255, 255, 0.2);
-  --ifm-color-secondary-contrast-background: #1a1a1a;
+  /* background colors */
+  --ifm-background-color: #000000;
+  --ifm-navbar-background-color: #000000;
+  --ifm-background-surface-color: var(--akka-soft-black);
+  --ifm-card-background-color: var(--akka-soft-black);
+  /* tables */
+  --ifm-table-border-color: #000000;
+  --ifm-table-background: var(--akka-soft-black);
+  --ifm-table-stripe-background: var(--akka-soft-medium-black);
+  --ifm-table-head-background: var(--akka-yellow);
+  --ifm-table-head-color: var(--akka-soft-black);
+  --ifm-table-head-font-weight: 700;
+  /* code */
+  --ifm-code-background: var(--akka-soft-medium-black);
+}
+
+
+.navbar__title {
+  font-size: 1.5rem;
+}
+code {
+  border-color: var(--akka-soft-medium-white);
+}
+
+[data-theme='dark'] code {
+  border-color: var(--akka-medium-gray);
+}
+
+table {
+  border-radius: 10px;
 }
 
 h1 {
@@ -87,11 +122,16 @@ h1 {
 }
 
 .footer--dark {
-  background-color: #000000;
+  background-color: var(--akka-soft-black);
+}
+
+.footer__copyright {
+  margin-top: 2rem;
+  font-size: .875rem;
 }
 
 [data-theme='dark'] .footer--dark {
-  border-top: 1px solid var(--ifm-toc-border-color);
+  border-top: 0px solid var(--ifm-toc-border-color);
 }
 
 .footer a {
@@ -115,34 +155,41 @@ h1 {
   color: var(--akka-yellow);
 }
 
+.theme-admonition-note {
+  border-color: var(--akka-yellow-dkr);
+  background-color: var(--akka-soft-white);
+}
+
 [data-theme='dark'] .theme-admonition-note {
   border-color: var(--akka-yellow);
-  background-color: var(--code-background-color);
+  background-color: var(--akka-soft-medium-black);
 }
-
 
 a.card {
-  background-color: #fff;
-  border-color: var(--ifm-color-gray-300);
+  background-color: var(--akka-soft-white);
+  border-color: var(--akka-soft-white);
+  box-shadow: none;
 }
+
 a.card:hover {
   border-color: var(--akka-blue);
-}
-a.card h2 {
-  color: var(--akka-yellow);
+  box-shadow: none;
 }
 
+a.card h2 {
+  color: var(--akka-yellow-dkr);
+}
 
 [data-theme='dark'] a.card {
-  background-color: var(--akka-black);
-  border-color: var(--akka-black);
+  background-color: var(--akka-soft-medium-black);
+  border-color: var(--akka-soft-black);
+  box-shadow: none;
 }
+
 [data-theme='dark'] a.card:hover {
   border-color: var(--akka-blue);
 }
+
 [data-theme='dark'] a.card h2 {
   color: var(--akka-yellow);
 }
-
-
-
