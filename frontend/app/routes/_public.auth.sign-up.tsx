@@ -63,6 +63,10 @@ export const action: ActionFunction = async ({ request }) => {
 
     console.log("User created:", userRecord.uid);
 
+    // Determine service tier based on email
+    const serviceTier = email.toLowerCase().endsWith('@akka.io') && 
+      email.includes('+gatling@akka.io') ? 'gatling' : 'free';
+
     // Set custom claims
     const now = new Date().toISOString();
     const customClaims = {
@@ -70,7 +74,7 @@ export const action: ActionFunction = async ({ request }) => {
       org_name: "not set",
       created_at: now,
       updated_at: now,
-      service_tier: "free",
+      service_tier: serviceTier,
       consent_scope: "Terms of Service and Privacy Policy",
       consent_date: now
     };
