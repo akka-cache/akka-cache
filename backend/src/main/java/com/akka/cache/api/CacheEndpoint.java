@@ -18,9 +18,12 @@ import java.util.concurrent.CompletionStage;
 
 import com.akka.cache.domain.CacheAPI.*;
 
+import static com.akka.cache.api.EndpointConstants.*;
+
 @Acl(allow = @Acl.Matcher(service = "*"))
-@HttpEndpoint("/cache")
+@HttpEndpoint(CACHE_PATH)
 public class CacheEndpoint {
+    // TODO: delete if not needed
     private static final Logger log = LoggerFactory.getLogger(CacheEndpoint.class);
 
     private final CacheAPICoreImpl core;
@@ -31,34 +34,34 @@ public class CacheEndpoint {
 
     // Cache Names -- BEGIN
 
-    @Post("/cacheName")
+    @Post(CACHE_NAME_PATH)
     public CompletionStage<HttpResponse> createCacheName(CacheNameRequest request) {
         return core.createCacheName(request);
     }
 
-    @Put("/cacheName")
+    @Put(CACHE_NAME_PATH)
     public CompletionStage<HttpResponse> updateCacheName(CacheNameRequest request) {
         return core.updateCacheName(request);
     }
 
-    @Get("/cacheName/{cacheName}")
+    @Get(CACHE_NAME_PATH + CACHE_NAME_REPLACE_PATH)
     public CompletionStage<CacheName> getCacheName(String cacheName) {
         return core.getCacheName(cacheName);
     }
 
-    @Get("/cacheName/{cacheName}/keys")
+    @Get(CACHE_NAME_PATH + CACHE_NAME_REPLACE_PATH + KEYS_PATH)
     public CompletionStage<CacheView.CacheSummaries> getCacheKeyList(String cacheName) {
         return core.getCacheKeyList(cacheName);
     }
 
     // This deletes the cacheName as well as all the keys
-    @Delete("/cacheName/{cacheName}")
+    @Delete(CACHE_NAME_PATH + CACHE_NAME_REPLACE_PATH)
     public CompletionStage<HttpResponse> deleteCacheKeys(String cacheName) {
         return core.deleteCacheKeys(cacheName, false);
     }
 
     // This deletes all the cached data but leaves the cacheName in place
-    @Put("/cacheName/{cacheName}/flush")
+    @Put(CACHE_NAME_PATH + CACHE_NAME_REPLACE_PATH + FLUSH_PATH)
     public CompletionStage<HttpResponse> flushCacheKeys(String cacheName) {
         return core.deleteCacheKeys(cacheName, true);
     }
@@ -68,7 +71,7 @@ public class CacheEndpoint {
     // Cache API -- BEGIN
 
     /* this is the JSON version of set */
-    @Post("/set")
+    @Post(SET_PATH)
     public CompletionStage<HttpResponse> cache(CacheRequest cacheRequest) {
         return core.cache(cacheRequest);
     }
@@ -79,18 +82,18 @@ public class CacheEndpoint {
      This solves the problem of having to convert into
      and out of ByteString for chunking.
     */
-    @Post("/{cacheName}/{key}/{ttlSeconds}")
+    @Post(CACHE_NAME_REPLACE_PATH + KEY_REPLACE_PATH + TTL_REPLACE_PATH)
     public CompletionStage<HttpResponse> cacheSet(String cacheName, String key, Integer ttlSeconds, HttpEntity.Strict strictRequestBody) {
         return core.cacheSet(Optional.empty(), cacheName, key, ttlSeconds, strictRequestBody);
     }
 
-    @Post("/{cacheName}/{key}")
+    @Post(CACHE_NAME_REPLACE_PATH + KEY_REPLACE_PATH)
     public CompletionStage<HttpResponse> cacheSet(String cacheName, String key, HttpEntity.Strict strictRequestBody) {
-        return core.cacheSet(Optional.empty(), cacheName, key, 0, strictRequestBody);
+        return core.cacheSet(Optional.empty(), cacheName, key, DEFAULT_TTL, strictRequestBody);
     }
 
     // this is a JSON verison of GET
-    @Get("/get/{cacheName}/{key}")
+    @Get(GET_PATH + CACHE_NAME_REPLACE_PATH + KEY_REPLACE_PATH)
     public CompletionStage<CacheGetResponse> getCache(String cacheName, String key) {
         return core.getCache(cacheName, key);
     }
@@ -101,32 +104,32 @@ public class CacheEndpoint {
      This solves the problem of having to convert into
      and out of ByteString for chunking.
     */
-    @Get("/{cacheName}/{key}")
+    @Get(CACHE_NAME_REPLACE_PATH + KEY_REPLACE_PATH)
     public CompletionStage<HttpResponse> getCacheGet(String cacheName, String key) {
         return core.getCacheGet(cacheName, key);
     }
 
-    @Get("/{cacheName}/keys")
+    @Get(CACHE_NAME_REPLACE_PATH + KEYS_PATH)
     public CompletionStage<CacheGetKeysResponse> getCacheKeys(String cacheName) {
         return core.getCacheKeys(cacheName);
     }
 
-    @Delete("/{cacheName}/{key}")
+    @Delete(CACHE_NAME_REPLACE_PATH + KEY_REPLACE_PATH)
     public CompletionStage<HttpResponse> delete(String cacheName, String key) {
         return core.delete(cacheName, key);
     }
 
-    @Post("/batch/")
+    @Post(BATCH_PATH)
     public CompletionStage<BatchCacheResponse> cacheBatch(BatchCacheRequest batchCacheRequest) {
         return core.cacheBatch(batchCacheRequest);
     }
 
-    @Post("/batch/get")
+    @Post(BATCH_PATH + GET_PATH)
     public CompletionStage<BatchGetCacheResponse> getCacheBatch(BatchGetCacheRequests getBatchRequests) {
         return core.getCacheBatch(getBatchRequests);
     }
 
-    @Delete("/batch/")
+    @Delete(BATCH_PATH)
     public CompletionStage<BatchDeleteCacheResponse> deleteCacheBatch(BatchGetCacheRequests getBatchRequests) {
         return core.deleteCacheBatch(getBatchRequests);
     }
