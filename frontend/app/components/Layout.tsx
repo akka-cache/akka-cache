@@ -26,7 +26,7 @@ import {
   IconPlus
 } from '@tabler/icons-react';
 import { ThemeToggle } from './ThemeToggle';
-import { useAuthActions, useAuthState } from '~/hooks';
+import { useAuthActions, useAuthState } from '~/contexts/auth-context';
 
 type BaseLink = {
   icon: React.ComponentType<any>;
