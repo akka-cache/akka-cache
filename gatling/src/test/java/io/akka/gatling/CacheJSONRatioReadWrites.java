@@ -19,44 +19,36 @@ import static io.gatling.javaapi.core.CoreDsl.*;
 import static io.gatling.javaapi.http.HttpDsl.http;
 import static io.gatling.javaapi.http.HttpDsl.status;
 
-public class CacheLowLevelRatioReadWrites  extends Simulation {
+public class CacheJSONRatioReadWrites extends Simulation {
     private static final Logger log = LoggerFactory.getLogger(CacheLowLevelSetScenario.class);
 
     private Config config = ConfigFactory.load();
 
     private String baseUrl = config.getString("loadtest.baseUrl");
-    private long targetObjectSize = config.getLong("loadtest.targetObjectSize");
 
     private Base64.Encoder encoder = Base64.getEncoder();
 
     private FeederBuilder.Batchable<String> namesFeeder = csv("lastnames.csv")
             .circular();
-/*
     private FeederBuilder<Object> phraseFeeder = csv("phrases.csv")
             .random()
             .transform((phrase, t2) -> {
-                long iterations = ((targetObjectSize / phrase.length()) + 1);
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < iterations; i++) {
-                    sb.append(phrase);
-                }
-                return sb.toString();
-            }
-    );
-*/
-    private FeederBuilder<String> phraseFeeder = csv("phrases.csv")
-            .random();
+                var encoded = encoder.encodeToString(
+                        phrase.getBytes(StandardCharsets.UTF_8) );
+                log.debug("phrase:".concat(phrase).concat("t2:").concat(t2));
+                return encoded;
+            });
 
     private Random random = new Random();
 
 //    private var Base64.getEncoder().encode("Test".getBytes());
 
-    Body.WithString newCacheValue = StringBody("#{phrase}");
+    Body.WithString newCacheValue = StringBody("{\"cacheName\":\"cache1\", \"key\":\"#{name}\", \"value\":\"#{phrase}\"}");
 
     HttpProtocolBuilder httpProtocol =
             http.baseUrl(baseUrl)
-                    .acceptHeader("application/octet-stream")
-                    .contentTypeHeader("application/octet-stream");
+                    .acceptHeader("application/json")
+                    .contentTypeHeader("application/json");
 
     ScenarioBuilder scnWarmUpWrites = scenario("CacheSetWarmupScenario")
             .feed(namesFeeder)
@@ -64,9 +56,8 @@ public class CacheLowLevelRatioReadWrites  extends Simulation {
 
             .exec(
                     http("warmup-set-cache")
-                            .post("/cache/cache1/#{name}/")
-                            .header("content-type", "application/octet-stream")
-                            .body(newCacheValue)
+                            .post("/cache/set")
+                            .body(newCacheValue).asJson()
                             .check(status().is(201))
             );
 
@@ -76,9 +67,8 @@ public class CacheLowLevelRatioReadWrites  extends Simulation {
 
             .exec(
                     http("set-cache")
-                            .post("/cache/cache1/#{name}/")
-                            .header("content-type", "application/octet-stream")
-                            .body(newCacheValue)
+                            .post("/cache/set")
+                            .body(newCacheValue).asJson()
                             .check(status().is(201))
             );
 
@@ -88,15 +78,16 @@ public class CacheLowLevelRatioReadWrites  extends Simulation {
             .exec(
                     http("get-cache")
                             .get("/cache/cache1/#{name}/")
-//                            .check(status().is(200))
+                            .check(status().is(200))
             );
     {
         setUp(
+//                scnWarmUpWrites.injectOpen(atOnceUsers(1)).protocols(httpProtocol)
                 scnWarmUpWrites.injectOpen(constantUsersPerSec(17).during(Duration.ofMinutes(1))).protocols(httpProtocol),
                 scnWrites.injectOpen(
-                        nothingFor(Duration.ofSeconds(75)), constantUsersPerSec(50).during(Duration.ofMinutes(10))).protocols(httpProtocol),
+                        nothingFor(Duration.ofSeconds(75)), constantUsersPerSec(5).during(Duration.ofMinutes(10))).protocols(httpProtocol),
                 scnReads.injectOpen(
-                        nothingFor(Duration.ofSeconds(75)), constantUsersPerSec(950).during(Duration.ofMinutes(10))).protocols(httpProtocol)
+                        nothingFor(Duration.ofSeconds(75)), constantUsersPerSec(95).during(Duration.ofMinutes(10))).protocols(httpProtocol)
         );
     }
 }
