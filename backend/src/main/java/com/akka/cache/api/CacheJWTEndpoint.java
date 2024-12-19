@@ -34,7 +34,7 @@ import static com.akka.cache.api.EndpointConstants.*;
 @HttpEndpoint
 @JWT(validate = JWT.JwtMethodMode.BEARER_TOKEN, bearerTokenIssuers = "https://session.firebase.google.com/akka-cache")
 public class CacheJWTEndpoint {
-    // TODO: Delete if not needed
+
     private static final Logger log = LoggerFactory.getLogger(CacheJWTEndpoint.class);
 
     private final ComponentClient componentClient;
@@ -91,7 +91,7 @@ public class CacheJWTEndpoint {
             // throw HttpException.badRequest(SERVICE_LEVEL + " not found in the JWT Token");
             serviceLevel = SERVICE_LEVEL_FREE;
         }
-        return new OrgClaims(org, serviceLevel.toUpperCase());
+        return new OrgClaims(org, serviceLevel.toLowerCase());
     }
 
     private CompletionStage<Organization> getOrg(String org) {
@@ -112,6 +112,7 @@ public class CacheJWTEndpoint {
                         yield false;
                     }
                 }
+                case SERVICE_LEVEL_GATLING -> false;
                 default -> {
                     throw HttpException.badRequest(String.format(SERVICE_LEVEL_JWT_ERR_MSG, orgClaims.serviceLevel()));
                 }

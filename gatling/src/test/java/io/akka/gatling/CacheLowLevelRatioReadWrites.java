@@ -94,9 +94,9 @@ public class CacheLowLevelRatioReadWrites  extends Simulation {
         setUp(
                 scnWarmUpWrites.injectOpen(constantUsersPerSec(17).during(Duration.ofMinutes(1))).protocols(httpProtocol),
                 scnWrites.injectOpen(
-                        nothingFor(Duration.ofSeconds(75)), constantUsersPerSec(50).during(Duration.ofMinutes(10))).protocols(httpProtocol),
+                        nothingFor(Duration.ofSeconds(75)), constantUsersPerSec(50/2).during(Duration.ofMinutes(10))).protocols(httpProtocol),
                 scnReads.injectOpen(
-                        nothingFor(Duration.ofSeconds(75)), constantUsersPerSec(950).during(Duration.ofMinutes(10))).protocols(httpProtocol)
+                        nothingFor(Duration.ofSeconds(75)), constantUsersPerSec(950/2).during(Duration.ofMinutes(10))).protocols(httpProtocol)
         );
     }
 }
