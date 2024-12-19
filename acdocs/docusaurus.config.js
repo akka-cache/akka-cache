@@ -55,6 +55,15 @@ const config = {
     ],
   ],
 
+  plugins: [
+    [
+      '@docusaurus/plugin-google-tag-manager',
+      {
+        containerId: 'GTM-WL2BG9MS',
+      },
+    ],
+  ],
+
   scripts: [
     {
       src: 'https://cdn.cookielaw.org/scripttemplates/otSDKStub.js',
