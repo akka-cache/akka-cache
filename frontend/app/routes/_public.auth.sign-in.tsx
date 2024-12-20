@@ -1,11 +1,11 @@
-import { json } from "@remix-run/node";
+import type { ActionFunction } from "@remix-run/node";
 import { useActionData } from "@remix-run/react";
 import { Card, Text, useMantineColorScheme } from '@mantine/core';
 import { sendSignInLinkToEmail } from 'firebase/auth';
 import { auth } from '~/utils/firebase-config';
 import { createTempEmailSession } from '~/utils/session.server';
 import { EmailForm } from '~/components/auth/email-form';
-import { Logo, HeaderContent } from '~/components/auth/common';
+import { Logo, HeaderContent, getAppOrigin } from '~/components/auth/common';
 import { useThemeColor } from '~/utils/theme';
 import { useOutletContext } from '@remix-run/react';
 import { Link } from '@remix-run/react';
@@ -16,23 +16,25 @@ type ActionData = {
   error?: string;
 };
 
-export async function action({ request }: { request: Request }) {
+export const action: ActionFunction = async ({ request }) => {
   console.log('Starting sign-in action');
   const formData = await request.formData();
   const email = formData.get("email") as string;
 
   if (!email) {
     console.log('No email provided');
-    return json<ActionData>({ error: "Email is required" }, { status: 400 });
+    return Response.json(
+      { error: "Email is required" }, 
+      { status: 400 }
+    );
   }
 
   try {
     console.log('Creating temp session for email:', email);
-    // Store auth action in temp session
     const headers = new Headers();
     headers.append("Set-Cookie", await createTempEmailSession(email));
 
-    const origin = process.env.APP_URL || request.headers.get("origin") || 'http://localhost:5173';
+    const origin = getAppOrigin(request);
     const actionCodeSettings = {
       url: `${origin}/auth/verify-email`,
       handleCodeInApp: true,
@@ -43,7 +45,7 @@ export async function action({ request }: { request: Request }) {
     await sendSignInLinkToEmail(auth, email, actionCodeSettings);
     console.log('Sign-in link sent successfully');
 
-    return json<ActionData>(
+    return Response.json(
       { success: true, message: "Check your email for the sign-in link" },
       { headers }
     );
@@ -68,7 +70,7 @@ export async function action({ request }: { request: Request }) {
       errorMessage = "Configuration error: Invalid continue URL.";
     }
 
-    return json<ActionData>(
+    return Response.json(
       { error: `${errorMessage} (${error.code})` },
       { status: 500 }
     );
