@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Card, Text } from '@mantine/core';
 import { SignUpForm } from '~/components/auth/sign-up-form';
-import { Logo, HeaderContent } from '~/components/auth/common';
+import { Logo, HeaderContent, getAppOrigin } from '~/components/auth/common';
 import { useThemeColor } from '~/utils/theme';
 import { useOutletContext, useActionData, useNavigation } from '@remix-run/react';
 import type { ActionFunction } from "@remix-run/node";
@@ -22,11 +22,7 @@ interface FirebaseAuthError extends Error {
 }
 
 function getVerificationURL(request: Request) {
-  const origin = process.env.NODE_ENV === 'production' 
-    ? process.env.PUBLIC_URL 
-    : 'http://localhost:5173';
-    
-  return `${origin}/auth/verify-email`;
+  return `${getAppOrigin(request)}/auth/verify-email`;
 }
 
 export const action: ActionFunction = async ({ request }) => {
@@ -38,6 +34,14 @@ export const action: ActionFunction = async ({ request }) => {
   const acceptedTerms = formData.get("acceptedTerms") === "true";
 
   console.log("Processing sign-up for:", email);
+
+  // Add server-side email validation
+  if (!email.toLowerCase().endsWith('@akka.io')) {
+    return Response.json(
+      { error: "Only @akka.io email addresses are allowed to sign up" },
+      { status: 403 }
+    );
+  }
 
   if (!email || !displayName) {
     return Response.json(
@@ -64,8 +68,7 @@ export const action: ActionFunction = async ({ request }) => {
     console.log("User created:", userRecord.uid);
 
     // Determine service tier based on email
-    const serviceLevel = email.toLowerCase().endsWith('@akka.io') && 
-      email.includes('+gatling@akka.io') ? 'gatling' : 'free';
+    const serviceLevel = email.includes('+gatling@akka.io') ? 'gatling' : 'free';
 
     // Set custom claims
     const now = new Date().toISOString();
@@ -243,11 +246,22 @@ export default function SignUp() {
     displayName: string;
     acceptedTerms: boolean;
   }) => {
+    // Reset any existing error message
+    setLocalErrorMessage('');
+
+    // Early validation for terms
     if (!formData.acceptedTerms) {
       setLocalErrorMessage('Please accept the terms and conditions');
-      return;
+      return false; // Prevent form submission
     }
-    setLocalErrorMessage('');
+
+    // Early validation for email domain
+    if (!formData.email.toLowerCase().endsWith('@akka.io')) {
+      setLocalErrorMessage('Sign up are currently disabled. Please try again after January 8th, 2025.');
+      return false; // Prevent form submission
+    }
+
+    return true; // Allow form submission
   };
 
   return (

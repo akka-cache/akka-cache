@@ -10,7 +10,7 @@ interface SignUpFormProps {
     email: string;
     displayName: string;
     acceptedTerms: boolean;
-  }) => Promise<void>;
+  }) => Promise<boolean>;
   status: AuthStatus;
   errorMessage?: string;
   successMessage?: string;
@@ -30,11 +30,18 @@ export function SignUpForm({
   const isLoading = status === 'loading';
   const isSuccess = status === 'success';
 
-  const handleClientValidation = async () => {
-    if (!acceptedTerms) {
-      return false;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const isValid = await onSubmit({
+      email,
+      displayName,
+      acceptedTerms
+    });
+
+    if (isValid) {
+      (e.target as HTMLFormElement).submit();
     }
-    return true;
   };
 
   return (
@@ -44,7 +51,7 @@ export function SignUpForm({
         loaderProps={{ size: 'md', color: 'blue' }}
         overlayProps={{ blur: 2 }}
       />
-      <Form method="post" className="space-y-4">
+      <Form method="post" className="space-y-4" onSubmit={handleSubmit}>
         <Stack gap="md">
           <TextInput
             label="Email"
