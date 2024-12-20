@@ -15,7 +15,7 @@ interface LogoProps {
 export function Logo({ logoUrl, alt }: LogoProps) {
   return (
     <div className="flex justify-center mb-8">
-      <img src={logoUrl} alt={alt} className="w-[150px] h-auto" />
+      <img src={logoUrl} alt={alt} className="h-auto" />
     </div>
   );
 }

@@ -64,19 +64,19 @@ export const action: ActionFunction = async ({ request }) => {
     console.log("User created:", userRecord.uid);
 
     // Determine service tier based on email
-    const serviceTier = email.toLowerCase().endsWith('@akka.io') && 
+    const serviceLevel = email.toLowerCase().endsWith('@akka.io') && 
       email.includes('+gatling@akka.io') ? 'gatling' : 'free';
 
     // Set custom claims
     const now = new Date().toISOString();
     const customClaims = {
-      org_id: nanoid(8),
-      org_name: "not set",
-      created_at: now,
-      updated_at: now,
-      service_tier: serviceTier,
-      consent_scope: "Terms of Service and Privacy Policy",
-      consent_date: now
+      org: nanoid(8),
+      orgName: "not set",
+      createdAt: now,
+      updatedAt: now,
+      serviceLevel: serviceLevel,
+      consentScope: "Terms of Service and Privacy Policy",
+      consentDate: now
     };
 
     // Set the custom claims for the user
