@@ -30,7 +30,7 @@ jobs:
           working-directory: ./acdocs
           
         - name: Build website
-          run: yarn build
+          run: yarn build 
           working-directory: ./acdocs
   
         - name: Upload Build Artifact
