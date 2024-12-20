@@ -21,7 +21,7 @@ jobs:
           
         - uses: actions/setup-node@v4
           with:
-            node-version: 18
+            node-version: 22
             cache: yarn
             cache-dependency-path: ./acdocs/yarn.lock
   
@@ -36,7 +36,7 @@ jobs:
         - name: Upload Build Artifact
           uses: actions/upload-pages-artifact@v3
           with:
-            path: build
+            path: acdocs
   
         - name: Deploy to GitHub Pages
           id: deployment
