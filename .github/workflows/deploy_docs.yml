@@ -37,4 +37,4 @@ jobs:
           run: GIT_USER="akka-cache-robot" yarn deploy
           working-directory: ./acdocs
           env:
-            GITHUB_TOKEN: ${{ secrets.AKKA_CACHE_ROBOT_REPO_TOKEN }}
+            GITHUB_TOKEN: ${{ secrets.AKKA_CACHE_ROBOT_REPO_TOKEN }} 
