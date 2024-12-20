@@ -58,7 +58,7 @@ export const action: ActionFunction = async ({ request }) => {
   }
 
   try {
-    // Create the user
+    // First create the user in Firebase Auth
     const userRecord = await adminAuth.createUser({
       email,
       displayName,
@@ -67,9 +67,6 @@ export const action: ActionFunction = async ({ request }) => {
 
     console.log("User created:", userRecord.uid);
 
-    // Determine service tier based on email
-    const serviceLevel = email.includes('+gatling@akka.io') ? 'gatling' : 'free';
-
     // Set custom claims
     const now = new Date().toISOString();
     const customClaims = {
@@ -77,23 +74,22 @@ export const action: ActionFunction = async ({ request }) => {
       orgName: "not set",
       createdAt: now,
       updatedAt: now,
-      serviceLevel: serviceLevel,
+      serviceLevel: email.includes('+gatling@akka.io') ? 'gatling' : 'free',
       consentScope: "Terms of Service and Privacy Policy",
       consentDate: now
     };
 
-    // Set the custom claims for the user
     await adminAuth.setCustomUserClaims(userRecord.uid, customClaims);
     console.log("Custom claims set for user:", userRecord.uid);
-
-    // Generate a custom token for the new user
-    const customToken = await adminAuth.createCustomToken(userRecord.uid);
 
     // Set up verification using the client SDK configuration
     const actionCodeSettings = {
       url: getVerificationURL(request),
       handleCodeInApp: true
     };
+
+    // Generate a custom token for the new user to sign them in
+    const customToken = await adminAuth.createCustomToken(userRecord.uid);
 
     // Sign in with custom token and send verification email
     const auth = getAuth();
