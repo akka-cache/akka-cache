@@ -1,3 +1,4 @@
+# docker-compose.yml
 services:
   frontend-dev:
     build:
@@ -8,14 +9,24 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
+      - ./serviceAccountKey.json:/app/serviceAccountKey.json:ro
     environment:
       - NODE_ENV=development
+      - SESSION_SECRET=${SESSION_SECRET}
+      - APP_URL=${APP_URL:-http://localhost:5173}
+    env_file:
+      - .env
 
-  frontend-prod:
-    build:
-      context: .
-      dockerfile: Dockerfile.prod
-    ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=production
+# Comment out or remove the production configuration for now
+#  frontend-prod:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile.prod
+#    ports:
+#      - "3000:3000"
+#    volumes:
+#      - ./serviceAccountKey.json:/app/serviceAccountKey.json:ro
+#    environment:
+#      - NODE_ENV=production
+#      - SESSION_SECRET=${SESSION_SECRET}
+#      - APP_URL=${APP_URL:-http://localhost:3000}

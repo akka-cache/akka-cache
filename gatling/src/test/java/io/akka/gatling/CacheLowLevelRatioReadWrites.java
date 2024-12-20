@@ -29,7 +29,8 @@ public class CacheLowLevelRatioReadWrites  extends Simulation {
 
     private Base64.Encoder encoder = Base64.getEncoder();
 
-    private FeederBuilder.Batchable<String> namesFeeder = csv("lastnames.csv").circular();
+    private FeederBuilder.Batchable<String> namesFeeder = csv("lastnames.csv")
+            .circular();
 /*
     private FeederBuilder<Object> phraseFeeder = csv("phrases.csv")
             .random()
@@ -54,15 +55,15 @@ public class CacheLowLevelRatioReadWrites  extends Simulation {
 
     HttpProtocolBuilder httpProtocol =
             http.baseUrl(baseUrl)
-                    .acceptHeader("application/json")
-                    .contentTypeHeader("application/json");
+                    .acceptHeader("application/octet-stream")
+                    .contentTypeHeader("application/octet-stream");
 
     ScenarioBuilder scnWarmUpWrites = scenario("CacheSetWarmupScenario")
             .feed(namesFeeder)
             .feed(phraseFeeder)
 
             .exec(
-                    http("set-cache")
+                    http("warmup-set-cache")
                             .post("/cache/cache1/#{name}/")
                             .header("content-type", "application/octet-stream")
                             .body(newCacheValue)
@@ -93,9 +94,9 @@ public class CacheLowLevelRatioReadWrites  extends Simulation {
         setUp(
                 scnWarmUpWrites.injectOpen(constantUsersPerSec(17).during(Duration.ofMinutes(1))).protocols(httpProtocol),
                 scnWrites.injectOpen(
-                        nothingFor(Duration.ofSeconds(75)), constantUsersPerSec(5).during(Duration.ofMinutes(10))).protocols(httpProtocol),
+                        nothingFor(Duration.ofSeconds(75)), constantUsersPerSec(50).during(Duration.ofMinutes(10))).protocols(httpProtocol),
                 scnReads.injectOpen(
-                        nothingFor(Duration.ofSeconds(75)), constantUsersPerSec(95).during(Duration.ofMinutes(10))).protocols(httpProtocol)
+                        nothingFor(Duration.ofSeconds(75)), constantUsersPerSec(950).during(Duration.ofMinutes(10))).protocols(httpProtocol)
         );
     }
 }

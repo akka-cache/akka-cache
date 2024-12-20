@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="232px" height="44px" viewBox="0 0 232 44" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>akkacache-dark</title>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd" font-family="InstrumentSans-Regular_Bold, Instrument Sans" font-size="36" font-weight="bold">
+        <g id="akkacache-dark">
+            <text id="AKKA" fill="#F1F1F1">
+                <tspan x="0.512" y="35">AKKA</tspan>
+            </text>
+            <text id="CACHE" fill="#FFCE4A">
+                <tspan x="102.524" y="35">CACHE</tspan>
+            </text>
+        </g>
+    </g>
+</svg>

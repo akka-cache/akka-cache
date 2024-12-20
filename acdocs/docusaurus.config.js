@@ -24,8 +24,8 @@ const config = {
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'Akka.io', // Usually your GitHub org/user name.
-  projectName: 'AkkaCache.io', // Usually your repo name.
+  organizationName: 'akka-cache', // Usually your GitHub org/user name.
+  projectName: 'akka-cache', // Usually your repo name.
 
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
@@ -52,6 +52,15 @@ const config = {
           customCss: './src/css/custom.css',
         },
       }),
+    ],
+  ],
+
+  plugins: [
+    [
+      '@docusaurus/plugin-google-tag-manager',
+      {
+        containerId: 'GTM-WL2BG9MS',
+      },
     ],
   ],
 
