@@ -34,7 +34,14 @@ jobs:
           working-directory: ./acdocs
 
         - name: Deploy website
-          run: GIT_USER="akka-cache-robot" yarn deploy
+          run: |
+            git config --global user.name "akka-cache-robot"
+            echo "machine github.com login akka-cache-robot password ${{ secrets.AKKA_CACHE_ROBOT_REPO_TOKEN }} " > ~/.netrc
+            yarn install && GIT_USER=akka-cache-robot yarn run publish-gh-pages
           working-directory: ./acdocs
           env:
             GITHUB_TOKEN: ${{ secrets.AKKA_CACHE_ROBOT_REPO_TOKEN }} 
+
+
+
+            
