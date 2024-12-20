@@ -3,30 +3,42 @@ on:
   push:
     branches: [ main ]
 
+environment:
+  name: github-pages
+  url: ${{ steps.deployment.outputs.page_url }}
+
+permissions:
+  pages: write
+  id-token: write
+
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Setup Node
-        uses: actions/setup-node@v2
+      - uses: actions/checkout@v4
         with:
-          node-version: '22.x'
+          fetch-depth: 0
+          
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: yarn
 
       - name: Install dependencies
-        run: yarn install
+        run: yarn install --frozen-lockfile
         working-directory: ./acdocs
-
-      - name: Build the site
+        
+      - name: Build website
         run: yarn build
         working-directory: ./acdocs
 
+      - name: Upload Build Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build
+
       - name: Deploy to GitHub Pages
-        run: yarn deploy
-        working-directory: ./acdocs
-        env:
-          GIT_USER: akka-cache-robot
-          GITHUB_TOKEN: ${{ secrets.AKKA_CACHE_ROBOT_REPO_TOKEN }}
+        id: deployment
+        uses: actions/deploy-pages@v4
+      
