@@ -18,12 +18,15 @@ jobs:
 
       - name: Install dependencies
         run: yarn install
+        working-directory: ./acdocs
 
       - name: Build the site
         run: yarn build
+        working-directory: ./acdocs
 
       - name: Deploy to GitHub Pages
         run: yarn deploy
+        working-directory: ./acdocs
         env:
           GIT_USER: akka-cache-robot
           GITHUB_TOKEN: ${{ secrets.AKKA_CACHE_ROBOT_REPO_TOKEN }}
