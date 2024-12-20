@@ -1,4 +1,4 @@
-# Akka Cache Frontend
+# Akka Cache Frontend 
 
 Modern web application built with Remix, Vite, TypeScript, Tailwind CSS, and Playwright.
 
