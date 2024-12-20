@@ -24,10 +24,10 @@ const config = {
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
-  organizationName: 'Akka.io', // Usually your GitHub org/user name.
-  projectName: 'AkkaCache.io', // Usually your repo name.
+  organizationName: 'akka-cache', // Usually your GitHub org/user name.
+  projectName: 'akka-cache', // Usually your repo name.
 
-  onBrokenLinks: 'throw',
+  onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
 
   // Even if you don't use internationalization, you can use this field to set
