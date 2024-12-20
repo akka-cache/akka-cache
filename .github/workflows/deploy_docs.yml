@@ -6,13 +6,6 @@ on:
 jobs:
     build-and-deploy:
       runs-on: ubuntu-latest
-      environment:
-        name: github-pages
-        url: ${{ steps.deployment.outputs.page_url }}
-    
-      permissions:
-        pages: write
-        id-token: write
         
       steps:
         - uses: actions/checkout@v4
@@ -34,7 +27,10 @@ jobs:
           working-directory: ./acdocs
 
         - name: Deploy website
-          run: GIT_USER=akka-cache-robot yarn deploy
+          run: |
+            git config --global user.email "akka-cache-robot@akka.io"
+            git config --global user.name "akka-cache-robot"
+            GIT_USER='akka-cache-robot' GIT_PASS='${{ secrets.AKKA_CACHE_ROBOT_REPO_TOKEN }}' yarn deploy
           working-directory: ./acdocs
           env:
             GIT_PASS: ${{ secrets.AKKA_CACHE_ROBOT_REPO_TOKEN }} 
