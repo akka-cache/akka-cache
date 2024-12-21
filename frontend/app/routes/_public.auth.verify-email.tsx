@@ -1,4 +1,4 @@
-import { redirect, json, type LoaderFunctionArgs } from "@remix-run/node";
+import { redirect, type LoaderFunctionArgs } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import { isSignInWithEmailLink, signInWithEmailLink } from "firebase/auth";
 import { auth } from "~/utils/firebase-config";
@@ -13,6 +13,7 @@ import {
 import { adminAuth } from "~/utils/firebase-admin.server";
 import { Card, Loader, Text } from '@mantine/core';
 import { useThemeColor } from '~/utils/theme';
+import { getAuth } from "firebase/auth";
 
 interface LoaderData {
   error?: string;
@@ -22,10 +23,20 @@ const SESSION_EXPIRY = 60 * 60 * 24 * 5 * 1000; // 5 days
 
 export async function loader({ request }: LoaderFunctionArgs) {
   console.log("Verify Email Loader - Starting");
+  console.log("Request URL:", request.url);
+  
+  // Use the configured auth instance instead of getting a new one
+  if (auth.currentUser) {
+    await auth.signOut();
+  }
 
   // Validate that this is a legitimate email verification link
-  if (!isSignInWithEmailLink(auth, request.url)) {
+  const isValidLink = isSignInWithEmailLink(auth, request.url);
+  console.log("Is valid email link?", isValidLink);
+  
+  if (!isValidLink) {
     console.log("Not a valid email verification link");
+    console.log("URL components:", new URL(request.url));
     return redirect("/auth/sign-in?error=invalid-link");
   }
 
@@ -130,7 +141,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
     }
   } catch (error: any) {
     console.error("Verify Email Error:", error);
-    return json<LoaderData>(
+    return Response.json(
       { error: "An unexpected error occurred. Please try signing in again." },
       { status: 500 }
     );

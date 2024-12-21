@@ -6,7 +6,7 @@ import { useThemeColor } from '~/utils/theme';
 import { useOutletContext, useActionData, useNavigation } from '@remix-run/react';
 import type { ActionFunction } from "@remix-run/node";
 import { adminAuth } from "~/utils/firebase-admin.server";
-import { createTempEmailSession } from "~/utils/session.server";
+import { createTempEmailSession, getSession, destroySession } from "~/utils/session.server";
 import type { UserData } from '~/types/auth';
 import { getAuth, sendEmailVerification, signInWithCustomToken } from "firebase/auth";
 import { nanoid } from 'nanoid';
@@ -22,12 +22,24 @@ interface FirebaseAuthError extends Error {
 }
 
 function getVerificationURL(request: Request) {
-  return `${getAppOrigin(request)}/auth/verify-email`;
+  const origin = getAppOrigin(request);
+  if (process.env.NODE_ENV === 'development') {
+    return `http://localhost:5173/auth/verify-email?from=signup`;
+  }
+  return `${origin}/auth/verify-email?from=signup`;
 }
 
 export const action: ActionFunction = async ({ request }) => {
   console.log("🚀 Sign-up action started");
   
+  // Get and destroy any existing session
+  const existingSession = await getSession(request.headers.get("Cookie"));
+  const headers = new Headers();
+  
+  if (existingSession.has("session")) {
+    headers.append("Set-Cookie", await destroySession(existingSession));
+  }
+
   const formData = await request.formData();
   const email = formData.get("email") as string;
   const displayName = formData.get("displayName") as string;
@@ -95,11 +107,13 @@ export const action: ActionFunction = async ({ request }) => {
     const auth = getAuth();
     const userCredential = await signInWithCustomToken(auth, customToken);
     await sendEmailVerification(userCredential.user, actionCodeSettings);
+    
+    // Sign out the user after sending verification email
+    await auth.signOut();
 
     console.log("Verification email sent to:", email);
 
     // Create temporary session
-    const headers = new Headers();
     headers.append(
       "Set-Cookie",
       await createTempEmailSession(email)
