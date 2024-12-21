@@ -1,4 +1,6 @@
 import admin from 'firebase-admin';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 
 if (!admin.apps.length) {
   if (process.env.NODE_ENV === 'production') {
@@ -14,10 +16,7 @@ if (!admin.apps.length) {
     }
   } else {
     // In development, read from file
-    const { readFileSync } = require('fs');
-    const path = require('path');
-    
-    const serviceAccountPath = path.resolve(
+    const serviceAccountPath = resolve(
       process.cwd(),
       process.env.FIREBASE_SERVICE_ACCOUNT_PATH || './serviceAccountKey.json'
     );

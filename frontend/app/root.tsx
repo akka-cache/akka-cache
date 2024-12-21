@@ -13,7 +13,7 @@ import theme from './utils/theme';
 import "./styles/tailwind.css";
 import { redirect } from '@remix-run/node';
 import { adminAuth } from '~/utils/firebase-admin.server';
-import { getSession } from '~/utils/session.server';
+import { getSession, destroySession } from '~/utils/session.server';
 import { AuthProvider } from '~/contexts/auth-context';
 
 export const links: LinksFunction = () => [
@@ -53,6 +53,26 @@ export const links: LinksFunction = () => [
 ];
 
 export async function loader({ request }: LoaderFunctionArgs) {
+  const url = new URL(request.url);
+  
+  // Skip authentication and clear session for verify-email and sign-up routes
+  if (url.pathname === '/auth/verify-email' || url.pathname === '/auth/sign-up') {
+    const session = await getSession(request.headers.get("Cookie"));
+    if (session.has("session")) {
+      // Return a response with headers to clear the session
+      return new Response(
+        JSON.stringify({ user: null }), 
+        {
+          headers: {
+            "Content-Type": "application/json",
+            "Set-Cookie": await destroySession(session)
+          }
+        }
+      );
+    }
+    return { user: null };
+  }
+
   console.log("🔍 Root loader - Request headers:", request.headers);
   const session = await getSession(request.headers.get("Cookie"));
   const sessionCookie = session.get("session");
