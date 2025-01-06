@@ -92,7 +92,7 @@ public class CacheJWTEndpoint {
             // throw HttpException.badRequest(SERVICE_LEVEL + " not found in the JWT Token");
             serviceLevel = SERVICE_LEVEL_FREE;
         }
-        return new OrgClaims(org, serviceLevel.toUpperCase());
+        return new OrgClaims(org, serviceLevel.toLowerCase());
     }
 
     private CompletionStage<Organization> getOrg(String org) {
