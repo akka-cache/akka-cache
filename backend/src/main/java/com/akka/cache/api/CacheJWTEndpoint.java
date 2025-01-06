@@ -17,6 +17,7 @@ import com.akka.cache.application.OrgEntity;
 import com.akka.cache.domain.CacheAPI.*;
 import com.akka.cache.domain.CacheName;
 import com.akka.cache.domain.Organization;
+import com.akka.cache.injection.PrometheusMetrics;
 import com.typesafe.config.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,8 +43,7 @@ public class CacheJWTEndpoint {
     
     private final CacheAPICoreImpl core;
     
-    // TODO: delete if not needed
-    private final RequestContext requestContext;
+    private final PrometheusMetrics metrics;
 
     // TODO: if we decide to throttle at the node level
     // private final int rateLimitDefaultRPS;
@@ -52,13 +52,13 @@ public class CacheJWTEndpoint {
     // // if done at org level, then we'd need to injest the following as stateful
     // private final Map<String, OrgStats> orgLimitMap = Maps.newConcurrentMap();
 
-    private long freeServiceMaxCachedBytes;
+    private final long freeServiceMaxCachedBytes;
 
     private final Map<String, String> claims;
     private final OrgClaims orgClaims;
 
-    public CacheJWTEndpoint(Config config, ComponentClient componentClient, TimerScheduler timerScheduler, Materializer materializer, RequestContext requestContext) {
-        this.requestContext = requestContext;
+    public CacheJWTEndpoint(Config config, ComponentClient componentClient, TimerScheduler timerScheduler, Materializer materializer, RequestContext requestContext, PrometheusMetrics metrics) {
+        this.metrics = metrics;
         this.componentClient = componentClient;
 
         this.core = new CacheAPICoreImpl(config, componentClient, timerScheduler, materializer);
@@ -103,20 +103,9 @@ public class CacheJWTEndpoint {
     }
 
     private CompletionStage<Boolean> doesExceedSubscription() {
-        return getOrg(orgClaims.org()).thenApply(org -> {
-            return switch (orgClaims.serviceLevel()) {
-                case SERVICE_LEVEL_FREE -> {
-                    if (org.totalBytesCached() > freeServiceMaxCachedBytes) {
-                        yield true;
-                    }
-                    else {
-                        yield false;
-                    }
-                }
-                default -> {
-                    throw HttpException.badRequest(String.format(SERVICE_LEVEL_JWT_ERR_MSG, orgClaims.serviceLevel()));
-                }
-            };
+        return getOrg(orgClaims.org()).thenApply(org -> switch (orgClaims.serviceLevel()) {
+            case SERVICE_LEVEL_FREE -> org.totalBytesCached() > freeServiceMaxCachedBytes;
+            default -> throw HttpException.badRequest(String.format(SERVICE_LEVEL_JWT_ERR_MSG, orgClaims.serviceLevel()));
         });
     }
 

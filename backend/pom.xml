@@ -6,22 +6,51 @@
     <artifactId>akka-cache-parent</artifactId>
     <version>1.0-SNAPSHOT</version>
   </parent>
-  
-  <groupId>io.akka-cache</groupId>
+
   <artifactId>akka-cache</artifactId>
   <version>1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>akka-cache</name>
-    <properties>
+  <properties>
 
     <!-- For Docker setup see https://doc.akka.io/operations/projects/container-registries.html -->
     <container.registry>kcr.us-east-1.kalix.io</container.registry>
     <organization>acme</organization>
 
+    <akka.grpc.version>2.5.0</akka.grpc.version>
+    <java.snappy.verison>1.1.10.7</java.snappy.verison>
+
   </properties>
 
   <dependencies>
     <!-- Your dependencies go here -->
+    <dependency>
+      <groupId>org.xerial.snappy</groupId>
+      <artifactId>snappy-java</artifactId>
+      <version>${java.snappy.verison}</version>
+    </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>com.lightbend.akka.grpc</groupId>
+        <artifactId>akka-grpc-maven-plugin</artifactId>
+        <version>${akka.grpc.version}</version>
+        <configuration>
+          <language>Java</language>
+          <generateClient>true</generateClient>
+          <generateServer>false</generateServer>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>generate</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>
