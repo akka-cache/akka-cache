@@ -37,7 +37,7 @@ public class CacheJWTEndpointTest extends TestKitSupport {
     private static final String PAYLOAD2 = "Akka 3 is on it's way";
 
     String bearerToken = bearerTokenWith(
-            Map.of("iss", "https://session.firebase.google.com/akka-cache", "user_id", ORG, "serviceLevel", "FREE")
+            Map.of("iss", "https://session.firebase.google.com/akka-cache", "org", ORG, "serviceLevel", "free")
     );
 
     private CacheInternalGetResponse getCache(String cacheName, String key) {
