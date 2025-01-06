@@ -136,14 +136,14 @@ curl -i http://localhost:9001/cache/get/cache1/key1
 
 POST /cache/cacheName
 ```shell
-curl -i -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6ImtleTEifQ.eyJpc3MiOiJnY3AiLCJvcmciOiJUVDEyMyIsInNlcnZpY2VMZXZlbCI6IkZSRUUifQ.bBUttuYtdFThLquxqlqCYrMUx02xwpC8rJCbQpzjSKg" -d '{"cacheName":"cache1", "description":"This is our first test"}' -H "Content-Type: application/json" -X POST http://localhost:9001/cacheName
+curl -i -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3Nlc3Npb24uZmlyZWJhc2UuZ29vZ2xlLmNvbS9ha2thLWNhY2hlIiwib3JnIjoidHRvcmciLCJuYW1lIjoiSm9obiBEb2UiLCJzZXJ2aWNlTGV2ZWwiOiJmcmVlIn0.rds8orVxVz149ovTxxYzFIqGmSdWJUlHONem9avKBgQ" -d '{"cacheName":"cache1", "description":"This is our first test"}' -H "Content-Type: application/json" -X POST http://localhost:9001/cacheName
 ```
 
 BINARY POST (with TTL at 30 seconds)
 ```shell
-curl -i -d 'This is our first test' -H "Content-Type: application/octet-stream" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6ImtleTEifQ.eyJpc3MiOiJnY3AiLCJvcmciOiJUVDEyMyIsInNlcnZpY2VMZXZlbCI6IkZSRUUifQ.bBUttuYtdFThLquxqlqCYrMUx02xwpC8rJCbQpzjSKg" -X POST http://localhost:9001/cache1/key1/30
+curl -i -d 'This is our first test' -H "Content-Type: application/octet-stream" -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3Nlc3Npb24uZmlyZWJhc2UuZ29vZ2xlLmNvbS9ha2thLWNhY2hlIiwib3JnIjoidHRvcmciLCJuYW1lIjoiSm9obiBEb2UiLCJzZXJ2aWNlTGV2ZWwiOiJmcmVlIn0.rds8orVxVz149ovTxxYzFIqGmSdWJUlHONem9avKBgQ" -X POST http://localhost:9001/cache1/key1/30
 ```
 BINARY GET:
 ```shell
-curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsImtpZCI6ImtleTEifQ.eyJpc3MiOiJnY3AiLCJvcmciOiJUVDEyMyIsInNlcnZpY2VMZXZlbCI6IkZSRUUifQ.bBUttuYtdFThLquxqlqCYrMUx02xwpC8rJCbQpzjSKg" -i http://localhost:9001/cache1/key1
+curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3Nlc3Npb24uZmlyZWJhc2UuZ29vZ2xlLmNvbS9ha2thLWNhY2hlIiwib3JnIjoidHRvcmciLCJuYW1lIjoiSm9obiBEb2UiLCJzZXJ2aWNlTGV2ZWwiOiJmcmVlIn0.rds8orVxVz149ovTxxYzFIqGmSdWJUlHONem9avKBgQ" -i http://localhost:9001/cache1/key1
 ```
