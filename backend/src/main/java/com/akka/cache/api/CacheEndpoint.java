@@ -9,6 +9,7 @@ import akka.javasdk.timer.TimerScheduler;
 import akka.stream.Materializer;
 import com.akka.cache.application.CacheView;
 import com.akka.cache.domain.*;
+import com.akka.cache.injection.PrometheusMetrics;
 import com.typesafe.config.Config;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,7 +21,8 @@ import com.akka.cache.domain.CacheAPI.*;
 
 import static com.akka.cache.api.EndpointConstants.*;
 
-@Acl(allow = @Acl.Matcher(service = "*"))
+//@Acl(allow = @Acl.Matcher(service = "*"))
+@Acl(allow = @Acl.Matcher(principal = Acl.Principal.ALL))
 @HttpEndpoint("/cache")
 public class CacheEndpoint {
 
@@ -28,6 +30,7 @@ public class CacheEndpoint {
     private static final Logger log = LoggerFactory.getLogger(CacheEndpoint.class);
 
     private final CacheAPICoreImpl core;
+    private final PrometheusMetrics metrics;
 
     /**
      * @param config the configuration for the component
@@ -37,8 +40,10 @@ public class CacheEndpoint {
      *
      * This is the constructor for the CacheEndpoint. It is used by the Akka framework to create an instance of this class.
      */
-    public CacheEndpoint(Config config, ComponentClient componentClient, TimerScheduler timerScheduler, Materializer materializer) {
+    public CacheEndpoint(Config config, ComponentClient componentClient, TimerScheduler timerScheduler, Materializer materializer, PrometheusMetrics metrics) {
+        this.metrics = metrics;
         core = new CacheAPICoreImpl(config, componentClient, timerScheduler, materializer);
+//        core = new CacheAPICoreImpl(config, componentClient, timerScheduler, materializer, metrics);
     }
 
     // Cache Names -- BEGIN

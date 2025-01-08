@@ -57,11 +57,13 @@ public class CacheJWTEndpoint {
     private final Map<String, String> claims;
     private final OrgClaims orgClaims;
 
-    public CacheJWTEndpoint(Config config, ComponentClient componentClient, TimerScheduler timerScheduler, Materializer materializer, RequestContext requestContext, PrometheusMetrics metrics) {
+//    public CacheJWTEndpoint(Config config, ComponentClient componentClient, TimerScheduler timerScheduler, Materializer materializer, RequestContext requestContext, PrometheusMetrics metrics) {
+public CacheJWTEndpoint(Config config, ComponentClient componentClient, TimerScheduler timerScheduler, Materializer materializer, RequestContext requestContext, PrometheusMetrics metrics) {
         this.metrics = metrics;
         this.componentClient = componentClient;
 
         this.core = new CacheAPICoreImpl(config, componentClient, timerScheduler, materializer);
+//        this.core = new CacheAPICoreImpl(config, componentClient, timerScheduler, materializer, metrics);
 
         // TODO: delete if not needed
         // this.rateLimitDefaultRPS = config.getInt("app.rate-limit-default-request-per-second");
@@ -105,6 +107,7 @@ public class CacheJWTEndpoint {
     private CompletionStage<Boolean> doesExceedSubscription() {
         return getOrg(orgClaims.org()).thenApply(org -> switch (orgClaims.serviceLevel()) {
             case SERVICE_LEVEL_FREE -> org.totalBytesCached() > freeServiceMaxCachedBytes;
+            case SERVICE_LEVEL_GATLING -> false;
             default -> throw HttpException.badRequest(String.format(SERVICE_LEVEL_JWT_ERR_MSG, orgClaims.serviceLevel()));
         });
     }
