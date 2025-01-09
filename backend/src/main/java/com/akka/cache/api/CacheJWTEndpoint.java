@@ -34,8 +34,6 @@ import static com.akka.cache.api.EndpointConstants.*;
 @HttpEndpoint
 @JWT(validate = JWT.JwtMethodMode.BEARER_TOKEN, bearerTokenIssuers = "https://session.firebase.google.com/akka-cache")
 public class CacheJWTEndpoint {
-
-    // TODO: Delete if not needed
     private static final Logger log = LoggerFactory.getLogger(CacheJWTEndpoint.class);
 
     private final ComponentClient componentClient;
@@ -45,13 +43,7 @@ public class CacheJWTEndpoint {
     // TODO: delete if not needed
     private final RequestContext requestContext;
 
-    // TODO: if we decide to throttle at the node level
-    // private final int rateLimitDefaultRPS;
-    // private final int rateLimitWaitTimeoutMillis;
-    // private record OrgStats(RateLimiter rateLimiter) {}
-    // // if done at org level, then we'd need to injest the following as stateful
-    // private final Map<String, OrgStats> orgLimitMap = Maps.newConcurrentMap();
-
+    private boolean enableOrgServiceLevelSaas;
     private long freeServiceMaxCachedBytes;
 
     private final Map<String, String> claims;
@@ -63,16 +55,8 @@ public class CacheJWTEndpoint {
 
         this.core = new CacheAPICoreImpl(config, componentClient, timerScheduler, materializer);
 
-        // TODO: delete if not needed
-        // this.rateLimitDefaultRPS = config.getInt("app.rate-limit-default-request-per-second");
-        // this.rateLimitWaitTimeoutMillis = config.getInt("app.rate-limit-wait-timeout-millis");
-
+        this.enableOrgServiceLevelSaas = config.getBoolean("app.enable-org-service-level-saas");
         this.freeServiceMaxCachedBytes = config.getLong("app.free-service-level-max-bytes");
-        
-        // TODO: delete if not needed
-        // if (log.isDebugEnabled()) {
-        //     log.debug("Free Service level max bytes {}", this.freeServiceMaxCachedBytes);
-        // }
 
         this.claims = requestContext.getJwtClaims().asMap();
         this.orgClaims = getOrgClaim();
@@ -82,14 +66,19 @@ public class CacheJWTEndpoint {
 
     private OrgClaims getOrgClaim() {
         String org = claims.get(ORG);
-        if (org == null) {
-            throw HttpException.badRequest(ORG + ORG_NULL_MSG);
+        if (this.enableOrgServiceLevelSaas) {
+            if (org == null) {
+                throw HttpException.badRequest(ORG + ORG_NULL_MSG);
+            }
+        }
+        else {
+            if (org == null) {
+                org = "";
+            }
         }
 
         String serviceLevel = claims.get(SERVICE_LEVEL);
         if (serviceLevel == null) {
-            // TODO: Delete if not needed
-            // throw HttpException.badRequest(SERVICE_LEVEL + " not found in the JWT Token");
             serviceLevel = SERVICE_LEVEL_FREE;
         }
         return new OrgClaims(org, serviceLevel.toLowerCase());
@@ -103,21 +92,26 @@ public class CacheJWTEndpoint {
     }
 
     private CompletionStage<Boolean> doesExceedSubscription() {
-        return getOrg(orgClaims.org()).thenApply(org -> {
-            return switch (orgClaims.serviceLevel()) {
-                case SERVICE_LEVEL_FREE -> {
-                    if (org.totalBytesCached() > freeServiceMaxCachedBytes) {
-                        yield true;
+        if (this.enableOrgServiceLevelSaas) {
+            return getOrg(orgClaims.org()).thenApply(org -> {
+                return switch (orgClaims.serviceLevel()) {
+                    case SERVICE_LEVEL_FREE -> {
+                        if (org.totalBytesCached() > freeServiceMaxCachedBytes) {
+                            yield true;
+                        } else {
+                            yield false;
+                        }
                     }
-                    else {
-                        yield false;
+                    case SERVICE_LEVEL_GATLING -> false;
+                    default -> {
+                        throw HttpException.badRequest(String.format(SERVICE_LEVEL_JWT_ERR_MSG, orgClaims.serviceLevel()));
                     }
-                }
-                default -> {
-                    throw HttpException.badRequest(String.format(SERVICE_LEVEL_JWT_ERR_MSG, orgClaims.serviceLevel()));
-                }
-            };
-        });
+                };
+            });
+        }
+        else {
+            return CompletableFuture.completedFuture(false);
+        }
     }
 
     // Cache Names -- BEGIN
