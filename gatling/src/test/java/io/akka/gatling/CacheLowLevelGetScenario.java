@@ -18,8 +18,6 @@ import static io.gatling.javaapi.http.HttpDsl.http;
 import static io.gatling.javaapi.http.HttpDsl.status;
 
 public class CacheLowLevelGetScenario extends Simulation {
-    private static final Logger log = LoggerFactory.getLogger(CacheLowLevelGetScenario.class);
-
     private Config config = ConfigFactory.load();
 
     private String baseUrl = config.getString("loadtest.baseUrl");

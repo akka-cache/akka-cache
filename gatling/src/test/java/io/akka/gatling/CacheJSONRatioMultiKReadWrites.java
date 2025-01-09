@@ -20,8 +20,6 @@ import static io.gatling.javaapi.http.HttpDsl.http;
 import static io.gatling.javaapi.http.HttpDsl.status;
 
 public class CacheJSONRatioMultiKReadWrites extends Simulation {
-    private static final Logger log = LoggerFactory.getLogger(CacheLowLevelSetScenario.class);
-
     private Config config = ConfigFactory.load();
 
     private String baseUrl = config.getString("loadtest.baseUrl");
@@ -33,11 +31,11 @@ public class CacheJSONRatioMultiKReadWrites extends Simulation {
             .circular();
     private FeederBuilder<Object> phraseFeeder = csv("phrases.csv")
             .random()
-            .transform((phrase, t2) -> {
-                long iterations = ((targetObjectSize / phrase.length()) + 1);
+            .transform((key, value) -> {
+                long iterations = ((targetObjectSize / value.length()) + 1);
                 StringBuilder sb = new StringBuilder();
                 for (int i = 0; i < iterations; i++) {
-                    sb.append(phrase);
+                    sb.append(value);
                 }
                 var encoded = encoder.encodeToString(
                         sb.toString().getBytes(StandardCharsets.UTF_8) );
