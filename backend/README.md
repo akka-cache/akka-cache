@@ -77,19 +77,18 @@ POST /cache/cacheName/update
 curl -i -d '{"cacheName":"cache1", "description":"This is our first modification"}' -H "Content-Type: application/json" -X POST http://localhost:9001/cache/cacheName/update
 ```
 
-GET /cache/cacheName/keys/{cacheName}
+GET /cache/cacheName/{cacheName}/keys
 
 > **_NOTE:_** execute the cache commands below before executing this
 ```shell
-curl -i http://localhost:9001/cache/cacheName/keys/cache1
+curl -i http://localhost:9001/cache/cacheName/cache1/keys
 ```
 
 ### Cache:
 
 BINARY POST (without TTL)
 
-```shell
-curl -i -d 'This is our first test' -H "Content-Type: application/octet-stream" -X POST http://localhost:9001/cache/cache1/key1
+```shellcurl -i -d 'This is our first test' -H "Content-Type: application/octet-stream" -X POST http://localhost:9001/cache/cache1/key1
 ````
 
 BINARY POST (with TTL at 30 seconds)

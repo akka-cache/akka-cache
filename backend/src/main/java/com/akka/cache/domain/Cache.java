@@ -1,5 +1,7 @@
 package com.akka.cache.domain;
 
+import akka.javasdk.annotations.TypeName;
+
 import java.time.Duration;
 import java.util.*;
 
