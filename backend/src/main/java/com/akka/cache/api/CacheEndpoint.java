@@ -21,6 +21,9 @@ import com.akka.cache.domain.CacheAPI.*;
 import static com.akka.cache.api.EndpointConstants.*;
 
 @Acl(allow = @Acl.Matcher(service = "*"))
+
+//Use this ACL if you want to experiment in unsecure mode
+//@Acl(allow = @Acl.Matcher(principal = Acl.Principal.INTERNET))
 @HttpEndpoint("/cache")
 public class CacheEndpoint {
 

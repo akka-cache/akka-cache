@@ -19,8 +19,6 @@ import static io.gatling.javaapi.http.HttpDsl.http;
 import static io.gatling.javaapi.http.HttpDsl.status;
 
 public class CacheLowLevelMultiKRatioReadWrites extends Simulation {
-    private static final Logger log = LoggerFactory.getLogger(CacheLowLevelSetScenario.class);
-
     private Config config = ConfigFactory.load();
 
     private String baseUrl = config.getString("loadtest.baseUrl");
@@ -32,23 +30,17 @@ public class CacheLowLevelMultiKRatioReadWrites extends Simulation {
             .circular();
     private FeederBuilder<Object> phraseFeeder = csv("phrases.csv")
             .random()
-            .transform((phrase, t2) -> {
-                long iterations = ((targetObjectSize / phrase.length()) + 1);
+            .transform((key, value) -> {
+                long iterations = ((targetObjectSize / value.length()) + 1);
                 StringBuilder sb = new StringBuilder();
                 for (int i = 0; i < iterations; i++) {
-                    sb.append(phrase);
+                    sb.append(value);
                 }
                 return sb.toString();
             }
     );
-/*
-    private FeederBuilder<String> phraseFeeder = csv("phrases.csv")
-            .random();
-*/
 
     private Random random = new Random();
-
-//    private var Base64.getEncoder().encode("Test".getBytes());
 
     Body.WithString newCacheValue = StringBody("#{phrase}");
 

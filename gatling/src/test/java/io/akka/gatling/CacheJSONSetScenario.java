@@ -18,8 +18,6 @@ import java.util.Random;
 import java.util.Base64;
 
 public class CacheJSONSetScenario extends Simulation {
-    private static final Logger log = LoggerFactory.getLogger(CacheJSONSetScenario.class);
-
     private Config config = ConfigFactory.load();
 
     private String baseUrl = config.getString("loadtest.baseUrl");
@@ -29,10 +27,9 @@ public class CacheJSONSetScenario extends Simulation {
     private FeederBuilder.Batchable<String> namesFeeder = csv("lastnames.csv");
     private FeederBuilder<Object> phraseFeeder = csv("phrases.csv")
             .random()
-            .transform((phrase, t2) -> {
+            .transform((key, value) -> {
                 var encoded = encoder.encodeToString(
-                        phrase.getBytes(StandardCharsets.UTF_8) );
-                log.debug("phrase:".concat(phrase).concat("t2:").concat(t2));
+                        value.getBytes(StandardCharsets.UTF_8) );
                 return encoded;
             });
 
