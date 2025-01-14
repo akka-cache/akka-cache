@@ -51,9 +51,6 @@ const config = {
         theme: {
           customCss: './src/css/custom.css',
         },
-        googleTagManager: {
-          containerId: 'GTM-WL2BG9MS',
-        },
       },
     ],
   ],
@@ -67,6 +64,10 @@ const config = {
     },
     {
       src: '/js/optanon-wrapper.js',
+      type: 'text/javascript',
+    },
+    {
+      src: '/js/google-tag-manager.js',
       type: 'text/javascript',
     },
   ],
