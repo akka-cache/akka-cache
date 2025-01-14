@@ -3,13 +3,13 @@ openapi: 3.1.0
 info:
   title: Akka Cache
   description: |-
-    This is Akka Cache a high speed, globally elastic, multi-region distributed key-value cache built upon Akka 3.
+    Akka Cache ia a high speed, globally elastic, multi-region distributed key-value cache built upon Akka 3.
   contact:
     email: support@akka.io
   license:
     name: Business Source License 1.1
     url: https://github.com/akka-cache/akka-cache/blob/main/LICENSE
-  version: 0.0.1
+  version: 0.1.0
 # probably need to comment out servers below when generating
 servers: [ { url: http://localhost:9001 } ]
 tags:
@@ -59,6 +59,19 @@ paths:
       responses:
         "202":
           description: "(accepted) Successfully created or updated."
+  /cacheName/list:
+    get:
+      tags:
+        - cacheName
+      summary:
+        Retrieves a list of cacheNames and associated description if it exists.
+      responses:
+        "200":
+          description: Returns a JSON format array of the cache namespaces, and description.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/cacheNameListResponse'
   /cacheName/{cacheName}:
     parameters:
       - $ref: '#/components/parameters/cacheNameParam'
@@ -119,7 +132,8 @@ paths:
     post:
       tags:
         - cache
-      summary: Create or update a cached object under the cacheName
+      summary: |-
+        Create or update a cached object under the cacheName. Note: this is a binary version of the API and requires that the cache object be passed in the request body.
       requestBody:
         required: true
         content:
@@ -134,14 +148,15 @@ paths:
     delete:
       tags:
         - cache
-      summary: delete the current cache by key within the cacheName
+      summary: Deletes the currently cached object by key within the given cacheName.
       responses:
         "202":
           description: (accepted) deleted
     get:
       tags:
         - cache
-      summary: get the current cache by key within the cacheName
+      summary: |-
+        Retrieves the currently cached object by key within the given cacheName. Note: this is a binary version of the API and requires that the cache object be passed in the request body.
       responses:
         "200":
           description: Okay
@@ -159,7 +174,8 @@ paths:
     post:
       tags:
         - cache
-      summary: Create or update a cached object under the cacheName
+      summary: |-
+        Create or update a cached object by key within the given cacheName. Note: this is a binary version of the API and requires that the cache object be passed in the request body.
       requestBody:
         required: true
         content:
@@ -175,7 +191,7 @@ paths:
     post:
       tags:
         - cache
-      summary: Create or update a cached object by cacheName / key
+      summary: Create or update a cached object (BASE64 encoded) by key within the given cacheName.
       requestBody:
         required: true
         content:
@@ -195,10 +211,10 @@ paths:
     get:
       tags:
         - cache
-      summary: get the current cache namespace description, and delete status
+      summary: Get the current cache namespace description, and delete status.
       responses:
         "200":
-          description: returned a JSON format of the cache namespace, and description
+          description: Returns a JSON format of the cache namespace, and description.
           content:
             application/json:
               schema:
@@ -207,7 +223,7 @@ paths:
     post:
       tags:
         - batch
-      summary: Create batch of cached objects, results are returned for each batch element
+      summary: Create batch of cached objects, results are returned for each batched element.
       requestBody:
         required: true
         content:
@@ -216,7 +232,7 @@ paths:
               $ref: '#/components/schemas/batchCacheRequest'
       responses:
         "200":
-          description: returned a JSON formated object of overall cached results
+          description: returns a JSON formated object of each cached result.
           content:
             application/json:
               schema:
@@ -224,7 +240,7 @@ paths:
     delete:
       tags:
         - batch
-      summary: delete a batch of individual cached objects
+      summary: Deletes a batch of individually cached objects.
       requestBody:
         required: true
         content:
@@ -233,7 +249,7 @@ paths:
               $ref: '#/components/schemas/batchGetCacheRequests'
       responses:
         "200":
-          description: returned a JSON formated object of overall cached results
+          description: Returned a JSON formated object of all cached results.
           content:
             application/json:
               schema:
@@ -242,7 +258,7 @@ paths:
     post:
       tags:
         - batch
-      summary: retrieve a batch of cached objects
+      summary: Retrieve a batch of cached objects.
       requestBody:
         required: true
         content:
@@ -251,7 +267,7 @@ paths:
               $ref: '#/components/schemas/batchGetCacheRequests'
       responses:
         "200":
-          description: returned a JSON formated object of overall cached results
+          description: Returns a JSON formated object of all cached results.
           content:
             application/json:
               schema:
@@ -312,6 +328,19 @@ components:
           type: string
         deleted:
           type: boolean
+    cacheNameListResponse:
+      type: array
+      items:
+        type: object
+        description: An array of all known cacheNames, along with their descriptions if they exist.
+        required:
+          - cacheName
+          - description
+        properties:
+          cacheName:
+            type: string
+          description:
+            type: string
     cacheNameKeys:
       type: array
       description: an array of all known keys under the given cacheName
