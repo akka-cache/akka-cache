@@ -34,7 +34,6 @@ import static com.akka.cache.api.EndpointConstants.*;
 @HttpEndpoint
 @JWT(validate = JWT.JwtMethodMode.BEARER_TOKEN, bearerTokenIssuers = "https://session.firebase.google.com/akka-cache")
 public class CacheJWTEndpoint {
-    // TODO: Delete if not needed
     private static final Logger log = LoggerFactory.getLogger(CacheJWTEndpoint.class);
 
     private final ComponentClient componentClient;
@@ -44,13 +43,7 @@ public class CacheJWTEndpoint {
     // TODO: delete if not needed
     private final RequestContext requestContext;
 
-    // TODO: if we decide to throttle at the node level
-    // private final int rateLimitDefaultRPS;
-    // private final int rateLimitWaitTimeoutMillis;
-    // private record OrgStats(RateLimiter rateLimiter) {}
-    // // if done at org level, then we'd need to injest the following as stateful
-    // private final Map<String, OrgStats> orgLimitMap = Maps.newConcurrentMap();
-
+    private boolean enableOrgServiceLevelSaas;
     private long freeServiceMaxCachedBytes;
 
     private final Map<String, String> claims;
@@ -62,16 +55,8 @@ public class CacheJWTEndpoint {
 
         this.core = new CacheAPICoreImpl(config, componentClient, timerScheduler, materializer);
 
-        // TODO: delete if not needed
-        // this.rateLimitDefaultRPS = config.getInt("app.rate-limit-default-request-per-second");
-        // this.rateLimitWaitTimeoutMillis = config.getInt("app.rate-limit-wait-timeout-millis");
-
+        this.enableOrgServiceLevelSaas = config.getBoolean("app.enable-org-service-level-saas");
         this.freeServiceMaxCachedBytes = config.getLong("app.free-service-level-max-bytes");
-        
-        // TODO: delete if not needed
-        // if (log.isDebugEnabled()) {
-        //     log.debug("Free Service level max bytes {}", this.freeServiceMaxCachedBytes);
-        // }
 
         this.claims = requestContext.getJwtClaims().asMap();
         this.orgClaims = getOrgClaim();
@@ -81,17 +66,22 @@ public class CacheJWTEndpoint {
 
     private OrgClaims getOrgClaim() {
         String org = claims.get(ORG);
-        if (org == null) {
-            throw HttpException.badRequest(ORG + ORG_NULL_MSG);
+        if (this.enableOrgServiceLevelSaas) {
+            if (org == null) {
+                throw HttpException.badRequest(ORG + ORG_NULL_MSG);
+            }
+        }
+        else {
+            if (org == null) {
+                org = "";
+            }
         }
 
         String serviceLevel = claims.get(SERVICE_LEVEL);
         if (serviceLevel == null) {
-            // TODO: Delete if not needed
-            // throw HttpException.badRequest(SERVICE_LEVEL + " not found in the JWT Token");
             serviceLevel = SERVICE_LEVEL_FREE;
         }
-        return new OrgClaims(org, serviceLevel.toUpperCase());
+        return new OrgClaims(org, serviceLevel.toLowerCase());
     }
 
     private CompletionStage<Organization> getOrg(String org) {
@@ -102,21 +92,26 @@ public class CacheJWTEndpoint {
     }
 
     private CompletionStage<Boolean> doesExceedSubscription() {
-        return getOrg(orgClaims.org()).thenApply(org -> {
-            return switch (orgClaims.serviceLevel()) {
-                case SERVICE_LEVEL_FREE -> {
-                    if (org.totalBytesCached() > freeServiceMaxCachedBytes) {
-                        yield true;
+        if (this.enableOrgServiceLevelSaas) {
+            return getOrg(orgClaims.org()).thenApply(org -> {
+                return switch (orgClaims.serviceLevel()) {
+                    case SERVICE_LEVEL_FREE -> {
+                        if (org.totalBytesCached() > freeServiceMaxCachedBytes) {
+                            yield true;
+                        } else {
+                            yield false;
+                        }
                     }
-                    else {
-                        yield false;
+                    case SERVICE_LEVEL_GATLING -> false;
+                    default -> {
+                        throw HttpException.badRequest(String.format(SERVICE_LEVEL_JWT_ERR_MSG, orgClaims.serviceLevel()));
                     }
-                }
-                default -> {
-                    throw HttpException.badRequest(String.format(SERVICE_LEVEL_JWT_ERR_MSG, orgClaims.serviceLevel()));
-                }
-            };
-        });
+                };
+            });
+        }
+        else {
+            return CompletableFuture.completedFuture(false);
+        }
     }
 
     // Cache Names -- BEGIN
@@ -124,34 +119,34 @@ public class CacheJWTEndpoint {
         return new CacheNameRequest(orgClaims.org.concat(request.cacheName()), request.description());
     }
 
-    @Post(CACHE_NAME_PATH)
+    @Post("/cacheName")
     public CompletionStage<HttpResponse> createCacheName(CacheNameRequest request) {
         return core.createCacheName(modCacheNameWithOrg(request));
     }
 
-    @Put(CACHE_NAME_PATH)
+    @Put("/cacheName")
     public CompletionStage<HttpResponse> updateCacheName(CacheNameRequest request) {
         return core.updateCacheName(modCacheNameWithOrg(request));
     }
 
-    @Get(CACHE_NAME_PATH + CACHE_NAME_REPLACE_PATH)
+    @Get("/cacheName/{cacheName}")
     public CompletionStage<CacheName> getCacheName(String cacheName) {
         return core.getCacheName(orgClaims.org.concat(cacheName));
     }
 
-    @Get(CACHE_NAME_PATH + CACHE_NAME_REPLACE_PATH + KEYS_PATH)
+    @Get("/cacheName/{cacheName}/keys")
     public CompletionStage<CacheView.CacheSummaries> getCacheKeyList(String cacheName) {
         return core.getCacheKeyList(orgClaims.org.concat(cacheName));
     }
 
     // This deletes the cacheName as well as all the keys
-    @Delete(CACHE_NAME_PATH + CACHE_NAME_REPLACE_PATH)
+    @Delete("/cacheName/{cacheName}")
     public CompletionStage<HttpResponse> deleteCacheKeys(String cacheName) {
         return core.deleteCacheKeys(orgClaims.org.concat(cacheName), false);
     }
 
     // This deletes all the cached data but leaves the cacheName in place
-    @Put(CACHE_NAME_PATH + CACHE_NAME_REPLACE_PATH + FLUSH_PATH)
+    @Put("/cacheName/{cacheName}/flush")
     public CompletionStage<HttpResponse> flushCacheKeys(String cacheName) {
         return core.deleteCacheKeys(orgClaims.org.concat(cacheName), true);
     }
@@ -171,7 +166,7 @@ public class CacheJWTEndpoint {
         );
     }
 
-    @Post(SET_PATH)
+    @Post("/set")
     public CompletionStage<HttpResponse> cache(CacheRequest cacheRequest) {
         return doesExceedSubscription().thenCompose(isExceeded -> {
            if (isExceeded) {
@@ -187,7 +182,7 @@ public class CacheJWTEndpoint {
      This solves the problem of having to convert into
      and out of ByteString for chunking.
     */
-    @Post(CACHE_NAME_REPLACE_PATH + KEY_REPLACE_PATH + TTL_REPLACE_PATH)
+    @Post("/{cacheName}/{key}/{ttlSeconds}") 
     public CompletionStage<HttpResponse> cacheSet(String cacheName, String key, Integer ttlSeconds, HttpEntity.Strict strictRequestBody) {
         return doesExceedSubscription().thenCompose(isExceeded -> {
             if (isExceeded) {
@@ -197,7 +192,7 @@ public class CacheJWTEndpoint {
         });
     }
 
-    @Post(CACHE_NAME_REPLACE_PATH + KEY_REPLACE_PATH)
+    @Post("/{cacheName}/{key}")
     public CompletionStage<HttpResponse> cacheSet(String cacheName, String key, HttpEntity.Strict strictRequestBody) {
         return doesExceedSubscription().thenCompose(isExceeded -> {
             if (isExceeded) {
@@ -208,7 +203,7 @@ public class CacheJWTEndpoint {
     }
 
     // this is a JSON verison of GET
-    @Get(GET_PATH + CACHE_NAME_REPLACE_PATH + KEY_REPLACE_PATH)
+    @Get("/get/{cacheName}/{key}")
     public CompletionStage<CacheGetResponse> getCache(String cacheName, String key) {
         return core.getCache(orgClaims.org.concat(cacheName), key);
     }
@@ -219,17 +214,17 @@ public class CacheJWTEndpoint {
      This solves the problem of having to convert into
      and out of ByteString for chunking.
     */
-    @Get(CACHE_NAME_REPLACE_PATH + KEY_REPLACE_PATH)
+    @Get("/{cacheName}/{key}")
     public CompletionStage<HttpResponse> getCacheGet(String cacheName, String key) {
         return core.getCacheGet(orgClaims.org.concat(cacheName), key);
     }
 
-    @Get(CACHE_NAME_REPLACE_PATH + KEYS_PATH)
+    @Get("/{cacheName}/keys")
     public CompletionStage<CacheGetKeysResponse> getCacheKeys(String cacheName) {
         return core.getCacheKeys(orgClaims.org.concat(cacheName));
     }
 
-    @Delete(CACHE_NAME_REPLACE_PATH + KEY_REPLACE_PATH)
+    @Delete("/{cacheName}/{key}")
     public CompletionStage<HttpResponse> delete(String cacheName, String key) {
         return core.delete(orgClaims.org.concat(cacheName), key);
     }
@@ -250,7 +245,7 @@ public class CacheJWTEndpoint {
         return new BatchCacheResponse(false, cacheResults);
     }
 
-    @Post(BATCH_PATH)
+    @Post("/batch")
     public CompletionStage<BatchCacheResponse> cacheBatch(BatchCacheRequest batchCacheRequest) {
         return doesExceedSubscription().thenCompose(isExceeded -> {
             if (isExceeded) {
@@ -268,12 +263,12 @@ public class CacheJWTEndpoint {
         return new BatchGetCacheRequests(batchGetCacheRequests);
     }
 
-    @Post(BATCH_PATH + GET_PATH)
+    @Post("/batch/get")
     public CompletionStage<BatchGetCacheResponse> getCacheBatch(BatchGetCacheRequests batchGetCacheRequests) {
         return core.getCacheBatch(addOrgToBatchGetRequest(batchGetCacheRequests));
     }
 
-    @Delete(BATCH_PATH)
+    @Delete("/batch")
     public CompletionStage<BatchDeleteCacheResponse> deleteCacheBatch(BatchGetCacheRequests batchGetCacheRequests) {
         return core.deleteCacheBatch(addOrgToBatchGetRequest(batchGetCacheRequests));
     }

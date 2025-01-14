@@ -36,4 +36,14 @@ export function HeaderContent({
       </Text>
     </div>
   );
+}
+
+export function getAppOrigin(request: Request): string {
+  // Always prefer PUBLIC_URL if available
+  if (process.env.PUBLIC_URL) {
+    return process.env.PUBLIC_URL.replace(/\/$/, ''); // Remove trailing slash if present
+  }
+  
+  // Fallback for development
+  return 'http://localhost:5173';
 } 

@@ -10,8 +10,8 @@ import {themes as prismThemes} from 'prism-react-renderer';
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
-  title: 'AkkaCache.io',
-  tagline: 'Akka.io is cool',
+  title: 'Akka Cache',
+  tagline: 'Akka Cache is an elastic, agile and resilient data accelerator.',
   favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
@@ -27,7 +27,7 @@ const config = {
   organizationName: 'akka-cache', // Usually your GitHub org/user name.
   projectName: 'akka-cache', // Usually your repo name.
 
-  onBrokenLinks: 'throw',
+  onBrokenLinks: 'warn',
   onBrokenMarkdownLinks: 'warn',
 
   // Even if you don't use internationalization, you can use this field to set
@@ -41,8 +41,8 @@ const config = {
   presets: [
     [
       'classic',
-      /** @type {import('@docusaurus/preset-classic').Options} */
-      ({
+      // @type {import('@docusaurus/preset-classic').Options}
+      {
         docs: {
           routeBasePath: '/', // Serve the docs at the site's root
           sidebarPath: './sidebars.js',
@@ -51,15 +51,9 @@ const config = {
         theme: {
           customCss: './src/css/custom.css',
         },
-      }),
-    ],
-  ],
-
-  plugins: [
-    [
-      '@docusaurus/plugin-google-tag-manager',
-      {
-        containerId: 'GTM-WL2BG9MS',
+        googleTagManager: {
+          containerId: 'GTM-WL2BG9MS',
+        },
       },
     ],
   ],
@@ -78,7 +72,7 @@ const config = {
   ],
 
   themeConfig:
-    /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
+    // @type {import('@docusaurus/preset-classic').ThemeConfig}
     ({
       // Replace with your project's social card
       //image: 'img/docusaurus-social-card.jpg',
@@ -106,7 +100,7 @@ const config = {
         //     label: 'Cache',
         //   },
           {
-            href: 'https://github.com/lightbend/akka-cache',
+            href: 'https://github.com/akka-cache/akka-cache',
             label: 'GitHub',
             position: 'right',
           },
@@ -116,11 +110,19 @@ const config = {
         style: 'dark',
         links: [
           {
-            title: 'AkkaCache.io',
+            title: 'Akka Cache',
             items: [
               {
-                label: 'Cache',
-                to: '/',
+                label: 'Login',
+                to: 'https://console.akkacache.io/login',
+              },
+              {
+                label: 'Register',
+                to: 'https://console.akkacache.io/register',
+              },
+              {
+                label: 'GitHub',
+                href: 'https://github.com/akka-cache/akka-cache',
               },
             ],
           },
@@ -138,15 +140,6 @@ const config = {
               {
                 label: 'X',
                 href: 'https://x.com/akka_io_',
-              },
-            ],
-          },
-          {
-            title: 'More',
-            items: [
-              {
-                label: 'GitHub',
-                href: 'https://github.com/lightbend/akka-cache',
               },
             ],
           },

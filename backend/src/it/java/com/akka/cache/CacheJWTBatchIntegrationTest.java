@@ -30,20 +30,29 @@ public class CacheJWTBatchIntegrationTest extends TestKitSupport {
     private static final Logger log = LoggerFactory.getLogger(CacheJWTBatchIntegrationTest.class);
 
     private static final String ORG = "ttorg";
+    private static final String ORG2 = "ttorg2";
     private static final String CACHE_BASE_NAME = "cache";
     private static final String KEY = "key";
     private static final String PAYLOAD = "This is Akka 3's time:";
-    private static final Duration ONE_HUNDERED_MILLISECONDS = Duration.ofMillis(100);
+    private static final Duration ONE_HUNDRED_MILLISECONDS = Duration.ofMillis(100);
 
-    String bearerToken = bearerTokenWith(
-            Map.of("iss", "https://session.firebase.google.com/akka-cache", "user_id", ORG, "serviceLevel", "FREE")
+    String freeServiceBearerToken = bearerTokenWith(
+            Map.of("iss", "https://session.firebase.google.com/akka-cache", "org", ORG, "serviceLevel", "free")
+    );
+
+    String gatlingServiceBearerToken = bearerTokenWith(
+            Map.of("iss", "https://session.firebase.google.com/akka-cache", "org", ORG2, "serviceLevel", "gatling")
     );
 
     @Override
     protected TestKit.Settings testKitSettings() {
-        var appFreeServiceLevelMaxBytes = ConfigFactory.parseMap(Map.of(
-                "app.free-service-level-max-bytes", "2000"));
-        return TestKit.Settings.DEFAULT.withAdditionalConfig(appFreeServiceLevelMaxBytes);
+        var overrideSettings = ConfigFactory.parseMap(
+                Map.of(
+                        "app.free-service-level-max-bytes", "2000",
+                        "app.enable-org-service-level-saas", true
+                )
+        );
+        return TestKit.Settings.DEFAULT.withAdditionalConfig(overrideSettings);
     }
 
     private CacheInternalGetResponse getCache(String cacheName, String key) {
@@ -98,7 +107,7 @@ public class CacheJWTBatchIntegrationTest extends TestKitSupport {
 
         var batchResponse = await(
                 httpClient.POST("/batch")
-                        .addHeader("Authorization","Bearer "+ bearerToken)
+                        .addHeader("Authorization","Bearer "+ freeServiceBearerToken)
                         .responseBodyAs(BatchCacheResponse.class)
                         .withRequestBody(batchCacheRequest)
                         .invokeAsync()
@@ -129,7 +138,7 @@ public class CacheJWTBatchIntegrationTest extends TestKitSupport {
 
         var batchResponse = await(
                 httpClient.POST("/batch/get")
-                        .addHeader("Authorization","Bearer "+ bearerToken)
+                        .addHeader("Authorization","Bearer "+ freeServiceBearerToken)
                         .responseBodyAs(BatchGetCacheResponse.class)
                         .withRequestBody(requests)
                         .invokeAsync()
@@ -162,7 +171,7 @@ public class CacheJWTBatchIntegrationTest extends TestKitSupport {
         Awaitility.await()
                 .ignoreExceptions()
                 .atMost(5, TimeUnit.SECONDS)
-                .with().pollInterval(ONE_HUNDERED_MILLISECONDS).and().with().pollDelay(20, MILLISECONDS)
+                .with().pollInterval(ONE_HUNDRED_MILLISECONDS).and().with().pollDelay(20, MILLISECONDS)
                 .until(() -> getOrg(ORG).cacheCount(), equalTo(99));
     }
 
@@ -173,7 +182,7 @@ public class CacheJWTBatchIntegrationTest extends TestKitSupport {
 
         var response = await(
                 httpClient.POST("/set")
-                        .addHeader("Authorization","Bearer "+ bearerToken)
+                        .addHeader("Authorization","Bearer "+ freeServiceBearerToken)
                         .withRequestBody(setRequest)
                         .invokeAsync()
         );
@@ -193,7 +202,7 @@ public class CacheJWTBatchIntegrationTest extends TestKitSupport {
 
         var batchResponse = await(
                 httpClient.DELETE("/batch")
-                        .addHeader("Authorization","Bearer "+ bearerToken)
+                        .addHeader("Authorization","Bearer "+ freeServiceBearerToken)
                         .responseBodyAs(BatchDeleteCacheResponse.class)
                         .withRequestBody(requests)
                         .invokeAsync()
@@ -209,8 +218,21 @@ public class CacheJWTBatchIntegrationTest extends TestKitSupport {
         Awaitility.await()
                 .ignoreExceptions()
                 .atMost(5, TimeUnit.SECONDS)
-                .with().pollInterval(ONE_HUNDERED_MILLISECONDS).and().with().pollDelay(20, MILLISECONDS)
+                .with().pollInterval(ONE_HUNDRED_MILLISECONDS).and().with().pollDelay(20, MILLISECONDS)
                 .until(() -> getOrg(ORG).cacheCount(), equalTo(0));
     }
 
+    @Test
+    @Order(7)
+    public void testMaxBytesLimitForGatling() {
+        CacheRequest setRequest = new CacheRequest(CACHE_BASE_NAME.concat("test"), "testerkey2", Optional.empty(), PAYLOAD.getBytes());
+
+        var response = await(
+                httpClient.POST("/set")
+                        .addHeader("Authorization","Bearer "+ gatlingServiceBearerToken)
+                        .withRequestBody(setRequest)
+                        .invokeAsync()
+        );
+        Assertions.assertEquals(StatusCodes.CREATED, response.status());
+    }
 }

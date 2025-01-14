@@ -1,7 +1,9 @@
 package com.akka.cache;
 
+import akka.javasdk.testkit.TestKit;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.typesafe.config.ConfigFactory;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 import akka.javasdk.testkit.TestKitSupport;
@@ -37,8 +39,18 @@ public class CacheJWTEndpointTest extends TestKitSupport {
     private static final String PAYLOAD2 = "Akka 3 is on it's way";
 
     String bearerToken = bearerTokenWith(
-            Map.of("iss", "https://session.firebase.google.com/akka-cache", "user_id", ORG, "serviceLevel", "FREE")
+            Map.of("iss", "https://session.firebase.google.com/akka-cache", "org", ORG, "serviceLevel", "free")
     );
+
+    @Override
+    protected TestKit.Settings testKitSettings() {
+        var overrideSettings = ConfigFactory.parseMap(
+                Map.of(
+                        "app.enable-org-service-level-saas", true
+                )
+        );
+        return TestKit.Settings.DEFAULT.withAdditionalConfig(overrideSettings);
+    }
 
     private CacheInternalGetResponse getCache(String cacheName, String key) {
         return await(
