@@ -83,7 +83,7 @@ const config = {
         respectPrefersColorScheme: true,
       },
       navbar: {
-        title: 'AKKA Cache',
+        title: 'Akka Cache',
         // logo: {
         //   alt: 'AkkaCache Logo',
         //   src: '',
