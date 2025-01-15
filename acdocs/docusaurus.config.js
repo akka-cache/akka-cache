@@ -8,6 +8,9 @@ import {themes as prismThemes} from 'prism-react-renderer';
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
+const isProd = process.env.NODE_ENV === 'production';
+// console.log('isProd:', isProd);
+
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'Akka Cache',
@@ -60,7 +63,10 @@ const config = {
       src: 'https://cdn.cookielaw.org/scripttemplates/otSDKStub.js',
       type: 'text/javascript',
       charset: 'UTF-8',
-      'data-domain-script': '0193b386-cf4c-79d3-b3b1-1875bd9cc23f-test'
+      // Use different data-domain-script for dev vs. production
+      'data-domain-script': isProd
+        ? '0193b386-cf4c-79d3-b3b1-1875bd9cc23f'
+        : '0193b386-cf4c-79d3-b3b1-1875bd9cc23f-test',
     },
     {
       src: '/js/optanon-wrapper.js',
