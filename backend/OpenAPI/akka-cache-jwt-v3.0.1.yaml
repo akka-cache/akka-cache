@@ -29,7 +29,7 @@ tags:
       description: Find out more about the batched APIs
       url: TBD
 security:
-  - bearerHttpAuthentication: []
+  - JWT: []
 paths:
   # cacheName APIs START here
   /cacheName:
@@ -46,6 +46,8 @@ paths:
       responses:
         "201":
           description: (created) Successfully created or updated.
+        "400":
+          description: Bad Request
     put:
       tags:
         - cacheName
@@ -59,26 +61,15 @@ paths:
       responses:
         "202":
           description: "(accepted) Successfully created or updated."
-  /cacheName/list:
-    get:
-      tags:
-        - cacheName
-      summary:
-        Retrieves a list of cacheNames and associated description if it exists.
-      responses:
-        "200":
-          description: Returns a JSON format array of the cache namespaces, and description.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/cacheNameListResponse'
+        "400":
+          description: Bad Request
   /cacheName/{cacheName}:
     parameters:
       - $ref: '#/components/parameters/cacheNameParam'
     get:
       tags:
         - cacheName
-      summary: get the current cache namespace description, and delete status
+      summary: Get the specified cache name description, and delete status.
       responses:
         "200":
           description: returned a JSON format of the cache namespace, and description
@@ -87,7 +78,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/cacheNameResponse'
         "400":
-          description: (bad request) doesn't exist
+          description: bad request or doesn't exist
     delete:
       tags:
         - cacheName
@@ -95,6 +86,23 @@ paths:
       responses:
         "202":
           description: (accepted) deleted
+        "400":
+          description: Bad Request
+  /cacheName/list:
+    get:
+      tags:
+        - cacheName
+      summary:
+        Retrieves a list of cacheNames and optional description.
+      responses:
+        "200":
+          description: Returns a JSON format array of the cache namespaces, and description.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/cacheNameListResponse'
+        "400":
+          description: Bad Request
   /cacheName/{cacheName}/keys:
     parameters:
       - $ref: '#/components/parameters/cacheNameParam'
@@ -110,7 +118,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/cacheNameKeys'
         "400":
-          description: (bad request) doesn't exist
+          description: bad request or doesn't exist
   /cacheName/{cacheName}/flush:
     parameters:
       - $ref: '#/components/parameters/cacheNameParam'
@@ -122,7 +130,7 @@ paths:
         "202":
           description: accepted
         "400":
-          description: (bad request) doesn't exist
+          description: bad request or doesn't exist
   # cacheName APIs END here
   # cacheName / cache specific APIs START here
   /{cacheName}/{key}:
@@ -144,7 +152,7 @@ paths:
         "201":
           description: (created) Successfully created or updated.
         "400":
-          description: (bad request) Potentially exceeded maximum cached bytes allowed
+          description: bad request or potentially exceeded maximum cached bytes allowed
     delete:
       tags:
         - cache
@@ -152,6 +160,8 @@ paths:
       responses:
         "202":
           description: (accepted) deleted
+        "400":
+          description: Bad Request
     get:
       tags:
         - cache
@@ -166,6 +176,8 @@ paths:
                 $ref: '#/components/schemas/byteArray'
         "404":
           description: Not Found
+        "400":
+          description: Bad Request
   /{cacheName}/{key}/{ttlSeconds}:
     parameters:
       - $ref: '#/components/parameters/cacheNameParam'
@@ -186,7 +198,7 @@ paths:
         "201":
           description: (created) Successfully created or updated.
         "400":
-          description: (bad request) Potentially exceeded maximum cached bytes allowed
+          description: Bad Request or potentially exceeded maximum cached bytes allowed
   /set:
     post:
       tags:
@@ -202,7 +214,7 @@ paths:
         "201":
           description: (created) Successfully created or updated.
         "400":
-          description: (bad request) Invalid cacheRequest, or potentially exceeded maximum cached bytes allowed.
+          description: Bad Request or, Invalid cacheRequest, or potentially exceeded maximum cached bytes allowed.
   # cacheName / cache specific APIs END here
   /get/{cacheName}/{key}:
     parameters:
@@ -219,6 +231,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/cacheGetResponse'
+        "400":
+          description: Bad Request
   /batch:
     post:
       tags:
@@ -237,6 +251,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/batchCacheResponse'
+        "400":
+          description: Bad Request
     delete:
       tags:
         - batch
@@ -254,6 +270,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/batchDeleteCacheResponse'
+        "400":
+          description: Bad Request
   /batch/get:
     post:
       tags:
@@ -272,9 +290,11 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/batchGetCacheResponse'
+        "400":
+          description: Bad Request
 components:
   securitySchemes:
-    bearerHttpAuthentication:
+    JWT:
       description: Bearer token using a JWT
       type: http
       scheme: Bearer
@@ -339,10 +359,9 @@ components:
       type: array
       items:
         type: object
-        description: An array of all known cacheNames, along with their descriptions if they exist.
+        description: An array of all known cacheNames, along with an optional description.
         required:
           - cacheName
-          - description
         properties:
           cacheName:
             type: string
