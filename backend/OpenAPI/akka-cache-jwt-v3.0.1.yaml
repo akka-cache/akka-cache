@@ -380,8 +380,8 @@ components:
       description: Time to Live of the cached object.
     byteArray:
       type: string
-      description: This is an array of bytes (byte[]).
-      format: byte
+      description: This is an array of bytes (byte[]) (not encoded)
+      format: binary # "byte" appears to be BASE64 encoded
     cacheRequest:
       type: object
       description: A JSON request object where the object is provided as a BASE64 encoded value.
