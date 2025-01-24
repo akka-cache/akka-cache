@@ -68,14 +68,11 @@ const config = {
         ? '28b912e7-09e9-43d5-91e4-3d1897044004'
         : '28b912e7-09e9-43d5-91e4-3d1897044004-test',
     },
-    {
-      src: '/js/optanon-wrapper.js',
-      type: 'text/javascript',
-    },
-    {
-      src: '/js/google-tag-manager.js',
-      type: 'text/javascript',
-    },
+  ],
+
+  plugins: [
+    require.resolve('./plugins/inlineOptanonPlugin.js'),
+    require.resolve('./plugins/googleTagManagerPlugin.js'),
   ],
 
   themeConfig:
