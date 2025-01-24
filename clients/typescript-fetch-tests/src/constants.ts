@@ -11,5 +11,6 @@ export const DESCRIPTION3 = "Cache Three";
 export const KEY1 = "key1";
 export const KEY2 = "key2";
 export const KEY3 = "key3";
+export const CAR = "aston-martin-dbr22";
 
 export const PAYLOAD = "payload";

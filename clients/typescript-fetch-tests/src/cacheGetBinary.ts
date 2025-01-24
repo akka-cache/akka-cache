@@ -10,7 +10,7 @@ export async function testGetCacheBinary(cacheName:string, key:string) : Promise
             {cacheName: cacheName, key: key}
         )
         .then(response => {
-            log("cacheGet successful for " + cacheName + "," + key + "," + response.bytes());
+            log("cacheNameKeyGet successful for " + cacheName + "," + key + "," + response.type);
             return response;
         })
         .catch(err => {
