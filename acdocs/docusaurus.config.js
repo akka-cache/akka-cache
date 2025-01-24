@@ -65,8 +65,8 @@ const config = {
       charset: 'UTF-8',
       // Use different data-domain-script for dev vs. production
       'data-domain-script': isProd
-        ? '0193b386-cf4c-79d3-b3b1-1875bd9cc23f'
-        : '0193b386-cf4c-79d3-b3b1-1875bd9cc23f-test',
+        ? '28b912e7-09e9-43d5-91e4-3d1897044004'
+        : '28b912e7-09e9-43d5-91e4-3d1897044004-test',
     },
     {
       src: '/js/optanon-wrapper.js',
