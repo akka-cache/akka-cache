@@ -106,11 +106,11 @@ const config = {
         //     position: 'right',
         //     label: 'Cache',
         //   },
-          {
-            href: 'https://github.com/akka-cache/akka-cache',
-            label: 'GitHub',
-            position: 'right',
-          },
+          // {
+          //   href: 'https://github.com/akka-cache/akka-cache',
+          //   label: 'GitHub',
+          //   position: 'right',
+          // },
         ],
       },
       footer: {
