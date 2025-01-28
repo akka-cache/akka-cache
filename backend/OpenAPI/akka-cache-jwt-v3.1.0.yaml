@@ -14,7 +14,7 @@ info:
 servers: [ { url: http://localhost:9001 } ]
 tags:
   - name: cacheName
-    description: APIs used to maintain a cache namespace or group.
+    description: APIs used to maintain a cache name, namespace, or group.
     externalDocs:
       description: Find out more about cacheNames
       url: TBD
@@ -36,7 +36,7 @@ paths:
     post:
       tags:
         - cacheName
-      summary: Create or update a cache namespace description
+      summary: Create or update a cache namespace description.
       requestBody:
         required: true
         content:
@@ -51,7 +51,7 @@ paths:
     put:
       tags:
         - cacheName
-      summary: Create or update a cache namespace description
+      summary: Create or update a cache namespace description.
       requestBody:
         required: true
         content:
@@ -82,7 +82,7 @@ paths:
     delete:
       tags:
         - cacheName
-      summary: delete the current cache namespace and all associated caches
+      summary: Deletes the current cache namespace and all associated caches.
       responses:
         "202":
           description: (accepted) deleted
@@ -109,10 +109,10 @@ paths:
     get:
       tags:
         - cacheName
-      summary: get the current cache namespace description, and delete status
+      summary: Get the current cache namespace's list of cache keys.
       responses:
         "200":
-          description: returned a JSON format of the cache namespace, and description
+          description: returns a JSON format array of cache keys.
           content:
             application/json:
               schema:
@@ -125,7 +125,7 @@ paths:
     put:
       tags:
         - cacheName
-      summary: deletes all existing cached objects but leaves the cache namespace in place
+      summary: Deletes all existing cached objects but leaves the cache namespace in place.
       responses:
         "202":
           description: accepted
@@ -301,21 +301,21 @@ components:
       bearerFormat: JWT
   parameters:
     cacheNameParam:
-      description: name of a cache (group)
+      description: Name of a cache namespace. (group)
       name: cacheName
       in: path
       required: true
       schema:
         $ref: '#/components/schemas/cacheName'
     keyParam:
-      description: key of a specific cache object within a cacheName
+      description: The key of a specific cache object within a cacheName.
       name: key
       in: path
       required: true
       schema:
         $ref: '#/components/schemas/key'
     ttlSecondsParam:
-      description: Time to Live of the cached object
+      description: Time to Live (TTL) of the cached object before being automatically deleted.
       name: ttlSeconds
       in: path
       required: true
@@ -324,15 +324,16 @@ components:
   schemas:
     cacheName:
       type: string
-      description: name of a cache namespace
+      description: Name of a cache namespace (group).
     description:
       type: string
-      description: description of a cache name
+      description: Description of a cache name.
     deleted:
       type: boolean
-      description: false if not deleted
+      description: False if not deleted.
     cacheNameCreate:
       type: object
+      description: A JSON object use to create a cacheName namespace.
       properties:
         cacheName:
           type: string
@@ -340,7 +341,11 @@ components:
           type: string
     cacheNameResponse:
       type: object
-      description: the complete cacheName object
+      required:
+        - cacheName
+        - description
+        - deleted
+      description: The complete cacheName object.
       properties:
         cacheName:
           type: string
@@ -352,7 +357,7 @@ components:
       type: array
       items:
         type: object
-        description: An array of all known cacheNames, along with their descriptions if they exist.
+        description: An array of all known cacheNames, along with an optional description.
         required:
           - cacheName
           - description
@@ -363,21 +368,26 @@ components:
             type: string
     cacheNameKeys:
       type: array
-      description: an array of all known keys under the given cacheName
+      description: An array of all known keys under the given cacheName.
       items:
         type: string
     key:
       type: string
-      description: unique key to the cache within the cacheName
+      description: Unique key to the cache within the cacheName.
     ttlSeconds:
       type: integer
-      description: Time to Live of the cached object
+      description: Time to Live of the cached object.
     byteArray:
       type: string
       description: This is an array of bytes (byte[]) (not encoded)
       format: binary # "byte" appears to be BASE64 encoded
     cacheRequest:
       type: object
+      description: A JSON request object where the object is provided as a BASE64 encoded value.
+      required:
+        - cacheName
+        - key
+        - value
       properties:
         cacheName:
           type: string
@@ -390,6 +400,12 @@ components:
           format: byte
     cacheGetResponse:
       type: object
+      description: The cached JSON object returned as a BASE64 encoded value.
+      required:
+        - cacheName
+        - key
+        - success
+        - value
       properties:
         cacheName:
           type: string
@@ -406,6 +422,11 @@ components:
         $ref: '#/components/schemas/cacheRequest'
     batchCacheResult:
       type: object
+      description: A JSON based array of results for each batched cache request.
+      required:
+        - cacheName
+        - key
+        - success
       properties:
         cacheName:
           type: string
@@ -415,6 +436,7 @@ components:
           type: boolean
     batchCacheResponse:
       type: object
+      description: A JSON wrapped array of batched cache results.
       properties:
         complete:
           type: boolean
@@ -424,6 +446,10 @@ components:
             $ref: '#/components/schemas/batchCacheResult'
     batchGetCacheRequest:
       type: object
+      description: A cashName/key value pair of a cached object to retrieve.
+      required:
+        - cacheName
+        - key
       properties:
         cacheName:
           type: string
@@ -435,6 +461,11 @@ components:
         $ref: '#/components/schemas/batchGetCacheRequest'
     cacheDeleteResponse:
       type: object
+      description: A JSON response of the cache delete request.
+      required:
+        - cacheName
+        - key
+        - success
       properties:
         cacheName:
           type: string
@@ -444,10 +475,12 @@ components:
           type: boolean
     batchDeleteCacheResponse:
       type: array
+      description: A JSON wrapped array of batched delete cache results.
       schema:
         $ref: '#/components/schemas/cacheDeleteResponse'
     batchGetCacheResponse:
       type: object
+      description: A JSON wrapped array of batched get cache results.
       properties:
         complete:
           type: boolean

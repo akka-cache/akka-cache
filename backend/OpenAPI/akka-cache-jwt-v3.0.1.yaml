@@ -36,7 +36,7 @@ paths:
     post:
       tags:
         - cacheName
-      summary: Create or update a cache namespace description
+      summary: Create or update a cache namespace description.
       requestBody:
         required: true
         content:
@@ -51,7 +51,7 @@ paths:
     put:
       tags:
         - cacheName
-      summary: Create or update a cache namespace description
+      summary: Create or update a cache namespace description.
       requestBody:
         required: true
         content:
@@ -109,10 +109,10 @@ paths:
     get:
       tags:
         - cacheName
-      summary: get the current cache namespace description, and delete status
+      summary: Get the current cache namespace's list of cache keys.
       responses:
         "200":
-          description: returned a JSON format of the cache namespace, and description
+          description: returns a JSON format array of cache keys.
           content:
             application/json:
               schema:
@@ -125,7 +125,7 @@ paths:
     put:
       tags:
         - cacheName
-      summary: deletes all existing cached objects but leaves the cache namespace in place
+      summary: Deletes all existing cached objects but leaves the cache namespace in place.
       responses:
         "202":
           description: accepted

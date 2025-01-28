@@ -10,9 +10,9 @@ TODO: (Sample JWT w/ iss, org, and serviceLevel=free )
 
 [ Jump to [Models](#models) ]
 
-### Table of Contents
+## Table of Contents
 
-#### CacheName
+### [CacheName](#cachename)
 APIs used to maintain a cache name, namespace, or group.
 
 * [`delete /cacheName/{cacheName}`](#cacheNameCacheNameDelete)
@@ -23,7 +23,7 @@ APIs used to maintain a cache name, namespace, or group.
 * [`post /cacheName`](#cacheNamePost)
 * [`put /cacheName`](#cacheNamePut)
 
-#### Cache
+### [Cache](#cache)
 APIs used to create, retrieve, and delete cached objects.
 
 * [`delete /{cacheName}/{key}`](#cacheNameKeyDelete)
@@ -33,7 +33,7 @@ APIs used to create, retrieve, and delete cached objects.
 * [`get /get/{cacheName}/{key}`](#getCacheNameKeyGet)
 * [`post /set`](#setPost)
 
-#### Batch
+### [Batch](#batch)
 Batch APIs used to create, retrieve, and delete cached objects.
 
 * [`delete /batch`](#batchDelete)
@@ -42,12 +42,12 @@ Batch APIs used to create, retrieve, and delete cached objects.
 
 ---
 
-# [CacheName](#CacheName)
+# CacheName {#cachename}
 APIs used to maintain a cache name, namespace, or group.
 
 [Up](#methods)
 
-## cacheNameCacheNameDelete
+## Cache Name Delete {#cacheNameCacheNameDelete}
 ```
 delete /cacheName/{cacheName}
 ```
@@ -70,11 +70,13 @@ Bad Request
 ---
 
 [Up](#methods)
+## Cache Name Flush {#cacheNameCacheNameFlushPut}
+
 ```
 put /cacheName/{cacheName}/flush
 ```
 
-deletes all existing cached objects but leaves the cache namespace in place (cacheNameCacheNameFlushPut)
+Deletes all existing cached objects but leaves the cache namespace in place.
 ### Path parameters
 
 cacheName (required)
@@ -92,6 +94,8 @@ bad request or doesn't exist
 ---
 
 [Up](#methods)
+## Cache Name Get {#cacheNameCacheNameGet}
+
 ```
 get /cacheName/{cacheName}
 ```
@@ -136,11 +140,12 @@ bad request or doesn't exist
 ---
 
 [Up](#methods)
+## Cache Name Get Keys {#cacheNameCacheNameKeysGet}
 ```
 get /cacheName/{cacheName}/keys
 ```
 
-get the current cache namespace description, and delete status (cacheNameCacheNameKeysGet)
+Get the current cache namespace's list of cache keys.
 ### Path parameters
 
 cacheName (required)
@@ -154,7 +159,7 @@ array[String]
 
 Content-Type: application/json
 ```
-[ "", "" ]
+{"cacheName":"cache1", "description":"This is our first test"}
 ```
 ### Produces
 
@@ -167,7 +172,7 @@ the media type will be conveyed by the Content-Type response header.
 
 #### 200
 
-returned a JSON format of the cache namespace, and description
+returns a JSON format array of cache keys
 #### 400
 
 bad request or doesn't exist
@@ -175,11 +180,13 @@ bad request or doesn't exist
 ---
 
 [Up](#methods)
+## Cache Name List {#cacheNameListGet}
+
 ```
 get /cacheName/list
 ```
 
-Retrieves a list of cacheNames and optional description. (cacheNameListGet)
+Retrieves a list of cacheNames and optional description.
 ### Return type
 
 array[[cacheNameListResponse\_inner](#cacheNameListResponse_inner)]
@@ -215,11 +222,12 @@ Bad Request
 ---
 
 [Up](#methods)
+## Cache Name Post {#cacheNamePost}
 ```
 post /cacheName
 ```
 
-Create or update a cache namespace description (cacheNamePost)
+Create or update a cache namespace description 
 ### Consumes
 
 This API call consumes the following media types via the Content-Type request header:
@@ -243,11 +251,12 @@ Bad Request
 ---
 
 [Up](#methods)
+## Cache Name Put {#cacheNamePut}
 ```
 put /cacheName
 ```
 
-Create or update a cache namespace description (cacheNamePut)
+Create or update a cache namespace description.
 ### Consumes
 
 This API call consumes the following media types via the Content-Type request header:
@@ -271,15 +280,17 @@ Bad Request
 ---
 
 
-# [Cache](#Cache)
+# Cache {#cache}
 APIs used to create, retrieve, and delete cached objects.
 
 [Up](#methods)
+
+## Cache Delete {#cacheNameKeyDelete}
 ```
 delete /{cacheName}/{key}
 ```
 
-Deletes the currently cached object by key within the given cacheName. (cacheNameKeyDelete)
+Deletes the currently cached object by key within the given cacheName.
 ### Path parameters
 
 cacheName (required)
@@ -298,11 +309,12 @@ Bad Request
 ---
 
 [Up](#methods)
+## Cache Get (binary) {#cacheNameKeyGet}
 ```
 get /{cacheName}/{key}
 ```
 
-Retrieves the currently cached object by key within the given cacheName. Note: this is a binary version of the API and requires that the cache object be passed in the request body. (cacheNameKeyGet)
+Retrieves the currently cached object by key within the given cacheName. Note: this is a binary version of the API and requires that the cache object be passed in the request body.
 ### Path parameters
 
 cacheName (required)
@@ -336,11 +348,12 @@ Bad Request
 ---
 
 [Up](#methods)
+## Cache Create (binary) {#cacheNameKeyPost}
 ```
 post /{cacheName}/{key}
 ```
 
-Create or update a cached object under the cacheName. Note: this is a binary version of the API and requires that the cache object be passed in the request body. (cacheNameKeyPost)
+Create or update a cached object under the cacheName. Note: this is a binary version of the API and requires that the cache object be passed in the request body.
 ### Path parameters
 
 cacheName (required)
@@ -370,11 +383,12 @@ bad request or potentially exceeded maximum cached bytes allowed
 ---
 
 [Up](#methods)
+## Cache Create with Time to Live (binary) {#cacheNameKeyTtlSecondsPost}
 ```
 post /{cacheName}/{key}/{ttlSeconds}
 ```
 
-Create or update a cached object by key within the given cacheName. Note: this is a binary version of the API and requires that the cache object be passed in the request body. (cacheNameKeyTtlSecondsPost)
+Create or update a cached object by key within the given cacheName. Note: this is a binary version of the API and requires that the cache object be passed in the request body.
 ### Path parameters
 
 cacheName (required)
@@ -405,11 +419,12 @@ Bad Request or potentially exceeded maximum cached bytes allowed
 ---
 
 [Up](#methods)
+## Cache Get (JSON) {#getCacheNameKeyGet}
 ```
 get /get/{cacheName}/{key}
 ```
 
-Get the current cache namespace description, and delete status. (getCacheNameKeyGet)
+Get the current cache namespace description, and delete status.
 ### Path parameters
 
 cacheName (required)
@@ -451,11 +466,12 @@ Bad Request
 ---
 
 [Up](#methods)
+## Cache Set (JSON) {#setPost}
 ```
 post /set
 ```
 
-Create or update a cached object (BASE64 encoded) by key within the given cacheName. (setPost)
+Create or update a cached object (BASE64 encoded) by key within the given cacheName.
 ### Consumes
 
 This API call consumes the following media types via the Content-Type request header:
@@ -476,15 +492,16 @@ Body Parameter —
 
 Bad Request or, Invalid cacheRequest, or potentially exceeded maximum cached bytes allowed.
 
-# [Batch](#Batch)
+# Batch {#batch}
 Batch APIs used to create, retrieve, and delete cached objects.
 
-[Up](# Methods)
+[Up](#methods)
+## Batch Delete {#batchDelete}
 ```
 delete /batch
 ```
 
-Deletes a batch of individually cached objects. (batchDelete)
+Deletes a batch of individually cached objects.
 ### Consumes
 
 This API call consumes the following media types via the Content-Type request header:
@@ -533,11 +550,12 @@ Bad Request
 ---
 
 [Up](#methods)
+## Batch Get {#batchGetPost}
 ```
 post /batch/get
 ```
 
-Retrieve a batch of cached objects. (batchGetPost)
+Retrieve a batch of cached objects.
 ### Consumes
 
 This API call consumes the following media types via the Content-Type request header:
@@ -592,11 +610,12 @@ Bad Request
 ---
 
 [Up](#methods)
+## Batch Create {#batchPost}
 ```
 post /batch
 ```
 
-Create batch of cached objects, results are returned for each batched element. (batchPost)
+Create batch of cached objects, results are returned for each batched element.
 ### Consumes
 
 This API call consumes the following media types via the Content-Type request header:
@@ -653,23 +672,24 @@ Bad Request
 [ Jump to [Methods](#methods) ]
 ### Table of Contents
 
-1. [`batchCacheRequest_inner` -](#batchCacheRequest_inner)
-2. [`batchCacheResponse` -](#batchCacheResponse)
-3. [`batchCacheResponse_results_inner` -](#batchCacheResponse_results_inner)
-4. [`batchCacheResult` -](#batchCacheResult)
-5. [`batchDeleteCacheResponse_inner` -](#batchDeleteCacheResponse_inner)
-6. [`batchGetCacheRequest` -](#batchGetCacheRequest)
-7. [`batchGetCacheRequests_inner` -](#batchGetCacheRequests_inner)
-8. [`batchGetCacheResponse` -](#batchGetCacheResponse)
-9. [`batchGetCacheResponse_results_inner` -](#batchGetCacheResponse_results_inner)
-10. [`cacheDeleteResponse` -](#cacheDeleteResponse)
-11. [`cacheGetResponse` -](#cacheGetResponse)
-12. [`cacheNameCreate` -](#cacheNameCreate)
-13. [`cacheNameListResponse_inner` -](#cacheNameListResponse_inner)
-14. [`cacheNameResponse` -](#cacheNameResponse)
-15. [`cacheRequest` -](#cacheRequest)
+* [batchCacheRequest_inner](#batchCacheRequest_inner)
+* [batchCacheResponse](#batchCacheResponse)
+* [batchCacheResponse_results_inner](#batchCacheResponse_results_inner)
+* [batchCacheResult](#batchCacheResult)
+* [batchDeleteCacheResponse_inner](#batchDeleteCacheResponse_inner)
+* [batchGetCacheRequest](#batchGetCacheRequest)
+* [batchGetCacheRequests_inner](#batchGetCacheRequests_inner)
+* [batchGetCacheResponse](#batchGetCacheResponse)
+* [batchGetCacheResponse_results_inner](#batchGetCacheResponse_results_inner)
+* [cacheDeleteResponse](#cacheDeleteResponse)
+* [cacheGetResponse](#cacheGetResponse)
+* [cacheNameCreate](#cacheNameCreate)
+* [cacheNameListResponse_inner](#cacheNameListResponse_inner)
+* [cacheNameResponse](#cacheNameResponse)
+* [cacheRequest](#cacheRequest)
 
-### `batchCacheRequest_inner` - [Up](#models)
+[Up](#models)
+### batchCacheRequest_inner 
 
 A JSON array of objects to be cached where the object must be a BASE64 encoded value.
 cacheName [String](#string)
@@ -677,65 +697,75 @@ key [String](#string)
 ttlSeconds (optional)[Integer](#integer)
 value [byte[]](#ByteArray) format: byte
 
-### `batchCacheResponse` - [Up](#models)
+[Up](#models)
+### batchCacheResponse
 
 A JSON wrapped array of batched cache results.
 
 complete (optional)[Boolean](#boolean)
 results (optional)[array[batchCacheResponse\_results\_inner]](#batchCacheResponse_results_inner)
 
-### `batchCacheResponse_results_inner` - [Up](#models)
+[Up](#models)
+### batchCacheResponse_results_inner
 
 A JSON array of batched cache results.
 cacheName [String](#string)
 key [String](#string)
 success [Boolean](#boolean)
 
-### `batchCacheResult` - [Up](#models)
+[Up](#models)
+### batchCacheResult
 
 A JSON based array of results for each batched cache request.
 cacheName [String](#string)
 key [String](#string)
 success [Boolean](#boolean)
 
-### `batchDeleteCacheResponse_inner` - [Up](#models)
+[Up](#models)
+### batchDeleteCacheResponse_inner 
 
 cacheName [String](#string)
 key [String](#string)
 success [Boolean](#boolean)
 
-### `batchGetCacheRequest` - [Up](#models)
+[Up](#models)
+### batchGetCacheRequest 
 
 A cashName/key value pair of a cached object to retrieve.
 cacheName [String](#string)
 key [String](#string)
 
-### `batchGetCacheRequests_inner` - [Up](#models)
+[Up](#models)
+### batchGetCacheRequests_inner
 
 A JSON array of retrieved cashName/key pairs to retrieve as a batch.
 cacheName [String](#string)
 key [String](#string)
 
-### `batchGetCacheResponse` - [Up](#models)
+[Up](#models)
+### batchGetCacheResponse
 
 complete (optional)[Boolean](#boolean)
 results (optional)[array[batchGetCacheResponse\_results\_inner]](#batchGetCacheResponse_results_inner) A JSON response containing the list of cached objects retrieved. Note: each object is encoded as a BASE64 encoded value.
 
-### `batchGetCacheResponse_results_inner` - [Up](#models)
+[Up](#models)
+### batchGetCacheResponse_results_inner
 
 cacheName [String](#string)
 key [String](#string)
 success [Boolean](#boolean)
 value [byte[]](#ByteArray) format: byte
 
-### `cacheDeleteResponse` - [Up](#models)
+[Up](#models)
+### cacheDeleteResponse
 
 A JSON response of the cache delete request.
 cacheName [String](#string)
 key [String](#string)
 success [Boolean](#boolean)
 
-### `cacheGetResponse` - [Up](#models)
+[Up](#models)
+### cacheGetResponse
 
 The cached JSON object returned as a BASE64 encoded value.
 cacheName [String](#string)
@@ -743,26 +773,30 @@ key [String](#string)
 success [Boolean](#boolean)
 value [byte[]](#ByteArray) format: byte
 
-### `cacheNameCreate` - [Up](#models)
+[Up](#models)
+### cacheNameCreate
 
 A JSON object use to create a cacheName namespace.
 cacheName [String](#string)
 description (optional)[String](#string)
 
-### `cacheNameListResponse_inner` - [Up](#models)
+[Up](#models)
+### cacheNameListResponse_inner
 
 An array of all known cacheNames, along with an optional description.
 cacheName [String](#string)
 description (optional)[String](#string)
 
-### `cacheNameResponse` - [Up](#models)
+[Up](#models)
+### cacheNameResponse
 
 The complete cacheName object.
 cacheName [String](#string)
 description [String](#string)
 deleted [Boolean](#boolean)
 
-### `cacheRequest` - [Up](#models)
+[Up](#models)
+### cacheRequest
 
 A JSON request object where the object is provided as a BASE64 encoded value.
 cacheName [String](#string)
