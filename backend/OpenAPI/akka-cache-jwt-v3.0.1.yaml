@@ -14,7 +14,7 @@ info:
 servers: [ { url: http://localhost:9001 } ]
 tags:
   - name: cacheName
-    description: APIs used to maintain a cache namespace or group.
+    description: APIs used to maintain a cache name, namespace, or group.
     externalDocs:
       description: Find out more about cacheNames
       url: TBD
@@ -82,7 +82,7 @@ paths:
     delete:
       tags:
         - cacheName
-      summary: delete the current cache namespace and all associated caches
+      summary: Deletes the current cache namespace and all associated caches.
       responses:
         "202":
           description: (accepted) deleted
@@ -452,6 +452,7 @@ components:
           type: boolean
     batchCacheResponse:
       type: object
+      description: A JSON wrapped array of batched cache results.
       properties:
         complete:
           type: boolean
@@ -511,9 +512,10 @@ components:
           type: boolean
     batchDeleteCacheResponse:
       type: array
-      description: A JSON array object listing each batched request and corresponding result.
+      description: A JSON wrapped array of batched delete cache results.
       items:
         type: object
+        description: A JSON array of batched deleted cache results.
         required:
           - cacheName
           - key
@@ -527,15 +529,16 @@ components:
             type: boolean
     batchGetCacheResponse:
       type: object
+      description: A JSON wrapped array of batched get cache results.
       properties:
         complete:
           type: boolean
         results:
           type: array
-          description: |-
-            A JSON response containing the list of cached objects retrieved. Note: each object is encoded as a BASE64 encoded value.
           items:
             type: object
+            description: |-
+              A JSON response containing the list of cached objects retrieved. Note: each object is encoded as a BASE64 encoded value.
             required:
               - cacheName
               - key
