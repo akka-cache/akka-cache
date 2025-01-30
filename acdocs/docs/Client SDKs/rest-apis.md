@@ -1,10 +1,24 @@
+---
+# Display h2 to h5 headings
+toc_min_heading_level: 2
+toc_max_heading_level: 3
+---
+
 # REST APIs
 
 ## Access
 
 Endpoint Authentication is based upon Java Web Tokens (JWT) using HTTP Bearer Token authentication headers.
 
-TODO: (Sample JWT w/ iss, org, and serviceLevel=free )
+The following claims (or fields) are required:
+```
+{
+"iss": "https://session.firebase.google.com/akka-cache",
+"org": "ttorg",
+"name": "John Doe",
+"serviceLevel": "free"
+}
+```
 
 ## Methods
 
@@ -12,107 +26,117 @@ TODO: (Sample JWT w/ iss, org, and serviceLevel=free )
 
 ## Table of Contents
 
-### [CacheName](#cachename)
+#### CacheName
+
 APIs used to maintain a cache name, namespace, or group.
 
-* [`delete /cacheName/{cacheName}`](#cacheNameCacheNameDelete)
-* [`put /cacheName/{cacheName}/flush`](#cacheNameCacheNameFlushPut)
-* [`get /cacheName/{cacheName}`](#cacheNameCacheNameGet)
-* [`get /cacheName/{cacheName}/keys`](#cacheNameCacheNameKeysGet)
-* [`get /cacheName/list`](#cacheNameListGet)
-* [`post /cacheName`](#cacheNamePost)
-* [`put /cacheName`](#cacheNamePut)
+- [`delete /cacheName/{cacheName}`](#cache-name-delete)
+- [`put /cacheName/{cacheName}/flush`](#cache-name-flush)
+- [`get /cacheName/{cacheName}`](#cache-name-get)
+- [`get /cacheName/{cacheName}/keys`](#cache-name-get-keys)
+- [`get /cacheName/list`](#cache-name-list)
+- [`post /cacheName`](#cache-name-post)
+- [`put /cacheName`](#cache-name-put)
 
-### [Cache](#cache)
+#### Cache
+
 APIs used to create, retrieve, and delete cached objects.
 
-* [`delete /{cacheName}/{key}`](#cacheNameKeyDelete)
-* [`get /{cacheName}/{key}`](#cacheNameKeyGet)
-* [`post /{cacheName}/{key}`](#cacheNameKeyPost)
-* [`post /{cacheName}/{key}/{ttlSeconds}`](#cacheNameKeyTtlSecondsPost)
-* [`get /get/{cacheName}/{key}`](#getCacheNameKeyGet)
-* [`post /set`](#setPost)
+- [`delete /{cacheName}/{key}`](#cache-delete)
+- [`get /{cacheName}/{key}`](#cache-get-binary)
+- [`post /{cacheName}/{key}`](#cache-create-binary)
+- [`post /{cacheName}/{key}/{ttlSeconds}`](#cache-create-with-time-to-live-binary)
+- [`get /get/{cacheName}/{key}`](#cache-get-json)
+- [`post /set`](#cache-set-json)
 
-### [Batch](#batch)
+#### Batch
+
 Batch APIs used to create, retrieve, and delete cached objects.
 
-* [`delete /batch`](#batchDelete)
-* [`post /batch/get`](#batchGetPost)
-* [`post /batch`](#batchPost)
+- [`delete /batch`](#batch-delete)
+- [`post /batch/get`](#batch-get)
+- [`post /batch`](#batch-create)
 
 ---
 
-# CacheName {#cachename}
+## CacheName
+
 APIs used to maintain a cache name, namespace, or group.
 
-[Up](#methods)
 
-## Cache Name Delete {#cacheNameCacheNameDelete}
+### Cache Name Delete
+
 ```
 delete /cacheName/{cacheName}
 ```
 
 delete the current cache namespace and all associated caches.
-### Path parameters
 
-cacheName (required)
+#### Path parameters
+
+- **cacheName (required)**\
 Path Parameter — Name of a cache namespace. (group) default: null
 
-### Responses
+#### Responses
 
-#### 202
+###### 202
 
 (accepted) deleted
-#### 400
+
+##### 400
 
 Bad Request
 
 ---
 
-[Up](#methods)
-## Cache Name Flush {#cacheNameCacheNameFlushPut}
+
+### Cache Name Flush
 
 ```
 put /cacheName/{cacheName}/flush
 ```
 
 Deletes all existing cached objects but leaves the cache namespace in place.
-### Path parameters
 
-cacheName (required)
+#### Path parameters
+
+- **cacheName (required)**\
 Path Parameter — Name of a cache namespace. (group) default: null
 
-### Responses
+#### Responses
 
-#### 202
+###### 202
 
 accepted
-#### 400
+
+##### 400
 
 bad request or doesn't exist
 
 ---
 
-[Up](#methods)
-## Cache Name Get {#cacheNameCacheNameGet}
+
+### Cache Name Get
 
 ```
 get /cacheName/{cacheName}
 ```
 
 Get the specified cache name description, and delete status. (cacheNameCacheNameGet)
-### Path parameters
 
-cacheName (required)
+#### Path parameters
+
+- **cacheName (required)**\
 Path Parameter — Name of a cache namespace. (group) default: null
 
-### Return type
+#### Return type
 
-[cacheNameResponse](#cacheNameResponse)
+[cacheNameResponse](#cachenameresponse)
 
-### Example data
+#### Example data
 
 Content-Type: application/json
+
 ```
 {
   "cacheName" : "cacheName",
@@ -120,80 +144,89 @@ Content-Type: application/json
   "description" : "description"
 }
 ```
-### Produces
+
+#### Produces
 
 This API call produces the following media types according to the Accept request header;
 the media type will be conveyed by the Content-Type response header.
 
-* `application/json`
+- `application/json`
 
-### Responses
+#### Responses
 
-#### 200
+##### 200
 
 returned a JSON format of the cache namespace, and description
-[cacheNameResponse](#cacheNameResponse)
-#### 400
+[cacheNameResponse](#cachenameresponse)
+
+##### 400
 
 bad request or doesn't exist
 
 ---
 
-[Up](#methods)
-## Cache Name Get Keys {#cacheNameCacheNameKeysGet}
+
+### Cache Name Get Keys
+
 ```
 get /cacheName/{cacheName}/keys
 ```
 
 Get the current cache namespace's list of cache keys.
-### Path parameters
 
-cacheName (required)
+#### Path parameters
+
+- **cacheName (required)**\
 Path Parameter — Name of a cache namespace. (group) default: null
 
-### Return type
+#### Return type
 
 array[String]
 
-### Example data
+#### Example data
 
 Content-Type: application/json
+
 ```
 {"cacheName":"cache1", "description":"This is our first test"}
 ```
-### Produces
+
+#### Produces
 
 This API call produces the following media types according to the Accept request header;
 the media type will be conveyed by the Content-Type response header.
 
-* `application/json`
+- `application/json`
 
-### Responses
+#### Responses
 
-#### 200
+##### 200
 
 returns a JSON format array of cache keys
-#### 400
+
+##### 400
 
 bad request or doesn't exist
 
 ---
 
-[Up](#methods)
-## Cache Name List {#cacheNameListGet}
+
+### Cache Name List
 
 ```
 get /cacheName/list
 ```
 
 Retrieves a list of cacheNames and optional description.
-### Return type
 
-array[[cacheNameListResponse\_inner](#cacheNameListResponse_inner)]
+#### Return type
 
-### Example data
+array[[cacheNameListResponse_inner](#cachenamelistresponse_inner)]
+
+#### Example data
 
 Content-Type: application/json
+
 ```
 [ {
   "cacheName" : "cacheName",
@@ -203,241 +236,264 @@ Content-Type: application/json
   "description" : "description"
 } ]
 ```
-### Produces
+
+#### Produces
 
 This API call produces the following media types according to the Accept request header;
 the media type will be conveyed by the Content-Type response header.
 
-* `application/json`
+- `application/json`
 
-### Responses
+#### Responses
 
-#### 200
+##### 200
 
 Returns a JSON format array of the cache namespaces, and description.
-#### 400
+
+##### 400
 
 Bad Request
 
 ---
 
-[Up](#methods)
-## Cache Name Post {#cacheNamePost}
+
+### Cache Name Post
+
 ```
 post /cacheName
 ```
 
-Create or update a cache namespace description 
-### Consumes
+Create or update a cache namespace description
+
+#### Consumes
 
 This API call consumes the following media types via the Content-Type request header:
 
-* `application/json`
+- `application/json`
 
-### Request body
+#### Request body
 
-cacheNameCreate [cacheNameCreate](#cacheNameCreate) (required)
+cacheNameCreate [cacheNameCreate](#cachenamecreate) (required)\
 Body Parameter —
 
-### Responses
+#### Responses
 
-#### 201
+##### 201
 
 (created) Successfully created or updated.
-#### 400
+
+##### 400
 
 Bad Request
 
 ---
 
-[Up](#methods)
-## Cache Name Put {#cacheNamePut}
+
+### Cache Name Put
+
 ```
 put /cacheName
 ```
 
 Create or update a cache namespace description.
-### Consumes
+
+#### Consumes
 
 This API call consumes the following media types via the Content-Type request header:
 
-* `application/json`
+- `application/json`
 
-### Request body
+#### Request body
 
-cacheNameCreate [cacheNameCreate](#cacheNameCreate) (required)
+cacheNameCreate [cacheNameCreate](#cachenamecreate) (required)\
 Body Parameter —
 
-### Responses
+#### Responses
 
-#### 202
+###### 202
 
 (accepted) Successfully created or updated.
-#### 400
+
+##### 400
 
 Bad Request
 
 ---
 
+## Cache
 
-# Cache {#cache}
 APIs used to create, retrieve, and delete cached objects.
 
-[Up](#methods)
 
-## Cache Delete {#cacheNameKeyDelete}
+### Cache Delete
+
 ```
 delete /{cacheName}/{key}
 ```
 
 Deletes the currently cached object by key within the given cacheName.
-### Path parameters
 
-cacheName (required)
+#### Path parameters
+
+- **cacheName (required)**\
 Path Parameter — Name of a cache namespace. (group) default: null key (required)
 Path Parameter — The key of a specific cache object within a cacheName. default: null
 
-### Responses
+#### Responses
 
-#### 202
+###### 202
 
 (accepted) deleted
-#### 400
+
+##### 400
 
 Bad Request
 
 ---
 
-[Up](#methods)
-## Cache Get (binary) {#cacheNameKeyGet}
+
+### Cache Get (binary)
+
 ```
 get /{cacheName}/{key}
 ```
 
 Retrieves the currently cached object by key within the given cacheName. Note: this is a binary version of the API and requires that the cache object be passed in the request body.
-### Path parameters
 
-cacheName (required)
+#### Path parameters
+
+- **cacheName (required)**\
 Path Parameter — Name of a cache namespace. (group) default: null key (required)
 Path Parameter — The key of a specific cache object within a cacheName. default: null
 
-### Return type
+#### Return type
 
 File
 
-### Produces
+#### Produces
 
 This API call produces the following media types according to the Accept request header;
 the media type will be conveyed by the Content-Type response header.
 
-* `application/octet-stream`
+- `application/octet-stream`
 
-### Responses
+#### Responses
 
-#### 200
+##### 200
 
 Okay
 [File](#File)
-#### 404
+
+##### 404
 
 Not Found
-#### 400
+
+##### 400
 
 Bad Request
 
 ---
 
-[Up](#methods)
-## Cache Create (binary) {#cacheNameKeyPost}
+
+### Cache Create (binary)
+
 ```
 post /{cacheName}/{key}
 ```
 
 Create or update a cached object under the cacheName. Note: this is a binary version of the API and requires that the cache object be passed in the request body.
-### Path parameters
 
-cacheName (required)
+#### Path parameters
+
+- **cacheName (required)**\
 Path Parameter — Name of a cache namespace. (group) default: null key (required)
 Path Parameter — The key of a specific cache object within a cacheName. default: null
 
-### Consumes
+#### Consumes
 
 This API call consumes the following media types via the Content-Type request header:
 
-* `application/octet-stream`
+- `application/octet-stream`
 
-### Request body
+#### Request body
 
-body [file](#file) (required)
+body [file](#file) (required)\
 Body Parameter —
 
-### Responses
+#### Responses
 
-#### 201
+##### 201
 
 (created) Successfully created or updated.
-#### 400
+
+##### 400
 
 bad request or potentially exceeded maximum cached bytes allowed
 
 ---
 
-[Up](#methods)
-## Cache Create with Time to Live (binary) {#cacheNameKeyTtlSecondsPost}
+
+### Cache Create with Time to Live (binary)
+
 ```
 post /{cacheName}/{key}/{ttlSeconds}
 ```
 
 Create or update a cached object by key within the given cacheName. Note: this is a binary version of the API and requires that the cache object be passed in the request body.
-### Path parameters
 
-cacheName (required)
+#### Path parameters
+
+- **cacheName (required)**\
 Path Parameter — Name of a cache namespace. (group) default: null key (required)
 Path Parameter — The key of a specific cache object within a cacheName. default: null ttlSeconds (required)
 Path Parameter — Time to Live (TTL) of the cached object before being automatically deleted. default: null
 
-### Consumes
+#### Consumes
 
 This API call consumes the following media types via the Content-Type request header:
 
-* `application/octet-stream`
+- `application/octet-stream`
 
-### Request body
+#### Request body
 
-body [file](#file) (required)
+body [file](#file) (required)\
 Body Parameter —
 
-### Responses
+#### Responses
 
-#### 201
+##### 201
 
 (created) Successfully created or updated.
-#### 400
+
+##### 400
 
 Bad Request or potentially exceeded maximum cached bytes allowed
 
 ---
 
-[Up](#methods)
-## Cache Get (JSON) {#getCacheNameKeyGet}
+
+### Cache Get (JSON)
+
 ```
 get /get/{cacheName}/{key}
 ```
 
 Get the current cache namespace description, and delete status.
-### Path parameters
 
-cacheName (required)
+#### Path parameters
+
+- **cacheName (required)**\
 Path Parameter — Name of a cache namespace. (group) default: null key (required)
 Path Parameter — The key of a specific cache object within a cacheName. default: null
 
-### Return type
+#### Return type
 
-[cacheGetResponse](#cacheGetResponse)
+[cacheGetResponse](#cachegetresponse)
 
-### Example data
+#### Example data
 
 Content-Type: application/json
+
 ```
 {
   "cacheName" : "cacheName",
@@ -446,80 +502,90 @@ Content-Type: application/json
   "key" : "key"
 }
 ```
-### Produces
+
+#### Produces
 
 This API call produces the following media types according to the Accept request header;
 the media type will be conveyed by the Content-Type response header.
 
-* `application/json`
+- `application/json`
 
-### Responses
+#### Responses
 
-#### 200
+##### 200
 
-Returns a JSON format of the cache namespace, and description.
-[cacheGetResponse](#cacheGetResponse)
-#### 400
+Returns a JSON format of the cache namespace, and description.\
+[cacheGetResponse](#cachegetresponse)
+
+##### 400
 
 Bad Request
 
 ---
 
-[Up](#methods)
-## Cache Set (JSON) {#setPost}
+
+### Cache Set (JSON)
+
 ```
 post /set
 ```
 
 Create or update a cached object (BASE64 encoded) by key within the given cacheName.
-### Consumes
+
+#### Consumes
 
 This API call consumes the following media types via the Content-Type request header:
 
-* `application/json`
+- `application/json`
 
-### Request body
+#### Request body
 
-cacheRequest [cacheRequest](#cacheRequest) (required)
+cacheRequest [cacheRequest](#cacherequest) (required)\
 Body Parameter —
 
-### Responses
+#### Responses
 
-#### 201
+##### 201
 
 (created) Successfully created or updated.
-#### 400
+
+##### 400
 
 Bad Request or, Invalid cacheRequest, or potentially exceeded maximum cached bytes allowed.
 
-# Batch {#batch}
+---
+## Batch
+
 Batch APIs used to create, retrieve, and delete cached objects.
 
-[Up](#methods)
-## Batch Delete {#batchDelete}
+
+### Batch Delete
+
 ```
 delete /batch
 ```
 
 Deletes a batch of individually cached objects.
-### Consumes
+
+#### Consumes
 
 This API call consumes the following media types via the Content-Type request header:
 
-* `application/json`
+- `application/json`
 
-### Request body
+#### Request body
 
-batchGetCacheRequests\_inner [batchGetCacheRequests\_inner](#batchGetCacheRequests_inner) (required)
+batchGetCacheRequests_inner [batchGetCacheRequests_inner](#batchgetcacherequests_inner) (required)\
 Body Parameter —
 
-### Return type
+#### Return type
 
-array[[batchDeleteCacheResponse\_inner](#batchDeleteCacheResponse_inner)]
+array[[batchDeleteCacheResponse_inner](#batchdeletecacheresponse_inner)]
 
-### Example data
+#### Example data
 
 Content-Type: application/json
+
 ```
 [ {
   "cacheName" : "cacheName",
@@ -531,49 +597,54 @@ Content-Type: application/json
   "key" : "key"
 } ]
 ```
-### Produces
+
+#### Produces
 
 This API call produces the following media types according to the Accept request header;
 the media type will be conveyed by the Content-Type response header.
 
-* `application/json`
+- `application/json`
 
-### Responses
+#### Responses
 
-#### 200
+##### 200
 
 Returned a JSON formated object of all cached results.
-#### 400
+
+##### 400
 
 Bad Request
 
 ---
 
-[Up](#methods)
-## Batch Get {#batchGetPost}
+
+### Batch Get
+
 ```
 post /batch/get
 ```
 
 Retrieve a batch of cached objects.
-### Consumes
+
+#### Consumes
 
 This API call consumes the following media types via the Content-Type request header:
 
-* `application/json`
+- `application/json`
 
-### Request body
+#### Request body
 
-batchGetCacheRequests\_inner [batchGetCacheRequests\_inner](#batchGetCacheRequests_inner) (required)
+batchGetCacheRequests_inner [batchGetCacheRequests_inner](#batchgetcacherequests_inner) (required)\
 Body Parameter —
 
-### Return type
+#### Return type
 
-[batchGetCacheResponse](#batchGetCacheResponse)
+[batchGetCacheResponse](#batchgetcacheresponse)
 
-### Example data
+#### Example data
 
 Content-Type: application/json
+
 ```
 {
   "complete" : true,
@@ -590,50 +661,55 @@ Content-Type: application/json
   } ]
 }
 ```
-### Produces
+
+#### Produces
 
 This API call produces the following media types according to the Accept request header;
 the media type will be conveyed by the Content-Type response header.
 
-* `application/json`
+- `application/json`
 
-### Responses
+#### Responses
 
-#### 200
+##### 200
 
-Returns a JSON formated object of all cached results.
-[batchGetCacheResponse](#batchGetCacheResponse)
-#### 400
+Returns a JSON formated object of all cached results.\
+[batchGetCacheResponse](#batchgetcacheresponse)
+
+##### 400
 
 Bad Request
 
 ---
 
-[Up](#methods)
-## Batch Create {#batchPost}
+
+### Batch Create
+
 ```
 post /batch
 ```
 
 Create batch of cached objects, results are returned for each batched element.
-### Consumes
+
+#### Consumes
 
 This API call consumes the following media types via the Content-Type request header:
 
-* `application/json`
+- `application/json`
 
-### Request body
+#### Request body
 
-batchCacheRequest\_inner [batchCacheRequest\_inner](#batchCacheRequest_inner) (required)
+batchCacheRequest_inner [batchCacheRequest_inner](#batchcacherequest_inner) (required)\
 Body Parameter —
 
-### Return type
+#### Return type
 
-[batchCacheResponse](#batchCacheResponse)
+[batchCacheResponse](#batchcacheresponse)
 
-### Example data
+#### Example data
 
 Content-Type: application/json
+
 ```
 {
   "complete" : true,
@@ -648,20 +724,22 @@ Content-Type: application/json
   } ]
 }
 ```
-### Produces
+
+#### Produces
 
 This API call produces the following media types according to the Accept request header;
 the media type will be conveyed by the Content-Type response header.
 
-* `application/json`
+- `application/json`
 
-### Responses
+#### Responses
 
-#### 200
+##### 200
 
-returns a JSON formated object of each cached result.
-[batchCacheResponse](#batchCacheResponse)
-#### 400
+returns a JSON formated object of each cached result.\
+[batchCacheResponse](#batchcacheresponse)
+
+##### 400
 
 Bad Request
 
@@ -670,138 +748,219 @@ Bad Request
 ## Models
 
 [ Jump to [Methods](#methods) ]
+
 ### Table of Contents
 
-* [batchCacheRequest_inner](#batchCacheRequest_inner)
-* [batchCacheResponse](#batchCacheResponse)
-* [batchCacheResponse_results_inner](#batchCacheResponse_results_inner)
-* [batchCacheResult](#batchCacheResult)
-* [batchDeleteCacheResponse_inner](#batchDeleteCacheResponse_inner)
-* [batchGetCacheRequest](#batchGetCacheRequest)
-* [batchGetCacheRequests_inner](#batchGetCacheRequests_inner)
-* [batchGetCacheResponse](#batchGetCacheResponse)
-* [batchGetCacheResponse_results_inner](#batchGetCacheResponse_results_inner)
-* [cacheDeleteResponse](#cacheDeleteResponse)
-* [cacheGetResponse](#cacheGetResponse)
-* [cacheNameCreate](#cacheNameCreate)
-* [cacheNameListResponse_inner](#cacheNameListResponse_inner)
-* [cacheNameResponse](#cacheNameResponse)
-* [cacheRequest](#cacheRequest)
+- [`batchCacheRequest_inner`](#batchcacherequest_inner)
+- [`batchCacheResponse`](#batchcacheresponse)
+- [`batchCacheResponse_results_inner`](#batchcacheresponse_results_inner)
+- [`batchCacheResult`](#batchcacheresult)
+- [`batchDeleteCacheResponse_inner`](#batchdeletecacheresponse_inner)
+- [`batchGetCacheRequest`](#batchgetcacherequest)
+- [`batchGetCacheRequests_inner`](#batchgetcacherequests_inner)
+- [`batchGetCacheResponse`](#batchgetcacheresponse)
+- [`batchGetCacheResponse_results_inner`](#batchgetcacheresponse_results_inner)
+- [`cacheDeleteResponse`](#cachedeleteresponse)
+- [`cacheGetResponse`](#cachegetresponse)
+- [`cacheNameCreate`](#cachenamecreate)
+- [`cacheNameListResponse_inner`](#cachenamelistresponse_inner)
+- [`cacheNameResponse`](#cachenameresponse)
+- [`cacheRequest`](#cacherequest)
 
-[Up](#models)
-### batchCacheRequest_inner 
+
+### batchCacheRequest_inner
 
 A JSON array of objects to be cached where the object must be a BASE64 encoded value.
-cacheName [String](#string)
-key [String](#string)
-ttlSeconds (optional)[Integer](#integer)
-value [byte[]](#ByteArray) format: byte
 
-[Up](#models)
+**cacheName**\
+`String`
+
+**key**\
+`String`
+
+**ttlSeconds** (optional)\
+`Integer`
+
+**value**\
+`byte[]` format: byte
+
+---
 ### batchCacheResponse
 
 A JSON wrapped array of batched cache results.
 
-complete (optional)[Boolean](#boolean)
-results (optional)[array[batchCacheResponse\_results\_inner]](#batchCacheResponse_results_inner)
+**complete** (optional)\
+`Boolean`
 
-[Up](#models)
+**results** (optional)\
+`array[batchCacheResponse_results_inner]`
+
+---
 ### batchCacheResponse_results_inner
 
 A JSON array of batched cache results.
-cacheName [String](#string)
-key [String](#string)
-success [Boolean](#boolean)
 
-[Up](#models)
+**cacheName**\
+`String`
+
+**key**\
+`String`
+
+**success**\
+`Boolean`
+
+---
 ### batchCacheResult
 
 A JSON based array of results for each batched cache request.
-cacheName [String](#string)
-key [String](#string)
-success [Boolean](#boolean)
 
-[Up](#models)
-### batchDeleteCacheResponse_inner 
+**cacheName**\
+`String`
 
-cacheName [String](#string)
-key [String](#string)
-success [Boolean](#boolean)
+**key**\
+`String`
 
-[Up](#models)
-### batchGetCacheRequest 
+**success**\
+`Boolean`
+
+---
+### batchDeleteCacheResponse_inner
+
+**cacheName**\
+`String`
+
+**key**\
+`String`
+
+**success**\
+`Boolean`
+
+---
+### batchGetCacheRequest
 
 A cashName/key value pair of a cached object to retrieve.
-cacheName [String](#string)
-key [String](#string)
 
-[Up](#models)
+**cacheName**\
+`String`
+
+**key**\
+`String`
+
+---
 ### batchGetCacheRequests_inner
 
 A JSON array of retrieved cashName/key pairs to retrieve as a batch.
-cacheName [String](#string)
-key [String](#string)
 
-[Up](#models)
+**cacheName**\
+`String`
+
+**key**\
+`String`
+
+---
 ### batchGetCacheResponse
 
-complete (optional)[Boolean](#boolean)
-results (optional)[array[batchGetCacheResponse\_results\_inner]](#batchGetCacheResponse_results_inner) A JSON response containing the list of cached objects retrieved. Note: each object is encoded as a BASE64 encoded value.
+**complete** (optional)\
+`Boolean`
 
-[Up](#models)
+**results** (optional)\
+`array[batchGetCacheResponse_results_inner]` A JSON response containing the list of cached objects retrieved. Note: each object is encoded as a BASE64 encoded value.
+
+---
 ### batchGetCacheResponse_results_inner
 
-cacheName [String](#string)
-key [String](#string)
-success [Boolean](#boolean)
-value [byte[]](#ByteArray) format: byte
+**cacheName**\
+`String`
 
-[Up](#models)
+**key**\
+`String`
+
+**success**\
+`Boolean`
+
+**value**\
+`byte[]` format: byte
+
+---
 ### cacheDeleteResponse
 
 A JSON response of the cache delete request.
-cacheName [String](#string)
-key [String](#string)
-success [Boolean](#boolean)
 
-[Up](#models)
+**cacheName**\
+`String`
+
+**key**\
+`String`
+
+**success**\
+`Boolean`
+
+---
 ### cacheGetResponse
 
 The cached JSON object returned as a BASE64 encoded value.
-cacheName [String](#string)
-key [String](#string)
-success [Boolean](#boolean)
-value [byte[]](#ByteArray) format: byte
 
-[Up](#models)
+**cacheName**\
+`String`
+
+**key**\
+`String`
+
+**success**\
+`Boolean`
+
+**value**\
+`byte[]` format: byte
+
+---
 ### cacheNameCreate
 
 A JSON object use to create a cacheName namespace.
-cacheName [String](#string)
-description (optional)[String](#string)
 
-[Up](#models)
+**cacheName**\
+`String`
+
+**description** (optional)\
+`String`
+
+---
 ### cacheNameListResponse_inner
 
 An array of all known cacheNames, along with an optional description.
-cacheName [String](#string)
-description (optional)[String](#string)
 
-[Up](#models)
+**cacheName**\
+`String`
+
+**description** (optional)\
+`String`
+
+---
 ### cacheNameResponse
 
 The complete cacheName object.
-cacheName [String](#string)
-description [String](#string)
-deleted [Boolean](#boolean)
 
-[Up](#models)
+**cacheName**\
+`String`
+
+**description**\
+`String`
+
+**deleted**\
+`Boolean`
+
+---
 ### cacheRequest
 
 A JSON request object where the object is provided as a BASE64 encoded value.
-cacheName [String](#string)
-key [String](#string)
-ttlSeconds (optional)[Integer](#integer)
-value [byte[]](#ByteArray) format: byte
 
----
+**cacheName**\
+`String`
+
+**key**\
+`String`
+
+**ttlSeconds** (optional)\
+`Integer`
+
+**value**\
+`byte[]` format: byte
