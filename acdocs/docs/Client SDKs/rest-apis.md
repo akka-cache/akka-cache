@@ -8,7 +8,7 @@ toc_max_heading_level: 3
 
 ## Access
 
-Endpoint Authentication is based upon Java Web Tokens (JWT) using HTTP Bearer Token authentication headers.
+Endpoint Authentication is based upon JSON Web Tokens (JWT) using HTTP Bearer Token authentication headers.
 
 The following claims (or fields) are required:
 ```
@@ -26,7 +26,7 @@ The following claims (or fields) are required:
 
 ## Table of Contents
 
-#### CacheName
+### [CacheName](#cachename-section)
 
 APIs used to maintain a cache name, namespace, or group.
 
@@ -38,7 +38,7 @@ APIs used to maintain a cache name, namespace, or group.
 - [`post /cacheName`](#cache-name-post)
 - [`put /cacheName`](#cache-name-put)
 
-#### Cache
+### [Cache](#cache-section)
 
 APIs used to create, retrieve, and delete cached objects.
 
@@ -49,7 +49,7 @@ APIs used to create, retrieve, and delete cached objects.
 - [`get /get/{cacheName}/{key}`](#cache-get-json)
 - [`post /set`](#cache-set-json)
 
-#### Batch
+### [Batch](#batch-section)
 
 Batch APIs used to create, retrieve, and delete cached objects.
 
@@ -59,7 +59,7 @@ Batch APIs used to create, retrieve, and delete cached objects.
 
 ---
 
-## CacheName
+## CacheName {#cachename-section}
 
 APIs used to maintain a cache name, namespace, or group.
 
@@ -320,7 +320,7 @@ Bad Request
 
 ---
 
-## Cache
+## Cache {#cache-section}
 
 APIs used to create, retrieve, and delete cached objects.
 
@@ -554,7 +554,7 @@ Body Parameter —
 Bad Request or, Invalid cacheRequest, or potentially exceeded maximum cached bytes allowed.
 
 ---
-## Batch
+## Batch {#batch-section}
 
 Batch APIs used to create, retrieve, and delete cached objects.
 
