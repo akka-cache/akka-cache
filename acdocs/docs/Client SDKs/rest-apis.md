@@ -2,9 +2,17 @@
 
 ## Access
 
-Endpoint Authentication is based upon Java Web Tokens (JWT) using HTTP Bearer Token authentication headers.
+Endpoint Authentication is based upon JSON Web Tokens (JWT) using HTTP Bearer Token authentication headers.
 
-TODO: (Sample JWT w/ iss, org, and serviceLevel=free )
+The following claims (or fields) are required:
+```
+{
+"iss": "https://session.firebase.google.com/akka-cache",
+"org": "ttorg",
+"name": "John Doe",
+"serviceLevel": "free"
+}
+```
 
 ## Methods
 
@@ -12,7 +20,7 @@ TODO: (Sample JWT w/ iss, org, and serviceLevel=free )
 
 ## Table of Contents
 
-### [CacheName](#cachename)
+### [CacheName APIs](#cachnamedtl)
 APIs used to maintain a cache name, namespace, or group.
 
 * [`delete /cacheName/{cacheName}`](#cacheNameCacheNameDelete)
@@ -23,7 +31,7 @@ APIs used to maintain a cache name, namespace, or group.
 * [`post /cacheName`](#cacheNamePost)
 * [`put /cacheName`](#cacheNamePut)
 
-### [Cache](#cache)
+### [Cache APIs](#cachedtl)
 APIs used to create, retrieve, and delete cached objects.
 
 * [`delete /{cacheName}/{key}`](#cacheNameKeyDelete)
@@ -33,7 +41,7 @@ APIs used to create, retrieve, and delete cached objects.
 * [`get /get/{cacheName}/{key}`](#getCacheNameKeyGet)
 * [`post /set`](#setPost)
 
-### [Batch](#batch)
+### [Batch APIs](#batchdtl)
 Batch APIs used to create, retrieve, and delete cached objects.
 
 * [`delete /batch`](#batchDelete)
@@ -42,7 +50,7 @@ Batch APIs used to create, retrieve, and delete cached objects.
 
 ---
 
-# CacheName {#cachename}
+# CacheName {#cachenamedtl}
 APIs used to maintain a cache name, namespace, or group.
 
 [Up](#methods)
@@ -280,7 +288,7 @@ Bad Request
 ---
 
 
-# Cache {#cache}
+# Cache {#cachedtl}
 APIs used to create, retrieve, and delete cached objects.
 
 [Up](#methods)
@@ -492,7 +500,7 @@ Body Parameter —
 
 Bad Request or, Invalid cacheRequest, or potentially exceeded maximum cached bytes allowed.
 
-# Batch {#batch}
+# Batch {#batchdtl}
 Batch APIs used to create, retrieve, and delete cached objects.
 
 [Up](#methods)
