@@ -8,19 +8,22 @@ import {themes as prismThemes} from 'prism-react-renderer';
 
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
+const isProd = process.env.NODE_ENV === 'production';
+// console.log('isProd:', isProd);
+
 /** @type {import('@docusaurus/types').Config} */
 const config = {
   title: 'Akka Cache',
   tagline: 'Akka Cache is an elastic, agile and resilient data accelerator.',
   favicon: 'img/favicon.ico',
-
+  noIndex: true, // Defaults to `false`
   // Set the production url of your site here
   // TODO: this needs to be updated
   url: 'https://your-docusaurus-site.example.com',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
   // baseUrl: '/',
-  baseUrl: '/',
+  baseUrl: '/cache/',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
@@ -60,16 +63,16 @@ const config = {
       src: 'https://cdn.cookielaw.org/scripttemplates/otSDKStub.js',
       type: 'text/javascript',
       charset: 'UTF-8',
-      'data-domain-script': '0193b386-cf4c-79d3-b3b1-1875bd9cc23f-test'
+      // Use different data-domain-script for dev vs. production
+      'data-domain-script': isProd
+        ? '28b912e7-09e9-43d5-91e4-3d1897044004'
+        : '28b912e7-09e9-43d5-91e4-3d1897044004-test',
     },
-    {
-      src: '/js/optanon-wrapper.js',
-      type: 'text/javascript',
-    },
-    {
-      src: '/js/google-tag-manager.js',
-      type: 'text/javascript',
-    },
+  ],
+
+  plugins: [
+    require.resolve('./plugins/inlineOptanonPlugin.js'),
+    require.resolve('./plugins/googleTagManagerPlugin.js'),
   ],
 
   themeConfig:
@@ -83,7 +86,7 @@ const config = {
         respectPrefersColorScheme: true,
       },
       navbar: {
-        title: 'AKKA Cache',
+        title: 'Akka Cache',
         // logo: {
         //   alt: 'AkkaCache Logo',
         //   src: '',
@@ -100,52 +103,35 @@ const config = {
         //     position: 'right',
         //     label: 'Cache',
         //   },
-          {
-            href: 'https://github.com/akka-cache/akka-cache',
-            label: 'GitHub',
-            position: 'right',
-          },
+          // {
+          //   href: 'https://github.com/akka-cache/akka-cache',
+          //   label: 'GitHub',
+          //   position: 'right',
+          // },
         ],
       },
       footer: {
         style: 'dark',
-        links: [
-          {
-            title: 'Akka Cache',
-            items: [
-              {
-                label: 'Login',
-                to: 'https://console.akkacache.io/login',
-              },
-              {
-                label: 'Register',
-                to: 'https://console.akkacache.io/register',
-              },
-              {
-                label: 'GitHub',
-                href: 'https://github.com/akka-cache/akka-cache',
-              },
-            ],
-          },
-          {
-            title: 'Community',
-            items: [
-              {
-                label: 'Akka.io',
-                href: 'https://akka.io',
-              },
-              {
-                label: 'Bluesky',
-                href: 'https://bsky.app/profile/akka.io',
-              },
-              {
-                label: 'X',
-                href: 'https://x.com/akka_io_',
-              },
-            ],
-          },
-        ],
-        copyright: `© ${new Date().getFullYear()} Lightbend Inc dba Akka.io. All rights reserved. | <a class="ot-sdk-show-settings">Cookie Settings</a>`,
+        // links: [
+        //   {
+        //     title: 'Resources',
+        //     items: [
+        //       {
+        //         label: 'Akka.io',
+        //         href: 'https://akka.io',
+        //       },
+        //       {
+        //         label: 'Bluesky',
+        //         href: 'https://bsky.app/profile/akka.io',
+        //       },
+        //       {
+        //         label: 'X',
+        //         href: 'https://x.com/akka_io_',
+        //       },
+        //     ],
+        //   },
+        // ],
+        copyright: `© ${new Date().getFullYear()} Lightbend Inc dba Akka.io. All rights reserved. | <a href="https://akka.io/legal/terms-of-use" target="_blank">Terms</a> | <a href="https://akka.io/legal/privacy" target="_blank">Privacy Policy</a> | <a class="ot-sdk-show-settings">Cookie Settings</a>`,
       },
       prism: {
         theme: prismThemes.github,

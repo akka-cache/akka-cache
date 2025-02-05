@@ -32,4 +32,13 @@ jobs:
 
       - name: Deploy service
         run: akka service deploy akka-cache ${{ steps.extract_tag.outputs.IMAGE_TAG }} --push
+
+      - name: Log in to Docker registry
+        run: |
+          echo ${{ secrets.DOCKER_PASSWORD }} | docker login hub.akka.io -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+
+      - name: Publish to Cloudsmith
+        run: |
+          docker tag ${{ steps.extract_tag.outputs.IMAGE_TAG }} hub.akka.io/${{ steps.extract_tag.outputs.IMAGE_TAG }}
+          docker push hub.akka.io/${{ steps.extract_tag.outputs.IMAGE_TAG }}
       
