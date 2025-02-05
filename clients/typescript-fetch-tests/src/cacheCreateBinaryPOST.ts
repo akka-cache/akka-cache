@@ -11,9 +11,10 @@ export async function testCachePostBinary(cacheName:string, key:string, payload:
             }
         )
         .then(nil => {
-            log("cache binary POST is successful for " + key);
-            return nil;
-        })
+                log("cache binary POST is successful for " + key);
+                return nil;
+            }
+        )
 
     } catch (err) {
         error('Error thrown : ', err);

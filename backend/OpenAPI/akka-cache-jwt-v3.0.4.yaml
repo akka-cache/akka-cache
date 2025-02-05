@@ -1,5 +1,5 @@
 # use https://editor-next.swagger.io/ to validate this file
-openapi: 3.1.0
+openapi: 3.0.4
 info:
   title: Akka Cache
   description: |-
@@ -141,7 +141,7 @@ paths:
       tags:
         - cache
       summary: |-
-        Create or update a cached object under the cacheName. Note: this is a binary version of the API and requires that the cache object be passed in the request body.
+        Create or update a cached object under the cacheName. Note: this is a binary version of the API and requires that the cache object be passed in the request body. 
       requestBody:
         required: true
         content:
@@ -186,7 +186,7 @@ paths:
     post:
       tags:
         - cache
-      summary: |-
+      summary: |- 
         Create or update a cached object by key within the given cacheName. Note: this is a binary version of the API and requires that the cache object be passed in the request body.
       requestBody:
         required: true
@@ -294,7 +294,7 @@ paths:
           description: Bad Request
 components:
   securitySchemes:
-    bearerHttpAuthentication:
+    JWT:
       description: Bearer token using a JWT
       type: http
       scheme: Bearer
@@ -334,6 +334,8 @@ components:
     cacheNameCreate:
       type: object
       description: A JSON object use to create a cacheName namespace.
+      required:
+        - cacheName
       properties:
         cacheName:
           type: string
@@ -354,18 +356,20 @@ components:
         deleted:
           type: boolean
     cacheNameListResponse:
-      type: array
-      items:
-        type: object
-        description: An array of all known cacheNames, along with an optional description.
-        required:
-          - cacheName
-          - description
-        properties:
-          cacheName:
-            type: string
-          description:
-            type: string
+      type: object
+      properties:
+        cacheNameList:
+          type: array
+          items:
+            type: object
+            description: An array of all known cacheNames, along with an optional description.
+            required:
+              - cacheName
+            properties:
+              cacheName:
+                type: string
+              description:
+                type: string
     cacheNameKeys:
       type: array
       description: An array of all known keys under the given cacheName.
@@ -417,9 +421,12 @@ components:
           type: string
           format: byte
     batchCacheRequest:
-      type: array
-      schema:
-        $ref: '#/components/schemas/cacheRequest'
+        type: object
+        properties:
+          cacheRequests:
+            type: array
+            items:
+              $ref: '#/components/schemas/cacheRequest'
     batchCacheResult:
       type: object
       description: A JSON based array of results for each batched cache request.
@@ -442,8 +449,20 @@ components:
           type: boolean
         results:
           type: array
-          schema:
-            $ref: '#/components/schemas/batchCacheResult'
+          items:
+            type: object
+            description: A JSON array of batched cache results.
+            required:
+              - cacheName
+              - key
+              - success
+            properties:
+              cacheName:
+                type: string
+              key:
+                type: string
+              success:
+                type: boolean
     batchGetCacheRequest:
       type: object
       description: A cashName/key value pair of a cached object to retrieve.
@@ -456,9 +475,12 @@ components:
         key:
           type: string
     batchGetCacheRequests:
-      type: array
-      schema:
-        $ref: '#/components/schemas/batchGetCacheRequest'
+      type: object
+      properties:
+        getCachedBatch:
+          type: array
+          items:
+            $ref: '#/components/schemas/batchGetCacheRequest'
     cacheDeleteResponse:
       type: object
       description: A JSON response of the cache delete request.
@@ -474,10 +496,13 @@ components:
         success:
           type: boolean
     batchDeleteCacheResponse:
-      type: array
-      description: A JSON wrapped array of batched delete cache results.
-      schema:
-        $ref: '#/components/schemas/cacheDeleteResponse'
+      type: object
+      properties:
+        cacheDeleteResponses:
+          type: array
+          description: A JSON wrapped array of batched delete cache results.
+          items:
+            $ref: '#/components/schemas/cacheDeleteResponse'
     batchGetCacheResponse:
       type: object
       description: A JSON wrapped array of batched get cache results.
@@ -486,5 +511,22 @@ components:
           type: boolean
         results:
           type: array
-          schema:
-            $ref: '#/components/schemas/cacheGetResponse'
+          items:
+            type: object
+            description: |-
+              A JSON response containing the list of cached objects retrieved. Note: each object is encoded as a BASE64 encoded value.
+            required:
+              - cacheName
+              - key
+              - success
+              - value
+            properties:
+              cacheName:
+                type: string
+              key:
+                type: string
+              success:
+                type: boolean
+              value: # byte[]
+                type: string
+                format: byte

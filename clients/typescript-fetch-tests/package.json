@@ -12,10 +12,10 @@
   "description": "",
   "devDependencies": {
     "@types/jest": "^29.5.14",
+    "akka-cache": "file:../../../openapi-generator/typescript-fetch",
     "jest": "^29.7.0",
     "ts-jest": "^29.2.5",
-    "typescript": "^5.7.3",
-    "akka-cache": "0.1.0",
+    "typescript": "^5.7.3"
   },
   "dependencies": {
     "fs-web": "^1.0.1"

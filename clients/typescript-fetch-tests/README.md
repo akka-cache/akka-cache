@@ -20,8 +20,15 @@ $ npm link
 $ npm link akka-cache
 ```
 
-3. Run Tests
+3. Run Unit Tests
+I know that unit tests are supposed to be idempotent but these aren't. My aim of setting up these test is to verify the OpenAPI spec and then generated code, as well as providing code examples for the docs. In this case, I run the tests individually. He're the order.
 ```
-$ npx jest
+$ npm test tests/cacheNameAPITests.test.ts
+$ npm test tests/cacheBinaryAPITests.test.ts
+$ npm test tests/cacheJSONAPITests.test.ts
+$ npm test tests/cacheJSONAPITTLTest.test.ts
+$ npm test tests/batchCreateTests.test.ts
+$ npm test tests/batchGetTests.test.ts
+$ npm test tests/batchDeleteTests.test.ts
 ```
 
