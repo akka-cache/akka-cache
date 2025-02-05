@@ -3,7 +3,6 @@ import {testGetCacheJSON} from "../src/cacheGetJSON";
 import * as constants from "../src/constants"
 import {testDeleteCache} from "../src/cacheDelete";
 import { Buffer } from "buffer";
-import {testGetCacheNameKeysGet} from "../src/cacheNameKeysGet";
 import {error, log} from "console";
 import {CAR} from "../src/constants";
 
