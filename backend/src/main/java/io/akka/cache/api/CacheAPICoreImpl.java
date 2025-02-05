@@ -391,7 +391,10 @@ public class CacheAPICoreImpl {
                                 });
                     }
                 })
-                .exceptionally(ex -> new CacheGetResponse(cacheName, key, false, new byte[0]));
+                .exceptionally(ex -> {
+                    log.error("getCache failed with exception", ex);
+                    return new CacheGetResponse(cacheName, key, false, new byte[0]);
+                });
     }
 
     /*

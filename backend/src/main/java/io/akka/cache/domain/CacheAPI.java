@@ -1,6 +1,8 @@
 package io.akka.cache.domain;
 
 import akka.http.javadsl.model.HttpResponse;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -8,10 +10,10 @@ import java.util.Optional;
 
 public sealed interface CacheAPI {
 
-    public record BatchCacheRequest(List<CacheRequest> cacheRequests) implements CacheAPI {
+    public record BatchCacheRequest(@JsonProperty(required = true) List<CacheRequest> cacheRequests) implements CacheAPI {
 
         // Sanitize the input during construction
-        public BatchCacheRequest(List<CacheRequest> cacheRequests) {
+        public BatchCacheRequest(@JsonProperty(required = true) List<CacheRequest> cacheRequests) {
             this.cacheRequests = cacheRequests == null || cacheRequests.stream().anyMatch(Objects::isNull)
                     ? Collections.emptyList()
                     : List.copyOf(cacheRequests);
@@ -82,10 +84,10 @@ public sealed interface CacheAPI {
         }
     }
    
-    public record BatchGetCacheRequests(List<BatchGetCacheRequest> getCachedBatch) implements CacheAPI {
+    public record BatchGetCacheRequests(@JsonProperty(required = true)  List<BatchGetCacheRequest> getCachedBatch) implements CacheAPI {
 
         // Sanitize the inputs during construction
-        public BatchGetCacheRequests(List<BatchGetCacheRequest> getCachedBatch) {
+        public BatchGetCacheRequests(@JsonProperty(required = true)  List<BatchGetCacheRequest> getCachedBatch) {
             // Ensure `getCachedBatch` is not null or contains null elements
             this.getCachedBatch = getCachedBatch == null || getCachedBatch.stream().anyMatch(Objects::isNull)
                     ? Collections.emptyList()
