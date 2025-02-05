@@ -69,8 +69,8 @@ public class CacheEndpoint {
     }
 
     @Get("/cacheName/{cacheName}/keys")
-    public CompletionStage<CacheView.CacheSummaries> getCacheKeyList(String cacheName) {
-        return core.getCacheKeyList(cacheName);
+    public CompletionStage<CacheGetKeysResponse> getCacheKeys(String cacheName) {
+        return core.getCacheKeys(cacheName);
     }
 
     // This deletes the cacheName as well as all the keys
@@ -126,11 +126,6 @@ public class CacheEndpoint {
     @Get("/{cacheName}/{key}")
     public CompletionStage<HttpResponse> getCacheGet(String cacheName, String key) {
         return core.getCacheGet(cacheName, key);
-    }
-
-    @Get("/{cacheName}/keys")
-    public CompletionStage<CacheGetKeysResponse> getCacheKeys(String cacheName) {
-        return core.getCacheKeys(cacheName);
     }
 
     @Delete("/{cacheName}/{key}")

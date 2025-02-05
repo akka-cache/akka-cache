@@ -136,11 +136,6 @@ public class CacheJWTEndpoint {
         return core.getCacheName(orgClaims.org.concat(cacheName));
     }
 
-    @Get("/cacheName/{cacheName}/keys")
-    public CompletionStage<CacheView.CacheSummaries> getCacheKeyList(String cacheName) {
-        return core.getCacheKeyList(orgClaims.org.concat(cacheName));
-    }
-
     // This deletes the cacheName as well as all the keys
     @Delete("/cacheName/{cacheName}")
     public CompletionStage<HttpResponse> deleteCacheKeys(String cacheName) {

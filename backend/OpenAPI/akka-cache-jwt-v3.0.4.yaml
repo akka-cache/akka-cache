@@ -103,7 +103,7 @@ paths:
                 $ref: '#/components/schemas/cacheNameListResponse'
         "400":
           description: Bad Request
-  /cacheName/{cacheName}/keys:
+  /{cacheName}/keys:
     parameters:
       - $ref: '#/components/parameters/cacheNameParam'
     get:
@@ -371,10 +371,15 @@ components:
               description:
                 type: string
     cacheNameKeys:
-      type: array
-      description: An array of all known keys under the given cacheName.
-      items:
-        type: string
+      type: object
+      properties:
+        cacheName:
+          type: string
+        keys:
+          type: array
+          description: An array of all known keys under the given cacheName.
+          items:
+            type: string
     key:
       type: string
       description: Unique key to the cache within the cacheName.
