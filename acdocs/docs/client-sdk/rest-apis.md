@@ -20,6 +20,11 @@ The following claims (or fields) are required:
 }
 ```
 
+In the following REST curl examples we'll be using the following Bearer Token which was generated on the [JWT.io](https://jwt.io/) website with the claims above.
+```
+-H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3Nlc3Npb24uZmlyZWJhc2UuZ29vZ2xlLmNvbS9ha2thLWNhY2hlIiwib3JnIjoidHRvcmciLCJuYW1lIjoiSm9obiBEb2UiLCJzZXJ2aWNlTGV2ZWwiOiJmcmVlIn0.rds8orVxVz149ovTxxYzFIqGmSdWJUlHONem9avKBgQ"
+```
+We'll also be running our curl examples against a locally running version of the akka-cache application.
 ## Methods
 
 [ Jump to [Models](#models) ]
