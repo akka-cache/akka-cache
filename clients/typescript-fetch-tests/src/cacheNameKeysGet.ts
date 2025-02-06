@@ -1,17 +1,17 @@
 import { CacheNameApi } from 'akka-cache';
 import { cfg } from './configuration';
-import { CacheNameResponse } from 'akka-cache'
+import { CacheNameKeys } from 'akka-cache'
 import { log, error } from "console";
 
-export async function testGetCacheNameKeysGet(cacheName:string) : Promise<string[]>  {
+export async function testCacheNameKeysGet(cacheName:string) : Promise<CacheNameKeys>  {
     const cacheNameAPI = new CacheNameApi(cfg);
 
     try {
-        return cacheNameAPI.cacheNameCacheNameKeysGet(
+        return cacheNameAPI.cacheNameKeysGet(
             {cacheName: cacheName}
         )
         .then(result => {
-            log("cacheNameCacheNameKeysGet successful for " + result);
+            log("cacheNameCacheNameKeysGet successful for " + result.keys);
             return result;
         })
         .catch(err => {

@@ -3,7 +3,6 @@ import {testGetCacheJSON} from "../src/cacheGetJSON";
 import * as constants from "../src/constants"
 import {testDeleteCache} from "../src/cacheDelete";
 import { Buffer } from "buffer";
-import {testGetCacheNameKeysGet} from "../src/cacheNameKeysGet";
 import {error, log} from "console";
 import {CAR} from "../src/constants";
 
@@ -44,13 +43,4 @@ describe('testing cacheSET (JSON) API with BASE64', () => {
 });
 */
 
-/*
-describe('testing cache get keys', () => {
-    test('should retrieve the cache list of keys', done => {
-        expect(testGetCacheNameKeysGet(constants.CACHE1).then(result => {
-            console.log(result);
-            return result;
-        })).resolves..toStrictEqual({"cached": [{"cacheName": "ttorgcache1", "key": "aston-martin-dbr22"}, {"cacheName": "ttorgcache1", "key": "key2"}, {"cacheName": "ttorgcache1", "key": "key1"}, {"cacheName": "ttorgcache1", "key": "key3"}]});
-        done();
-    });
-})*/
+

@@ -100,7 +100,7 @@ public class CacheEndpointTest extends TestKitSupport {
             .atMost(20, TimeUnit.SECONDS)
             .untilAsserted(() -> {
               var response = await(
-                      httpClient.GET("/cache/" + CACHE_NAME + "/keys")
+                      httpClient.GET("/cache/cacheName/" + CACHE_NAME + "/keys")
                               .responseBodyAs(CacheGetKeysResponse.class)
                               .invokeAsync()
 

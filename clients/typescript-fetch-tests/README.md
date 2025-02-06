@@ -30,5 +30,6 @@ $ npm test tests/cacheJSONAPITTLTest.test.ts
 $ npm test tests/batchCreateTests.test.ts
 $ npm test tests/batchGetTests.test.ts
 $ npm test tests/batchDeleteTests.test.ts
+$ npm test tests/cacheNameKeysTest.test.ts
 ```
 

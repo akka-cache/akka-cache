@@ -436,7 +436,12 @@ public class CacheAPICoreImpl {
         return componentClient.forView()
                 .method(CacheView::getCacheKeys)
                 .invokeAsync(cacheName)
-                .thenApply(results -> new CacheGetKeysResponse(cacheName, results.keys()));
+                .thenApply(results -> {
+                    if (log.isDebugEnabled()) {
+                        log.debug("JSON getCacheKeys cachename: {}, keys: {}, size: {}", cacheName, results, results.keys().size());
+                    }
+                    return new CacheGetKeysResponse(cacheName, results.keys());
+                });
     }
     
     public CompletionStage<HttpResponse> delete(String cacheName, String key) {

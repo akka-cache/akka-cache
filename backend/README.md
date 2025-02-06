@@ -89,7 +89,8 @@ curl -i http://localhost:9001/cache/cacheName/cache1/keys
 
 BINARY POST (without TTL)
 
-```shellcurl -i -d 'This is our first test' -H "Content-Type: application/octet-stream" -X POST http://localhost:9001/cache/cache1/key1
+```shell
+curl -i -d 'This is our first test' -H "Content-Type: application/octet-stream" -X POST http://localhost:9001/cache/cache1/key1
 ````
 
 BINARY POST (with TTL at 30 seconds)
@@ -167,7 +168,7 @@ curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJo
 GET /cacheName/{cacheName}/keys
 
 ```shell
-curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3Nlc3Npb24uZmlyZWJhc2UuZ29vZ2xlLmNvbS9ha2thLWNhY2hlIiwib3JnIjoidHRvcmciLCJuYW1lIjoiSm9obiBEb2UiLCJzZXJ2aWNlTGV2ZWwiOiJmcmVlIn0.rds8orVxVz149ovTxxYzFIqGmSdWJUlHONem9avKBgQ" -i http://localhost:9001/cacheName/cache1/keys
+curl -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3Nlc3Npb24uZmlyZWJhc2UuZ29vZ2xlLmNvbS9ha2thLWNhY2hlIiwib3JnIjoidHRvcmciLCJuYW1lIjoiSm9obiBEb2UiLCJzZXJ2aWNlTGV2ZWwiOiJmcmVlIn0.rds8orVxVz149ovTxxYzFIqGmSdWJUlHONem9avKBgQ" -i http://localhost:9001/cache1/keys
 ````
 
 JSON GET:
