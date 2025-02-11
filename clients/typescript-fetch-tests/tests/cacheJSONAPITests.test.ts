@@ -15,18 +15,10 @@ beforeAll(done => {
     done();
 });
 
-/*
-afterAll(done => {
-    expect(testDeleteCache(constants.CACHE1, constants.KEY1)).resolves.toBe(undefined);
-    done();
-});
-*/
-
 describe('testing cacheSET (JSON) API', () => {
-    test('should retrieve the cache successfully', done => {
-        // NOTE: the org from the bearer token is used to prefix the return cacheName
-        expect(testGetCacheJSON(constants.CACHE1, constants.KEY1)).resolves.toStrictEqual( {"cacheName": constants.ORG+constants.CACHE1, "key": constants.KEY1, "success": true, "value": b64encode(constants.PAYLOAD+"1")});
-        done();
+    test('should retrieve the cache successfully', async () => {
+        const result = await testGetCacheJSON(constants.CACHE1, constants.KEY1);
+        expect(result).toStrictEqual( {"cacheName": constants.ORG+constants.CACHE1, "key": constants.KEY1, "success": true, "value": b64encode(constants.PAYLOAD+"1")});
     });
 });
 

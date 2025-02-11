@@ -136,6 +136,10 @@ public sealed interface CacheAPI {
                     ? Collections.emptyList()
                     : List.copyOf(keys);
         }
+
+        public CacheGetKeysResponse withDropOrg(String orgName) {
+            return new CacheGetKeysResponse(cacheName.substring(orgName.length()), keys);
+        }
     }
    
     public record CacheGetResponse(String cacheName, String key, Boolean success, byte[] value) implements CacheAPI {

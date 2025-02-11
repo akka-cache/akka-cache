@@ -13,7 +13,6 @@ import akka.javasdk.timer.TimerScheduler;
 import akka.javasdk.annotations.JWT;
 import akka.javasdk.annotations.http.HttpEndpoint;
 import akka.stream.Materializer;
-import io.akka.cache.application.CacheView;
 import io.akka.cache.application.OrgEntity;
 import io.akka.cache.domain.CacheAPI.*;
 import io.akka.cache.domain.CacheName;
@@ -117,23 +116,25 @@ public class CacheJWTEndpoint {
     }
 
     // Cache Names -- BEGIN
-    private CacheNameRequest modCacheNameWithOrg(CacheNameRequest request) {
+    private CacheNameRequest prefixCacheNameWithOrg(CacheNameRequest request) {
         return new CacheNameRequest(orgClaims.org.concat(request.cacheName()), request.description());
     }
 
+
     @Post("/cacheName")
     public CompletionStage<HttpResponse> createCacheName(CacheNameRequest request) {
-        return core.createCacheName(modCacheNameWithOrg(request));
+        return core.createCacheName(prefixCacheNameWithOrg(request));
     }
 
     @Put("/cacheName")
     public CompletionStage<HttpResponse> updateCacheName(CacheNameRequest request) {
-        return core.updateCacheName(modCacheNameWithOrg(request));
+        return core.updateCacheName(prefixCacheNameWithOrg(request));
     }
 
     @Get("/cacheName/{cacheName}")
     public CompletionStage<CacheName> getCacheName(String cacheName) {
-        return core.getCacheName(orgClaims.org.concat(cacheName));
+        return core.getCacheName(orgClaims.org.concat(cacheName))
+                .thenApply(result -> result.withDropOrg(orgClaims.org()));
     }
 
     // This deletes the cacheName as well as all the keys
@@ -218,7 +219,8 @@ public class CacheJWTEndpoint {
 
     @Get("/{cacheName}/keys")
     public CompletionStage<CacheGetKeysResponse> getCacheKeys(String cacheName) {
-        return core.getCacheKeys(orgClaims.org.concat(cacheName));
+        return core.getCacheKeys(orgClaims.org.concat(cacheName))
+                .thenApply(result -> result.withDropOrg(orgClaims.org()));
     }
 
     @Delete("/{cacheName}/{key}")
@@ -237,7 +239,7 @@ public class CacheJWTEndpoint {
     BatchCacheResponse failAllBatchRequests(BatchCacheRequest batchCacheRequest) {
         List<BatchCacheResult> cacheResults = new ArrayList<>();
         batchCacheRequest.cacheRequests().forEach(cacheRequest -> {
-            cacheResults.add(new BatchCacheResult(cacheRequest.cacheName(), cacheRequest.key(), false));
+            cacheResults.add(new BatchCacheResult(cacheRequest.cacheName().substring(orgClaims.org().length()), cacheRequest.key(), false));
         });
         return new BatchCacheResponse(false, cacheResults);
     }
@@ -248,7 +250,15 @@ public class CacheJWTEndpoint {
             if (isExceeded) {
                 return CompletableFuture.completedFuture(failAllBatchRequests(batchCacheRequest));
             }
-            return core.cacheBatch(addOrgToBatchRequest(batchCacheRequest));
+            return core.cacheBatch(addOrgToBatchRequest(batchCacheRequest))
+                    // note: strip off Org prefix from cacheName results
+                    .thenApply(result -> {
+                        List<BatchCacheResult> cacheResults = new ArrayList<>();
+                        result.results().forEach(cacheResult -> {
+                            cacheResults.add(new BatchCacheResult(cacheResult.cacheName().substring(orgClaims.org().length()), cacheResult.key(), cacheResult.success()));
+                        });
+                        return new BatchCacheResponse(true, cacheResults);
+                    });
         });
     }
 
