@@ -12,6 +12,10 @@ public record CacheName(String cacheName, Optional<String> description, Boolean 
         return new CacheName(cacheName, Optional.empty(), deleted);
     }
 
+    public CacheName withDropOrg(String orgName) {
+        return new CacheName(cacheName.substring(orgName.length()), description, deleted);
+    }
+
     public CacheName withDescription(Optional<String> newDescription) { // <2>
         return new CacheName(cacheName, newDescription, deleted);
     }

@@ -24,9 +24,11 @@ public class CacheEntity extends EventSourcedEntity<Cache, CacheEvent> {
             return errorNotFound();
         }
         else {
+            // Note: if we're returning data we should drop the org from the cacheName
+            String respCacheName = currentState().org().isPresent() ? currentState().cacheName().substring(currentState().org().get().length()) : currentState().cacheName();
             return effects().reply(new CacheInternalGetResponse(
                     currentState().org(),
-                    currentState().cacheName(),
+                    respCacheName,
                     currentState().key(),
                     currentState().ttlSeconds(),
                     currentState().deleted(),
