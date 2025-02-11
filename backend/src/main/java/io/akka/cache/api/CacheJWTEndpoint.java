@@ -137,6 +137,12 @@ public class CacheJWTEndpoint {
                 .thenApply(result -> result.withDropOrg(orgClaims.org()));
     }
 
+    @Get("/cacheName/{cacheName}/keys")
+    public CompletionStage<CacheGetKeysResponse> getCacheKeys(String cacheName) {
+        return core.getCacheKeys(orgClaims.org.concat(cacheName))
+                .thenApply(result -> result.withDropOrg(orgClaims.org()));
+    }
+
     // This deletes the cacheName as well as all the keys
     @Delete("/cacheName/{cacheName}")
     public CompletionStage<HttpResponse> deleteCacheKeys(String cacheName) {
@@ -215,12 +221,6 @@ public class CacheJWTEndpoint {
     @Get("/{cacheName}/{key}")
     public CompletionStage<HttpResponse> getCacheGet(String cacheName, String key) {
         return core.getCacheGet(orgClaims.org.concat(cacheName), key);
-    }
-
-    @Get("/{cacheName}/keys")
-    public CompletionStage<CacheGetKeysResponse> getCacheKeys(String cacheName) {
-        return core.getCacheKeys(orgClaims.org.concat(cacheName))
-                .thenApply(result -> result.withDropOrg(orgClaims.org()));
     }
 
     @Delete("/{cacheName}/{key}")
