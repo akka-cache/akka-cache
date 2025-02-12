@@ -51,7 +51,7 @@ paths:
     put:
       tags:
         - cacheName
-      summary: Create or update a cache namespace description.
+      summary: update an existing cache namespace's description.
       requestBody:
         required: true
         content:
@@ -103,7 +103,7 @@ paths:
                 $ref: '#/components/schemas/cacheNameListResponse'
         "400":
           description: Bad Request
-  /{cacheName}/keys:
+  /cacheName/{cacheName}/keys:
     parameters:
       - $ref: '#/components/parameters/cacheNameParam'
     get:

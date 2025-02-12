@@ -7,7 +7,7 @@ export async function testCacheNameKeysGet(cacheName:string) : Promise<CacheName
     const cacheNameAPI = new CacheNameApi(cfg);
 
     try {
-        return cacheNameAPI.cacheNameKeysGet(
+        return cacheNameAPI.cacheNameCacheNameKeysGet(
             {cacheName: cacheName}
         )
         .then(result => {

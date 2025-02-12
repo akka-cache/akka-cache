@@ -138,7 +138,7 @@ public class CacheJWTEndpointTest extends TestKitSupport {
                 .atMost(20, TimeUnit.SECONDS)
                 .untilAsserted(() -> {
                     var response = await(
-                            httpClient.GET("/" + CACHE_NAME + "/keys")
+                            httpClient.GET("/cacheName/" + CACHE_NAME + "/keys")
                                     .addHeader("Authorization","Bearer "+ bearerToken)
                                     .responseBodyAs(CacheGetKeysResponse.class)
                                     .invokeAsync()
