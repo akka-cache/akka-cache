@@ -9,8 +9,9 @@ toc_max_heading_level: 3
 ## Access
 
 Endpoint Authentication is based upon JSON Web Tokens (JWT) using HTTP Bearer Token authentication headers.
+> **_NOTE:_**  When deploying the Akka Cache application to your Akka account the JWT is going to be different from the following example as it’ll be encrypted by your private key. For more information, please see [Securing your Cache Service](/getting-started/securing-cache-service).
 
-The following claims (or fields) are required:
+The following claims (or fields) are required in your JWT:
 ```
 {
 "iss": "https://session.firebase.google.com/akka-cache",
@@ -20,11 +21,19 @@ The following claims (or fields) are required:
 }
 ```
 
-In the following REST curl examples we'll be using the following Bearer Token which was generated on the [JWT.io](https://jwt.io/) website with the claims above.
+In the REST curl examples used throughout the APIs, we'll be using the following Bearer Token which was generated on the [JWT.io](https://jwt.io/) website with the claims above.
+
 ```
 -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3Nlc3Npb24uZmlyZWJhc2UuZ29vZ2xlLmNvbS9ha2thLWNhY2hlIiwib3JnIjoidHRvcmciLCJuYW1lIjoiSm9obiBEb2UiLCJzZXJ2aWNlTGV2ZWwiOiJmcmVlIn0.rds8orVxVz149ovTxxYzFIqGmSdWJUlHONem9avKBgQ"
 ```
-We'll also be running our curl examples against a locally running version of the akka-cache application.
+However, for brevity we’ll be abbreviating the JWT as the following:
+```
+-H "Authorization: Bearer <YOUR-JWT>"
+```
+We'll also be running our curl examples against a locally running version of the akka-cache application using the following command:
+```
+mvn clean compile exec:java
+```
 ## Methods
 
 [ Jump to [Models](#models) ]
@@ -92,6 +101,19 @@ Path Parameter — Name of a cache namespace. (group) default: null
 
 Bad Request
 
+#### REST Curl Example
+```
+curl -i -H "Authorization: Bearer <YOUR-JWT>" -X DELETE http://localhost:9001/cacheName/cache1
+```
+
+#### REST Curl Result
+```
+HTTP/1.1 201 Created
+Access-Control-Allow-Origin: *
+Server: akka-http/10.7.0
+Date: ...
+Content-Length: 0
+```
 ---
 
 
@@ -118,6 +140,19 @@ accepted
 
 bad request or doesn't exist
 
+#### REST Curl Example
+```
+curl -i -H "Authorization: Bearer <YOUR-JWT>" -H "Content-Type: application/json" -X PUT http://localhost:9001/cacheName/cache1/flush
+```
+
+#### REST Curl Result
+```
+HTTP/1.1 202 Accepted
+Access-Control-Allow-Origin: *
+Server: akka-http/10.7.0
+Date: ...
+Content-Length: 0
+```
 ---
 
 
@@ -138,18 +173,6 @@ Path Parameter — Name of a cache namespace. (group) default: null
 
 [cacheNameResponse](#cachenameresponse)
 
-#### Example data
-
-Content-Type: application/json
-
-```
-{
-  "cacheName" : "cacheName",
-  "deleted" : true,
-  "description" : "description"
-}
-```
-
 #### Produces
 
 This API call produces the following media types according to the Accept request header;
@@ -169,7 +192,22 @@ returned a JSON format of the cache namespace, and description
 bad request or doesn't exist
 
 ---
+#### REST Curl Example
+```
+curl -i -H "Authorization: Bearer <YOUR-JWT>" -H "Content-Type: application/json" http://localhost:9001/cacheName/cache1
+```
 
+#### REST Curl Result
+```
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+Server: akka-http/10.7.0
+Date: ...
+Content-Type: application/json
+Content-Length: 77
+
+{"cacheName":"cache1","description":"This is our first test","deleted":false}
+```
 
 ### Cache Name Get Keys
 
@@ -188,14 +226,6 @@ Path Parameter — Name of a cache namespace. (group) default: null
 
 array[String]
 
-#### Example data
-
-Content-Type: application/json
-
-```
-{"cacheName":"cache1", "description":"This is our first test"}
-```
-
 #### Produces
 
 This API call produces the following media types according to the Accept request header;
@@ -213,6 +243,22 @@ returns a JSON format array of cache keys
 
 bad request or doesn't exist
 
+#### REST Curl Example
+```
+curl -i -H "Authorization: Bearer <YOUR-JWT>" -H "Content-Type: application/json" http://localhost:9001/cacheName/cache1/keys
+```
+
+#### REST Curl Result
+```
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+Server: akka-http/10.7.0
+Date: ...
+Content-Type: application/json
+Content-Length: 47
+
+{"cacheName":"cache1","keys":["key32","key31"]}
+```
 ---
 
 
@@ -227,20 +273,6 @@ Retrieves a list of cacheNames and optional description.
 #### Return type
 
 array[[cacheNameListResponse_inner](#cachenamelistresponse_inner)]
-
-#### Example data
-
-Content-Type: application/json
-
-```
-[ {
-  "cacheName" : "cacheName",
-  "description" : "description"
-}, {
-  "cacheName" : "cacheName",
-  "description" : "description"
-} ]
-```
 
 #### Produces
 
@@ -259,8 +291,16 @@ Returns a JSON format array of the cache namespaces, and description.
 
 Bad Request
 
----
+#### REST Curl Example
+```
+TODO:
+```
 
+#### REST Curl Result
+```
+TODO:
+```
+---
 
 ### Cache Name Post
 
@@ -291,6 +331,19 @@ Body Parameter —
 
 Bad Request
 
+#### REST Curl Example
+```
+curl -i -H "Authorization: Bearer <YOUR-JWT>" -d '{"cacheName":"cache1", "description":"This is our first test"}' -H "Content-Type: application/json" -X POST http://localhost:9001/cacheName
+```
+
+#### REST Curl Result
+```
+HTTP/1.1 201 Created
+Access-Control-Allow-Origin: *
+Server: akka-http/10.7.0
+Date: ...
+Content-Length: 0
+```
 ---
 
 
@@ -300,7 +353,7 @@ Bad Request
 put /cacheName
 ```
 
-Create or update a cache namespace description.
+Update an existing cache namespace's description.
 
 #### Consumes
 
@@ -323,6 +376,20 @@ Body Parameter —
 
 Bad Request
 
+#### REST Curl Example
+```
+curl -i -H "Authorization: Bearer <YOUR-JWT>" -d '{"cacheName":"cache1", "description":"This is our first test modified"}' -H "Content-Type: application/json" -X PUT http://localhost:9001/cacheName
+```
+
+#### REST Curl Result
+```
+HTTP/1.1 202 Accepted
+Access-Control-Allow-Origin: *
+Server: akka-http/10.7.0
+Date: ...
+Content-Length: 0
+
+```
 ---
 
 ## Cache {#cache-section}
@@ -354,6 +421,20 @@ Path Parameter — The key of a specific cache object within a cacheName. defaul
 
 Bad Request
 
+#### REST Curl Example
+```
+curl -i -H "Authorization: Bearer <YOUR-JWT>" -X DELETE http://localhost:9001/cache1/key31
+```
+
+#### REST Curl Result
+```
+HTTP/1.1 202 Accepted
+Access-Control-Allow-Origin: *
+Server: akka-http/10.7.0
+Date: ...
+Content-Length: 0
+
+```
 ---
 
 
@@ -397,6 +478,22 @@ Not Found
 
 Bad Request
 
+#### REST Curl Example
+```
+curl -H "Authorization: Bearer <YOUR-JWT>" -i http://localhost:9001/cache1/key32
+```
+
+#### REST Curl Result
+```
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+Server: akka-http/10.7.0
+Date: ...
+Content-Type: application/octet-stream
+Content-Length: 9
+
+payload32
+```
 ---
 
 
@@ -435,6 +532,20 @@ Body Parameter —
 
 bad request or potentially exceeded maximum cached bytes allowed
 
+#### REST Curl Example
+```
+curl -i -H "Authorization: Bearer <YOUR-JWT>" -d 'This is our second test' -H "Content-Type: application/octet-stream" -X POST http://localhost:9001/cache1/key2
+```
+
+#### REST Curl Result
+```
+HTTP/1.1 201 Created
+Access-Control-Allow-Origin: *
+Server: akka-http/10.7.0
+Date: ...
+Content-Length: 0
+
+```
 ---
 
 
@@ -451,7 +562,7 @@ Create or update a cached object by key within the given cacheName. Note: this i
 - **cacheName (required)**\
 Path Parameter — Name of a cache namespace. (group) default: null key (required)
 Path Parameter — The key of a specific cache object within a cacheName. default: null ttlSeconds (required)
-Path Parameter — Time to Live (TTL) of the cached object before being automatically deleted. default: null
+Path Parameter — Time to Live (TTL), in seconds, of the cached object before being automatically deleted. default: null
 
 #### Consumes
 
@@ -474,6 +585,20 @@ Body Parameter —
 
 Bad Request or potentially exceeded maximum cached bytes allowed
 
+#### REST Curl Example
+```
+curl -i -H "Authorization: Bearer <YOUR-JWT>" -d 'This is our first test' -H "Content-Type: application/octet-stream"  -X POST http://localhost:9001/cache1/key1/30
+```
+
+#### REST Curl Result
+```
+HTTP/1.1 201 Created
+Access-Control-Allow-Origin: *
+Server: akka-http/10.7.0
+Date: ...
+Content-Length: 0
+
+```
 ---
 
 
@@ -495,19 +620,6 @@ Path Parameter — The key of a specific cache object within a cacheName. defaul
 
 [cacheGetResponse](#cachegetresponse)
 
-#### Example data
-
-Content-Type: application/json
-
-```
-{
-  "cacheName" : "cacheName",
-  "success" : true,
-  "value" : "value",
-  "key" : "key"
-}
-```
-
 #### Produces
 
 This API call produces the following media types according to the Accept request header;
@@ -526,6 +638,22 @@ Returns a JSON format of the cache namespace, and description.\
 
 Bad Request
 
+#### REST Curl Example
+```
+curl -H "Authorization: Bearer <YOUR-JWT>" -i http://localhost:9001/get/cache1/key2
+```
+
+#### REST Curl Result
+```
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+Server: akka-http/10.7.0
+Date: Tue, 11 Feb 2025 23:46:26 GMT
+Content-Type: application/json
+Content-Length: 93
+
+{"cacheName":"cache1","key":"key2","success":true,"value":"VGhpcyBpcyBvdXIgc2Vjb25kIHRlc3Q="}
+```
 ---
 
 
@@ -558,6 +686,20 @@ Body Parameter —
 
 Bad Request or, Invalid cacheRequest, or potentially exceeded maximum cached bytes allowed.
 
+#### REST Curl Example
+```
+curl -i -H "Authorization: Bearer <YOUR-JWT>" -d '{"cacheName":"cache1", "key":"key1", "value":"dGhpcyBpcyB0aGUgcGF5bG9hZCBvZiBvbmU="}' -H "Content-Type: application/json" -X POST http://localhost:9001/set
+```
+
+#### REST Curl Result
+```
+HTTP/1.1 201 Created
+Access-Control-Allow-Origin: *
+Server: akka-http/10.7.0
+Date: ...
+Content-Length: 0
+
+```
 ---
 ## Batch {#batch-section}
 
@@ -587,22 +729,6 @@ Body Parameter —
 
 array[[batchDeleteCacheResponse_inner](#batchdeletecacheresponse_inner)]
 
-#### Example data
-
-Content-Type: application/json
-
-```
-[ {
-  "cacheName" : "cacheName",
-  "success" : true,
-  "key" : "key"
-}, {
-  "cacheName" : "cacheName",
-  "success" : true,
-  "key" : "key"
-} ]
-```
-
 #### Produces
 
 This API call produces the following media types according to the Accept request header;
@@ -620,6 +746,22 @@ Returned a JSON formated object of all cached results.
 
 Bad Request
 
+#### REST Curl Example
+```
+curl -i -H "Authorization: Bearer <YOUR-JWT>" -d '{"getCachedBatch" : [{"cacheName":"cache1", "key":"key3"}, {"cacheName":"cache1", "key":"key2"}]}' -H "Content-Type: application/json" -X DELETE http://localhost:9001/batch
+```
+
+#### REST Curl Result
+```
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+Server: akka-http/10.7.0
+Date: ...
+Content-Type: application/json
+Content-Length: 153
+
+{"success":true,"cacheDeleteResponses":[{"cacheName":"ttorgcache1","key":"key3","success":true},{"cacheName":"ttorgcache1","key":"key2","success":true}]}
+```
 ---
 
 
@@ -646,27 +788,6 @@ Body Parameter —
 
 [batchGetCacheResponse](#batchgetcacheresponse)
 
-#### Example data
-
-Content-Type: application/json
-
-```
-{
-  "complete" : true,
-  "results" : [ {
-    "cacheName" : "cacheName",
-    "success" : true,
-    "value" : "value",
-    "key" : "key"
-  }, {
-    "cacheName" : "cacheName",
-    "success" : true,
-    "value" : "value",
-    "key" : "key"
-  } ]
-}
-```
-
 #### Produces
 
 This API call produces the following media types according to the Accept request header;
@@ -685,6 +806,22 @@ Returns a JSON formated object of all cached results.\
 
 Bad Request
 
+#### REST Curl Example
+```
+curl -i -curl -i -H "Authorization: Bearer <YOUR-JWT>" -d '{"getCachedBatch" : [{"cacheName":"cache1", "key":"key3"}, {"cacheName":"cache1", "key":"key2"},  {"cacheName":"cache1", "key":"key1"}]}' -H "Content-Type: application/json" -X POST http://localhost:9001/batch/get -d '{"getCachedBatch" : [{"cacheName":"cache1", "key":"key3"}, {"cacheName":"cache1", "key":"key2"},  {"cacheName":"cache1", "key":"key1"}]}' -H "Content-Type: application/json" -X POST http://localhost:9001/batch/get
+```
+
+#### REST Curl Result
+```
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+Server: akka-http/10.7.0
+Date: Wed, 12 Feb 2025 00:02:46 GMT
+Content-Type: application/json
+Content-Length: 327
+
+{"complete":true,"results":[{"cacheName":"cache1","key":"key3","success":true,"value":"dGhpcyBpcyB0aGUgcGF5bG9hZCBvZiB0aHJlZQ=="},{"cacheName":"cache1","key":"key2","success":true,"value":"dGhpcyBpcyB0aGUgcGF5bG9hZCBvZiB0d28="},{"cacheName":"cache1","key":"key1","success":true,"value":"dGhpcyBpcyB0aGUgcGF5bG9hZCBvZiBvbmU="}]}
+```
 ---
 
 
@@ -711,25 +848,6 @@ Body Parameter —
 
 [batchCacheResponse](#batchcacheresponse)
 
-#### Example data
-
-Content-Type: application/json
-
-```
-{
-  "complete" : true,
-  "results" : [ {
-    "cacheName" : "cacheName",
-    "success" : true,
-    "key" : "key"
-  }, {
-    "cacheName" : "cacheName",
-    "success" : true,
-    "key" : "key"
-  } ]
-}
-```
-
 #### Produces
 
 This API call produces the following media types according to the Accept request header;
@@ -748,6 +866,22 @@ returns a JSON formated object of each cached result.\
 
 Bad Request
 
+#### REST Curl Example
+```
+curl -i -H "Authorization: Bearer <YOUR-JWT>" -d '{ "cacheRequests" : [{"cacheName":"cache1", "key":"key1", "value":"dGhpcyBpcyB0aGUgcGF5bG9hZCBvZiBvbmU="}, {"cacheName":"cache1", "key":"key2", "value":"dGhpcyBpcyB0aGUgcGF5bG9hZCBvZiB0d28="}, {"cacheName":"cache1", "key":"key3", "value":"dGhpcyBpcyB0aGUgcGF5bG9hZCBvZiB0aHJlZQ=="}, {"cacheName":"cache1", "key":"key2", "value":"dGhpcyBpcyB0aGUgcGF5bG9hZCBvZiB0d28="}]}' -H "Content-Type: application/json" -X POST http://localhost:9001/batch
+```
+
+#### REST Curl Result
+```
+HTTP/1.1 200 OK
+Access-Control-Allow-Origin: *
+Server: akka-http/10.7.0
+Date: Tue, 11 Feb 2025 23:59:46 GMT
+Content-Type: application/json
+Content-Length: 30
+
+{"complete":true,"results":[]}
+```
 ---
 
 ## Models
