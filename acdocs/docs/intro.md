@@ -4,11 +4,10 @@ sidebar_position: 1
 ---
 
 # Overview
+**Akka Cache** is a ready-to-use drop-in service that you can deploy in any of your [akka.io](https://console.akka.io) projects.
 
-What is **AkkaCache.io**?
+This service gives you access to an elastic, resilient cache that has all of the characteristics and benefits of your own Akka services. Once deployed in your project, you can choose into which regions you'll deploy. Every region with the **Akka Cache** service will have locally-replicated cache data.
 
-Responsive by Design, AkkaCache.io is an elastic, agile and resilient data accelerator.
+Typically when we realize that we're going to need a key-value cache, we have to worry about provisioning (and paying for 💸) a big, bulky, and costly central server. By implementing this cache with a simple Akka component, you don't have to worry about any of that.
 
-AkkaCache.io is the world's first truly serverless caching service. It provides instant elasticity, scale-to-zero capability, and blazing-fast performance.
 
-...
