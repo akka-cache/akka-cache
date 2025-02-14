@@ -3,11 +3,11 @@ import { CacheNameApi } from 'akka-cache';
 import { cfg } from './configuration';
 import { log, error } from "console";
 
-export async function testCreateCacheName(cacheName:string, description:string) : Promise<void>  {
+export async function testPutCacheName(cacheName:string, description:string) : Promise<void>  {
     const cacheNameAPI = new CacheNameApi(cfg);
 
     try {
-        return cacheNameAPI.cacheNamePost({
+        return cacheNameAPI.cacheNamePut({
             cacheNameCreate: {cacheName: cacheName, description: description}
         })
         .then(nil => {

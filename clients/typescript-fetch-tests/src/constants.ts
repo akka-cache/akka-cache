@@ -5,6 +5,7 @@ export const CACHE2 = "cache2";
 export const CACHE3 = "cache3";
 
 export const DESCRIPTION1 = "Cache One";
+export const DESCRIPTION1MOD = "Cache One (modified)";
 export const DESCRIPTION2 = "Cache Two";
 export const DESCRIPTION3 = "Cache Three";
 export const DESCRIPTION4 = "Cache Four";

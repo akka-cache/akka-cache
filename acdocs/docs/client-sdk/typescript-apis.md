@@ -302,6 +302,8 @@ Create or update a cache namespace description
 
 #### Return type
 
+- **Promise\<void\>**
+
 ```ts title="cacheNameCreate.ts"
 import { CacheNameApi } from 'akka-cache';
 import { cfg } from './configuration';
@@ -330,12 +332,42 @@ export async function testCreateCacheName(cacheName:string, description:string) 
 ### Cache Name Put
 
 ```
-put /cacheName
+cacheNameAPI.cacheNamePut(cacheNameCreate)
 ```
 
 Update an existing cache namespace's description.
 
+#### Parameters
 
+- **[CacheNameCreate](#cachenameput) (required)**
+
+#### Return type
+
+- **Promise\<void\>**
+
+
+```ts title="cacheNamePut.ts"
+import { CacheNameApi } from 'akka-cache';
+import { cfg } from './configuration';
+import { log, error } from "console";
+
+export async function testPutCacheName(cacheName:string, description:string) : Promise<void>  {
+    const cacheNameAPI = new CacheNameApi(cfg);
+
+    try {
+        return cacheNameAPI.cacheNamePut({
+            cacheNameCreate: {cacheName: cacheName, description: description}
+        })
+        .then(nil => {
+            log("cacheNamePut successful for " + cacheName);
+            return nil;
+        })
+
+    } catch (err) {
+        error('Error thrown : ', err);
+    }
+}
+```
 ---
 
 ## Cache {#cache-section}

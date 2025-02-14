@@ -3,6 +3,7 @@ import { testGetCacheName } from "../src/cacheNameGet";
 import { testDeleteCacheName } from "../src/cacheNameDelete";
 import * as constants from '../src/constants';
 import {error, log} from "console";
+import {DESCRIPTION1MOD} from "../src/constants";
 
 /*beforeAll(done => {
     expect(testCreateCacheName(constants.CACHE1, constants.DESCRIPTION1)).resolves.toBe(undefined);
@@ -18,6 +19,15 @@ describe('testing cacheName Create, Get, & Delete', () => {
     test('get should be successful',async () => {
         const result = await testGetCacheName(constants.CACHE1);
         expect(result).toStrictEqual( {"cacheName": "cache1", "deleted": false, "description": constants.DESCRIPTION1 });
+    });
+    test('modification should be successful', async ()=> {
+        const result = await testCreateCacheName(constants.CACHE1, constants.DESCRIPTION1MOD);
+        log(JSON.stringify(result));
+        expect(result).toBe(undefined);
+    });
+    test('get should be successful',async () => {
+        const result = await testGetCacheName(constants.CACHE1);
+        expect(result).toStrictEqual( {"cacheName": "cache1", "deleted": false, "description": constants.DESCRIPTION1MOD });
     });
     test('delete should be successful', async () => {
         const result = await testDeleteCacheName(constants.CACHE1);
