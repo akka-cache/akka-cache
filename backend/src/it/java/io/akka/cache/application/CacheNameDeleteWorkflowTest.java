@@ -2,13 +2,13 @@ package io.akka.cache.application;
 
 import akka.Done;
 import akka.http.javadsl.model.StatusCodes;
+import akka.javasdk.http.HttpResponses;
 import akka.javasdk.testkit.EventingTestKit;
 import akka.javasdk.testkit.TestKit;
 import akka.javasdk.testkit.TestKitSupport;
+import com.typesafe.config.ConfigFactory;
+import io.akka.cache.domain.*;
 import io.akka.cache.domain.CacheAPI.*;
-import io.akka.cache.domain.CacheEvent;
-import io.akka.cache.domain.CacheName;
-import io.akka.cache.domain.PayloadChunk;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -16,8 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
-import java.util.Optional;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -35,11 +34,14 @@ public class CacheNameDeleteWorkflowTest extends TestKitSupport {
     private final Duration ttl = Duration.ofSeconds(30);
     private final Random random = new Random();
 
-    @Override
     protected TestKit.Settings testKitSettings() {
-        return TestKit.Settings.DEFAULT
-                .withEventSourcedEntityIncomingMessages("cache")
-                .withAclDisabled();
+        var overrideSettings = ConfigFactory.parseMap(
+                Map.of(
+                        "app.cache-name-delete-block-size", 7
+                )
+        );
+//        return TestKit.Settings.DEFAULT.withAdditionalConfig(overrideSettings);
+        return super.testKitSettings().withAclDisabled().withAdditionalConfig(overrideSettings);
     }
 
     private CompletionStage<CacheView.CachedKeys> getView(String cacheName) {
@@ -48,21 +50,26 @@ public class CacheNameDeleteWorkflowTest extends TestKitSupport {
                 .invokeAsync(cacheName);
     }
 
+    private void setCache(String cacheName, String key, Cache cache) {
+        String cacheId = cacheName.concat(key);
+        await(componentClient.forEventSourcedEntity(cacheId)
+                .method(CacheEntity::set)
+                .invokeAsync(cache)
+        );
+    }
+
     @Test
     public void shouldCreateThenDeleteCachedEntities() throws ExecutionException, InterruptedException {
-        final EventingTestKit.IncomingMessages cacheEvents = testKit.getEventSourcedEntityIncomingMessages("cache");
 
-        Awaitility.await().until(() -> {
-            log.info("shouldCreateThenDeleteCached creating caches...");
-            for (int i = 1; i <= NUMBER_OF_CACHES; i++) {
-                Optional<Duration> evtTTL = Optional.empty();
-                String payload = "my payload " + i;
-                var event = new CacheEvent.CacheSet(Optional.empty(), CACHENAME1, "key" + i, evtTTL, payload.length(), new PayloadChunk(0, payload.getBytes()));
-                log.info("creating {} {}", CACHENAME1, "key" + i);
-                cacheEvents.publish(event, String.valueOf(i));
-            }
-            return true;
-        });
+        log.info("shouldCreateThenDeleteCached creating caches...");
+        for (int i = 1; i <= NUMBER_OF_CACHES; i++) {
+            Optional<Duration> evtTTL = Optional.empty();
+            byte[] payload = ("my payload " + i).getBytes();
+            List<PayloadChunk> chunks = new ArrayList<>(List.of(new PayloadChunk(0, payload)));
+            String key = "key" + i;
+            Cache toCache = new Cache(Optional.empty(), CACHENAME1, key, evtTTL, false, payload.length, false, chunks);
+            setCache(CACHENAME1, "key" + i, toCache);
+        }
 
         Awaitility.await()
             .ignoreExceptions()
@@ -110,8 +117,8 @@ public class CacheNameDeleteWorkflowTest extends TestKitSupport {
 
     @Test
     public void shouldCreateThenFlushCachedEntities() throws ExecutionException, InterruptedException {
-        final EventingTestKit.IncomingMessages cacheEvents = testKit.getEventSourcedEntityIncomingMessages("cache");
 
+        log.info("shouldCreateThenFlushCachedEntities creating cacheName {}", CACHENAME2);
         Awaitility.await()
                 .ignoreExceptions()
                 .atMost(20, TimeUnit.SECONDS)
@@ -129,16 +136,14 @@ public class CacheNameDeleteWorkflowTest extends TestKitSupport {
                             });
                 });
 
-        Awaitility.await().until(() -> {
-            log.info("shouldCreateThenDeleteCached creating caches...");
-            for (int i = 1; i <= NUMBER_OF_CACHES; i++) {
-                Optional<Duration> evtTTL = random.nextBoolean() ? Optional.of(this.ttl) : Optional.empty();
-                String payload = "my payload " + i;
-                var event = new CacheEvent.CacheSet(Optional.empty(), CACHENAME2, "key" + i, evtTTL, payload.length(), new PayloadChunk(0, payload.getBytes()));
-                cacheEvents.publish(event, String.valueOf(i));
-            }
-            return true;
-        });
+        for (int i = 1; i <= NUMBER_OF_CACHES; i++) {
+            Optional<Duration> evtTTL = random.nextBoolean() ? Optional.of(this.ttl) : Optional.empty();
+            byte[] payload = ("my payload " + i).getBytes();
+            List<PayloadChunk> chunks = new ArrayList<>(List.of(new PayloadChunk(0, payload)));
+            String key = "key" + i;
+            Cache toCache = new Cache(Optional.empty(), CACHENAME2, key, evtTTL, false, payload.length, false, chunks);
+            setCache(CACHENAME2, "key" + i, toCache);
+        }
 
         Awaitility.await()
                 .ignoreExceptions()

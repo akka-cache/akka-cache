@@ -4,6 +4,7 @@ package io.akka.cache.application;
 import akka.Done;
 import akka.javasdk.annotations.ComponentId;
 import akka.javasdk.eventsourcedentity.EventSourcedEntity;
+import akka.javasdk.eventsourcedentity.EventSourcedEntityContext;
 import io.akka.cache.domain.Cache;
 import io.akka.cache.domain.CacheEvent;
 import io.akka.cache.domain.CacheInternalGetResponse;
@@ -12,6 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Optional;
 
 import static akka.Done.done;
 
