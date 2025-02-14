@@ -62,6 +62,11 @@ public class CacheNameDeleteWorkflow extends Workflow<DeleteCacheNameState> {
                 .thenApply(c -> {
                     timerScheduler.cancel(compoundKey);
                     return Done.done();
+                }).exceptionally(ex -> {
+                    if (log.isDebugEnabled()) {
+                       // if a cache doesn't actually exist don't stop the workflow
+                    }
+                    return Done.done();
                 }).toCompletableFuture();
     }
 
@@ -161,9 +166,23 @@ public class CacheNameDeleteWorkflow extends Workflow<DeleteCacheNameState> {
 
     protected Step getStepDeleteCacheName(String stepName) {
         return step(stepName)
-                .asyncCall(() -> componentClient.forEventSourcedEntity(currentState().cacheName())
-                        .method(CacheNameEntity::delete)
-                        .invokeAsync())
+                .asyncCall(() -> {
+                    var result = componentClient.forEventSourcedEntity(currentState().cacheName())
+                            .method(CacheNameEntity::delete)
+                            .invokeAsync();
+                    return result.thenApply(done -> {
+                        if (log.isDebugEnabled()) {
+                            log.debug("delete cacheName {}", currentState().cacheName());
+                        }
+                        return Done.done();
+                    }).exceptionally(ex -> {
+                        // if a cache doesn't actually exist don't stop the workflow
+                        if (log.isDebugEnabled()) {
+                            log.error("an exception occurred while deleting cacheName: {}. The cacheName may not have existed previously", ex.getMessage());
+                        }
+                        return Done.done();
+                    });
+                })
                 .andThen(Done.class, done -> {
                     if (log.isDebugEnabled()) {
                         log.debug("getStepDeleteCacheName completed.");

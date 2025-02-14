@@ -28,7 +28,9 @@ jobs:
           # Example line: DOCKER> Tagging image akka-cache:1.0-SNAPSHOT-20241220045359 successful!
           # We'll extract "akka-cache:1.0-SNAPSHOT-20241220045359"
           IMAGE_TAG=$(grep "DOCKER> Tagging image akka-cache:" build.log | sed -E 's/.*DOCKER> Tagging image (akka-cache:[^ ]+) .*/\1/')
+          IMAGE_LATEST="akka-cache:latest"
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "IMAGE_LATEST=$IMAGE_LATEST" >> $GITHUB_OUTPUT
 
       - name: Deploy service
         run: akka service deploy akka-cache ${{ steps.extract_tag.outputs.IMAGE_TAG }} --push
@@ -40,5 +42,6 @@ jobs:
       - name: Publish to Cloudsmith
         run: |
           docker tag ${{ steps.extract_tag.outputs.IMAGE_TAG }} hub.akka.io/${{ steps.extract_tag.outputs.IMAGE_TAG }}
+          docker tag ${{ steps.extract_tag.outputs.IMAGE_TAG }} hub.akka.io/${{ steps.extract_tag.outputs.IMAGE_LATEST }}
           docker push hub.akka.io/${{ steps.extract_tag.outputs.IMAGE_TAG }}
-      
+          docker push hub.akka.io/${{ steps.extract_tag.outputs.IMAGE_LATEST }}
