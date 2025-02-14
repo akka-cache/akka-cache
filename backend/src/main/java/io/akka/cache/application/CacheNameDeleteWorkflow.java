@@ -54,10 +54,10 @@ public class CacheNameDeleteWorkflow extends Workflow<DeleteCacheNameState> {
     private CompletableFuture<Done> deleteCache(String key) {
         String compoundKey = currentState().cacheName().concat(key);
         if (log.isDebugEnabled()) {
-            log.debug("requesting delete of cache {}", compoundKey);
+            log.debug("deleteCache requesting delete of cache {}", compoundKey);
         }
         return componentClient.forEventSourcedEntity(compoundKey)
-                .method(CacheNameEntity::delete)
+                .method(CacheEntity::delete)
                 .invokeAsync()
                 .thenApply(c -> {
                     timerScheduler.cancel(compoundKey);

@@ -1,4 +1,4 @@
-import {BatchApi, BatchPostRequest} from 'akka-cache';
+import { BatchApi } from 'akka-cache';
 import { cfg } from './configuration';
 import { log, error } from "console";
 import { BatchGetPostRequest } from 'akka-cache';

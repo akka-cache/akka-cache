@@ -17,7 +17,7 @@ describe('testing cacheName Create, Get, & Delete', () => {
     });
     test('get should be successful',async () => {
         const result = await testGetCacheName(constants.CACHE1);
-        expect(result).toStrictEqual( {"cacheName": "ttorgcache1", "deleted": false, "description": constants.DESCRIPTION1 });
+        expect(result).toStrictEqual( {"cacheName": "cache1", "deleted": false, "description": constants.DESCRIPTION1 });
     });
     test('delete should be successful', async () => {
         const result = await testDeleteCacheName(constants.CACHE1);

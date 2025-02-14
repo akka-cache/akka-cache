@@ -21,7 +21,7 @@ The following claims (or fields) are required in your JWT:
 }
 ```
 
-In the REST curl examples used throughout the APIs, we'll be using the following Bearer Token which was generated on the [JWT.io](https://jwt.io/) website with the claims above.
+In the REST curl examples used throughout the APIs below, we'll be using the following Bearer Token which was generated on the [JWT.io](https://jwt.io/) website with the claims above.
 
 ```
 -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL3Nlc3Npb24uZmlyZWJhc2UuZ29vZ2xlLmNvbS9ha2thLWNhY2hlIiwib3JnIjoidHRvcmciLCJuYW1lIjoiSm9obiBEb2UiLCJzZXJ2aWNlTGV2ZWwiOiJmcmVlIn0.rds8orVxVz149ovTxxYzFIqGmSdWJUlHONem9avKBgQ"
@@ -84,7 +84,7 @@ APIs used to maintain a cache name, namespace, or group.
 delete /cacheName/{cacheName}
 ```
 
-delete the current cache namespace and all associated caches.
+Deletes the current cache namespace and all associated caches.
 
 #### Path parameters
 
@@ -191,7 +191,6 @@ returned a JSON format of the cache namespace, and description
 
 bad request or doesn't exist
 
----
 #### REST Curl Example
 ```
 curl -i -H "Authorization: Bearer <YOUR-JWT>" -H "Content-Type: application/json" http://localhost:9001/cacheName/cache1
@@ -208,7 +207,7 @@ Content-Length: 77
 
 {"cacheName":"cache1","description":"This is our first test","deleted":false}
 ```
-
+---
 ### Cache Name Get Keys
 
 ```
@@ -1062,6 +1061,14 @@ A JSON object use to create a cacheName namespace.
 **description** (optional)\
 `String`
 
+---
+### cacheNameKeys
+
+**cacheName** (optional)\
+`String`
+
+**keys** (optional)\
+`array[String]` An array of all known keys under the given cacheName.
 ---
 ### cacheNameListResponse_inner
 
