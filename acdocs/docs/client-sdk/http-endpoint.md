@@ -169,42 +169,6 @@ returned a JSON format of the cache namespace, and description
 bad request or doesn't exist
 
 ---
-### Cache Name Get Keys
-
-```
-get /cache/cacheName/{cacheName}/keys
-```
-
-Get the current cache namespace's list of cache keys.
-
-#### Path parameters
-
-- **cacheName (required)**\
-Path Parameter — Name of a cache namespace. (group) default: null
-
-#### Return type
-
-array[String]
-
-#### Produces
-
-This API call produces the following media types according to the Accept request header;
-the media type will be conveyed by the Content-Type response header.
-
-- `application/json`
-
-#### Responses
-
-##### 200
-
-returns a JSON format array of cache keys
-
-##### 400
-
-bad request or doesn't exist
-
----
-
 
 ### Cache Name List
 

@@ -19,7 +19,7 @@ Make sure the project name matches exactly what you see in the output of `akka p
 Now that your Akka CLI is configured to point to your desired target project and organization, you're ready to deploy. Deploying a service is done with just one easy command:
 
 ```
-akka service deploy akka-cache {TBD}
+akka service deploy akka-cache hub.akka.io/akka-cache:latest
 ```
 
 This will deploy the cache service from its well-known public registry location. If you are deploying your own custom build, you'll want to use the appropriate image tag.
