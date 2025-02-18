@@ -1,8 +1,8 @@
 {
-  "label": "Client SDKs",
+  "label": "Using the Cache",
   "position": 3,
   "link": {
     "type": "generated-index",
-    "description": "Supported client SDK APIs."
+    "description": "Using the cache from within your components"
   }
 }
