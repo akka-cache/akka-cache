@@ -37,7 +37,7 @@
   --akka-soft-medium-white: #E5E5E5;
   --ifm-font-family-base: 'Instrument Sans', sans-serif;
   --ifm-font-family-monospace: 'Roboto Mono', monospace;
-  --ifm-code-font-size: 95%;
+  --ifm-code-font-size: 15px;
 
   /* primary */
   --ifm-color-primary: #f5b60b;
@@ -47,6 +47,10 @@
   --ifm-color-primary-light: #f6bd24;
   --ifm-color-primary-lighter: #f7c130;
   --ifm-color-primary-lightest: #f8cc55;
+  --ifm-color-content: var(--akka-soft-black);
+  --ifm-font-color-base: var(--akka-soft-black);
+  /* menu */
+  --ifm-menu-color: var(--akka-soft-black);
   /* links */
   --ifm-link-color: var(--akka-blue-dkr);
   --ifm-link-hover-color: var(--akka-blue-dkr);
@@ -62,7 +66,7 @@
   --ifm-table-stripe-background: var(--akka-soft-medium-white);
   --ifm-table-head-background: var(--akka-soft-medium-black);
   --ifm-table-head-color: var(--akka-yellow);
-  --ifm-table-head-font-weight: 700;
+  --ifm-table-head-font-weight: 500;
   /* code */
   --ifm-code-background: var(--akka-soft-white);
 }
@@ -77,6 +81,10 @@
   --ifm-color-primary-light: #ffd76b;
   --ifm-color-primary-lighter: #ffdb7b;
   --ifm-color-primary-lightest: #ffe9ad;
+  --ifm-color-content: var(--akka-soft-white);
+  --ifm-font-color-base: var(--akka-soft-white);
+  /* menu */
+  --ifm-menu-color: var(--akka-soft-white);
   /* links */
   --ifm-link-color: var(--akka-blue);
   --ifm-link-hover-color: var(--akka-blue);
@@ -92,14 +100,21 @@
   --ifm-table-stripe-background: var(--akka-soft-medium-black);
   --ifm-table-head-background: var(--akka-yellow);
   --ifm-table-head-color: var(--akka-soft-black);
-  --ifm-table-head-font-weight: 700;
+  --ifm-table-head-font-weight: 500;
   /* code */
   --ifm-code-background: var(--akka-soft-medium-black);
 }
 
+html {
+  -webkit-font-smoothing: unset;
+}
 
 .navbar__title {
   font-size: 1.5rem;
+}
+
+[data-theme='dark'] pre {
+  background-color: var(--akka-soft-black) !important;
 }
 code {
   border-color: var(--akka-soft-medium-white);
@@ -113,8 +128,25 @@ table {
   border-radius: 10px;
 }
 
+h1,h2,h3,h4,h5,h6 {
+  font-weight: 500;
+}
+
 h1 {
   color: var(--akka-yellow-dkr);
+  font-size: 36px;
+}
+h2 {
+  font-size: 24px;
+}
+h3 {
+  font-size: 20px;
+}
+h4 {
+  font-size: 18px;
+}
+h5,h6 {
+  font-size: 16px;
 }
 
 [data-theme='dark'] h1 {
