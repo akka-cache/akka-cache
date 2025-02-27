@@ -34,24 +34,23 @@ to create a project and then deploy your service into the project by first packa
 
 _____
 ## Current APIs:
-paths: [
-POST /cache/{cacheName}/{key}, 
-POST /cache/{cacheName}/{key}/{ttlSeconds}, 
-GET /cache/cacheName/{cacheName}, 
-GET /cache/{cacheName}/keys, 
-GET /cache/cacheName/{cacheName}/keys, 
-DELETE /cache/cacheName/{cacheName}, 
-PUT /cache/cacheName/{cacheName}/flush, 
-GET /cache/{cacheName}/{key}, 
-POST /cache/batch/, 
-POST /cache/batch/get, 
-DELETE /cache/batch/, 
-POST /cache/set, 
-PUT /cache/cacheName,
-DELETE /cache/{cacheName}/{key}, 
-POST /cache/cacheName, 
-GET /cache/get/{cacheName}/{key}
-]
+paths:
+- POST /cache/{cacheName}/{key}
+- POST /cache/{cacheName}/{key}/{ttlSeconds}
+- GET /cache/cacheName/{cacheName}
+- GET /cache/{cacheName}/keys
+- GET /cache/cacheName/{cacheName}/keys
+- DELETE /cache/cacheName/{cacheName}
+- PUT /cache/cacheName/{cacheName}/flush
+- GET /cache/{cacheName}/{key}
+- POST /cache/batch/
+- POST /cache/batch/get
+- DELETE /cache/batch/
+- POST /cache/set
+- PUT /cache/cacheName
+- DELETE /cache/{cacheName}/{key}
+- POST /cache/cacheName
+- GET /cache/get/{cacheName}/{key}
 
 -----
 ## Curl Examples
@@ -62,7 +61,7 @@ The most heavily used APIs for caches are the POST & GET of the cache itself. We
   
 ### Cache Name:
 
-POST /cache/cacheName/create
+POST /cache/cacheName
 ```shell
 curl -i -d '{"cacheName":"cache1", "description":"This is our first test"}' -H "Content-Type: application/json" -X POST http://localhost:9001/cache/cacheName
 ```
@@ -82,6 +81,16 @@ GET /cache/cacheName/{cacheName}/keys
 > **_NOTE:_** execute the cache commands below before executing this
 ```shell
 curl -i http://localhost:9001/cache/cacheName/cache1/keys
+```
+
+PUT /cacheName/{cacheName}/flush
+```shell
+curl -i -H "Content-Type: application/json" -X PUT http://localhost:9001/cacheName/cache1/flush
+```
+
+DELETE /cacheName/{cacheName}
+```shell
+curl -i -X DELETE http://localhost:9001/cacheName/cache1
 ```
 
 ### Cache:
@@ -127,4 +136,31 @@ JSON GET:
 
 ```shell
 curl -i http://localhost:9001/cache/get/cache1/key1
+```
+
+DELETE /{cacheName}/{key}
+```shell
+curl -i -X DELETE http://localhost:9001/cache1/key31
+```
+
+### Batch
+
+Batch Cache (JSON):
+```shell
+curl -i -d '{ "cacheRequests" : [{"cacheName":"cache1", "key":"key1", "value":"dGhpcyBpcyB0aGUgcGF5bG9hZCBvZiBvbmU="}, {"cacheName":"cache1", "key":"key2", "value":"dGhpcyBpcyB0aGUgcGF5bG9hZCBvZiB0d28="}, {"cacheName":"cache1", "key":"key3", "value":"dGhpcyBpcyB0aGUgcGF5bG9hZCBvZiB0aHJlZQ=="}, {"cacheName":"cache1", "key":"key2", "value":"dGhpcyBpcyB0aGUgcGF5bG9hZCBvZiB0d28="}]}' -H "Content-Type: application/json"  -X POST http://localhost:9001/batch
+```
+
+Batch Cache (JSON) w/ failure due to lack of BASE64 encoding on payload
+```shell
+curl -i -d '{ "cacheRequests" : [{"cacheName":"cache1", "key":"key4", "value":"this is a fourth payload"}, {"cacheName":"cache1", "key":"key5", "value":"dGhpcyBpcyB0aGUgcGF5bG9hZCBvZiB0d28="}]}' -H "Content-Type: application/json" -X POST http://localhost:9001/batch
+```
+
+Batch Get Cached
+```shell
+curl -i -d '{"getCachedBatch" : [{"cacheName":"cache1", "key":"key3"}, {"cacheName":"cache1", "key":"key2"},  {"cacheName":"cache1", "key":"key1"}]}' -H "Content-Type: application/json" -X POST http://localhost:9001/batch/get
+```
+
+Batch Delete Cached
+```shell
+curl -i -d '{"getCachedBatch" : [{"cacheName":"cache1", "key":"key3"}, {"cacheName":"cache1", "key":"key2"}]}' -H "Content-Type: application/json" -X DELETE http://localhost:9001/batch
 ```
