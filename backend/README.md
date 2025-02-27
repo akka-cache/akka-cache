@@ -83,12 +83,12 @@ GET /cache/cacheName/{cacheName}/keys
 curl -i http://localhost:9001/cache/cacheName/cache1/keys
 ```
 
-PUT /cacheName/{cacheName}/flush
+PUT /cache/cacheName/{cacheName}/flush
 ```shell
 curl -i -H "Content-Type: application/json" -X PUT http://localhost:9001/cacheName/cache1/flush
 ```
 
-DELETE /cacheName/{cacheName}
+DELETE /cache/cacheName/{cacheName}
 ```shell
 curl -i -X DELETE http://localhost:9001/cacheName/cache1
 ```
@@ -140,27 +140,27 @@ curl -i http://localhost:9001/cache/get/cache1/key1
 
 DELETE /{cacheName}/{key}
 ```shell
-curl -i -X DELETE http://localhost:9001/cache1/key31
+curl -i -X DELETE http://localhost:9001/cache/cache1/key31
 ```
 
 ### Batch
 
 Batch Cache (JSON):
 ```shell
-curl -i -d '{ "cacheRequests" : [{"cacheName":"cache1", "key":"key1", "value":"dGhpcyBpcyB0aGUgcGF5bG9hZCBvZiBvbmU="}, {"cacheName":"cache1", "key":"key2", "value":"dGhpcyBpcyB0aGUgcGF5bG9hZCBvZiB0d28="}, {"cacheName":"cache1", "key":"key3", "value":"dGhpcyBpcyB0aGUgcGF5bG9hZCBvZiB0aHJlZQ=="}, {"cacheName":"cache1", "key":"key2", "value":"dGhpcyBpcyB0aGUgcGF5bG9hZCBvZiB0d28="}]}' -H "Content-Type: application/json"  -X POST http://localhost:9001/batch
+curl -i -d '{ "cacheRequests" : [{"cacheName":"cache1", "key":"key1", "value":"dGhpcyBpcyB0aGUgcGF5bG9hZCBvZiBvbmU="}, {"cacheName":"cache1", "key":"key2", "value":"dGhpcyBpcyB0aGUgcGF5bG9hZCBvZiB0d28="}, {"cacheName":"cache1", "key":"key3", "value":"dGhpcyBpcyB0aGUgcGF5bG9hZCBvZiB0aHJlZQ=="}, {"cacheName":"cache1", "key":"key2", "value":"dGhpcyBpcyB0aGUgcGF5bG9hZCBvZiB0d28="}]}' -H "Content-Type: application/json"  -X POST http://localhost:9001/cache/batch
 ```
 
 Batch Cache (JSON) w/ failure due to lack of BASE64 encoding on payload
 ```shell
-curl -i -d '{ "cacheRequests" : [{"cacheName":"cache1", "key":"key4", "value":"this is a fourth payload"}, {"cacheName":"cache1", "key":"key5", "value":"dGhpcyBpcyB0aGUgcGF5bG9hZCBvZiB0d28="}]}' -H "Content-Type: application/json" -X POST http://localhost:9001/batch
+curl -i -d '{ "cacheRequests" : [{"cacheName":"cache1", "key":"key4", "value":"this is a fourth payload"}, {"cacheName":"cache1", "key":"key5", "value":"dGhpcyBpcyB0aGUgcGF5bG9hZCBvZiB0d28="}]}' -H "Content-Type: application/json" -X POST http://localhost:9001/cache/batch
 ```
 
 Batch Get Cached
 ```shell
-curl -i -d '{"getCachedBatch" : [{"cacheName":"cache1", "key":"key3"}, {"cacheName":"cache1", "key":"key2"},  {"cacheName":"cache1", "key":"key1"}]}' -H "Content-Type: application/json" -X POST http://localhost:9001/batch/get
+curl -i -d '{"getCachedBatch" : [{"cacheName":"cache1", "key":"key3"}, {"cacheName":"cache1", "key":"key2"},  {"cacheName":"cache1", "key":"key1"}]}' -H "Content-Type: application/json" -X POST http://localhost:9001/cache/batch/get
 ```
 
 Batch Delete Cached
 ```shell
-curl -i -d '{"getCachedBatch" : [{"cacheName":"cache1", "key":"key3"}, {"cacheName":"cache1", "key":"key2"}]}' -H "Content-Type: application/json" -X DELETE http://localhost:9001/batch
+curl -i -d '{"getCachedBatch" : [{"cacheName":"cache1", "key":"key3"}, {"cacheName":"cache1", "key":"key2"}]}' -H "Content-Type: application/json" -X DELETE http://localhost:9001/cache/batch
 ```
