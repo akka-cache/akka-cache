@@ -3,7 +3,7 @@ sidebar_position: 2
 title: Deploying to Your Akka Account
 ---
 
-Like all Akka services, the **Akka Cache** service is flexible in how it can be deployed. In this guide, you'll go through the steps to deploy it into your own [akka.io](https://akka.io) account. In order to continue, you'll want to make sure that you've set up all of the [pre-requisites](./prerequisites.md), including creating an Akka account.
+Like all Akka services, the **Akka Cache** service is flexible in how it can be deployed. In this guide, you'll go through the steps to deploy it into your own [akka.io](https://akka.io) account. In order to continue, you'll want to make sure that you've set up all of the [prerequisites](./prerequisites.md), including creating an Akka account.
 
 ## Create or Reuse a Project
 Every service deployed on the Akka platform exists within a **project**. You can either create a new one or select a pre-existing one. You'll need to use the `akka` CLI to choose the target project for your deployments. For example, to select a project named `cache`, you would enter the following command at a terminal prompt:
