@@ -53,7 +53,6 @@ APIs used to maintain a cache name, namespace, or group.
 - [`put /cache/cacheName/{cacheName}/flush`](#cache-name-flush)
 - [`get /cache/cacheName/{cacheName}`](#cache-name-get)
 - [`get /cache/cacheName/{cacheName}/keys`](#cache-name-get-keys)
-- [`get /cache/cacheName/list`](#cache-name-list)
 - [`post /cache/cacheName`](#cache-name-post)
 - [`put /cache/cacheName`](#cache-name-put)
 
@@ -167,37 +166,6 @@ returned a JSON format of the cache namespace, and description
 ##### 400
 
 bad request or doesn't exist
-
----
-
-### Cache Name List
-
-```
-get /cache/cacheName/list
-```
-
-Retrieves a list of cacheNames and optional description.
-
-#### Return type
-
-array[[cacheNameListResponse_inner](#cachenamelistresponse_inner)]
-
-#### Produces
-
-This API call produces the following media types according to the Accept request header;
-the media type will be conveyed by the Content-Type response header.
-
-- `application/json`
-
-#### Responses
-
-##### 200
-
-Returns a JSON format array of the cache namespaces, and description.
-
-##### 400
-
-Bad Request
 
 ---
 
@@ -631,7 +599,6 @@ Bad Request
 - [`cacheDeleteResponse`](#cachedeleteresponse)
 - [`cacheGetResponse`](#cachegetresponse)
 - [`cacheNameCreate`](#cachenamecreate)
-- [`cacheNameListResponse_inner`](#cachenamelistresponse_inner)
 - [`cacheNameResponse`](#cachenameresponse)
 - [`cacheRequest`](#cacherequest)
 
@@ -784,17 +751,6 @@ The cached JSON object returned as a BASE64 encoded value.
 ### cacheNameCreate
 
 A JSON object use to create a cacheName namespace.
-
-**cacheName**\
-`String`
-
-**description** (optional)\
-`String`
-
----
-### cacheNameListResponse_inner
-
-An array of all known cacheNames, along with an optional description.
 
 **cacheName**\
 `String`
