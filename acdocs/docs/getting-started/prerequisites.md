@@ -1,11 +1,11 @@
 ---
 sidebar_position: 1
-title: Pre-requisites
+title: Prerequisites
 ---
 
 Setup and preparation for using the cache service
 
-# Pre-requisites
+# Prerequisites
 
 <!-- more -->
 
