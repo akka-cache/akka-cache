@@ -88,21 +88,6 @@ paths:
           description: (accepted) deleted
         "400":
           description: Bad Request
-  /cacheName/list:
-    get:
-      tags:
-        - cacheName
-      summary:
-        Retrieves a list of cacheNames and optional description.
-      responses:
-        "200":
-          description: Returns a JSON format array of the cache namespaces, and description.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/cacheNameListResponse'
-        "400":
-          description: Bad Request
   /cacheName/{cacheName}/keys:
     parameters:
       - $ref: '#/components/parameters/cacheNameParam'
@@ -355,21 +340,6 @@ components:
           type: string
         deleted:
           type: boolean
-    cacheNameListResponse:
-      type: object
-      properties:
-        cacheNameList:
-          type: array
-          items:
-            type: object
-            description: An array of all known cacheNames, along with an optional description.
-            required:
-              - cacheName
-            properties:
-              cacheName:
-                type: string
-              description:
-                type: string
     cacheNameKeys:
       type: object
       properties:
